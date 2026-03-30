@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — SSO Sign in</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Auth page body override */
+body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:auto}
+
+/* Auth topbar */
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text-primary)}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.012em}
+.topbar-right{display:flex;align-items:center;gap:12px}
+
+/* Centered layout */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:400px;text-align:center}
+.heading{font-size:24px;font-weight:600;letter-spacing:-0.022em;margin-bottom:6px}
+.subheading{font-size:14px;color:var(--text-secondary);margin-bottom:24px;line-height:1.5}
+
+/* SSO button overrides */
+.btn{width:100%;height:40px;border:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:8px;text-decoration:none}
+.btn-pri{background:var(--primary);color:#fff}.btn-pri:hover{background:var(--primary-hover)}.btn-pri:disabled{opacity:.4;cursor:not-allowed}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid transparent}.btn-ghost:hover{background:var(--bg-hover);color:var(--text-primary)}
+
+/* SSO-specific: info card */
+.info-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;padding:14px 16px;display:flex;align-items:flex-start;gap:10px;text-align:left;margin-top:16px}
+.info-card-ico{font-size:16px;flex-shrink:0;margin-top:1px}
+.info-card-text{font-size:13px;color:var(--text-secondary);line-height:1.5}
+.info-card-text a{color:var(--primary-text);text-decoration:none;font-weight:500}.info-card-text a:hover{text-decoration:underline}
+
+/* SSO-specific: redirect view */
+.redirect-spinner{width:32px;height:32px;border:3px solid var(--border-strong);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px}
+.redirect-link{font-size:12px;color:var(--text-tertiary);margin-top:12px}.redirect-link a{color:var(--primary-text);text-decoration:none}
+
+/* View toggling */
+.view{display:none}.view.active{display:block}
+
+/* Page footer */
+.page-footer{padding:16px;text-align:center;font-size:12px;color:var(--text-tertiary);flex-shrink:0}.page-footer a{color:var(--text-tertiary);text-decoration:none;margin:0 8px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <div class="topbar-right"><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
+</header>
+<main class="main">
+  <div class="card">
+    <div class="view active" id="v-form">
+      <h1 class="heading"><span data-en="Sign in with SSO" data-ar="تسجيل الدخول عبر SSO">Sign in with SSO</span></h1>
+      <p class="subheading"><span data-en="Enter your organization's domain to continue" data-ar="أدخل نطاق منظمتك للمتابعة">Enter your organization's domain to continue</span></p>
+      <form onsubmit="return handleSSO(event)">
+        <div class="fg" id="f-domain"><label><span data-en="Work email or domain" data-ar="البريد الإلكتروني أو النطاق">Work email or domain</span></label><input type="text" placeholder="you@company.com or company.com" required><div class="err"><span data-en="Please enter a valid domain" data-ar="يرجى إدخال نطاق صالح">Please enter a valid domain</span></div></div>
+        <button type="submit" class="btn btn-pri" id="sso-btn"><span data-en="Continue with SSO &#8594;" data-ar="المتابعة عبر SSO &#8592;">Continue with SSO &#8594;</span></button>
+      </form>
+      <div class="divider"></div>
+      <a href="login.html" class="btn btn-ghost"><span data-en="&#8592; Back to regular sign in" data-ar="العودة لتسجيل الدخول العادي &#8594;">&#8592; Back to regular sign in</span></a>
+      <div class="info-card">
+        <span class="info-card-ico">&#127970;</span>
+        <div class="info-card-text"><span data-en="SSO is available on the Scale plan." data-ar="SSO متاح في خطة Scale.">SSO is available on the Scale plan.</span> <a href="#"><span data-en="Learn about SSO &#8594;" data-ar="تعرف على SSO &#8592;">Learn about SSO &#8594;</span></a></div>
+      </div>
+    </div>
+    <div class="view" id="v-redirect">
+      <div style="margin-bottom:16px">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>
+      </div>
+      <h1 class="heading" style="font-size:20px"><span data-en="Redirecting to" data-ar="إعادة التوجيه إلى">Redirecting to</span> <span id="org-name">Fatura Inc.</span> SSO</h1>
+      <p class="subheading"><span data-en="You'll be redirected to your identity provider" data-ar="ستتم إعادة توجيهك إلى مزود الهوية الخاص بك">You'll be redirected to your identity provider</span></p>
+      <div class="redirect-spinner"></div>
+      <div class="redirect-link"><span data-en="Not redirecting?" data-ar="لم تتم إعادة التوجيه؟">Not redirecting?</span> <a href="#" onclick="document.getElementById('v-redirect').classList.remove('active');document.getElementById('v-form').classList.add('active');return false"><span data-en="Click here" data-ar="انقر هنا">Click here</span></a></div>
+    </div>
+  </div>
+</main>
+<footer class="page-footer"><a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a><a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a></footer>
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
+function handleSSO(e){
+  e.preventDefault();const fg=document.getElementById('f-domain'),i=fg.querySelector('input');
+  if(!i.value.trim()||i.value.trim().length<3){fg.classList.add('invalid');return false}
+  fg.classList.remove('invalid');
+  const domain=i.value.includes('@')?i.value.split('@')[1]:i.value;
+  const org=domain.split('.')[0];
+  document.getElementById('org-name').textContent=org.charAt(0).toUpperCase()+org.slice(1)+' Inc.';
+  const btn=document.getElementById('sso-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Connecting...';
+  setTimeout(()=>{document.getElementById('v-form').classList.remove('active');document.getElementById('v-redirect').classList.add('active')},1000);
+  return false;
+}
+document.querySelectorAll('.fg input').forEach(i=>i.addEventListener('input',()=>i.closest('.fg').classList.remove('invalid')));
+(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+</script>
+</body>
+</html>

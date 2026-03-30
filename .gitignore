@@ -1,0 +1,46 @@
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+*.swp
+
+# Java
+*.class
+*.jar
+*.war
+*.ear
+out/
+
+# Node / Frontend
+node_modules/
+dist/
+.pnpm-store/
+
+# Environment / Secrets
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+
+# Docker volumes (local)
+infra/docker/volumes/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Logs
+*.log
+
+# Spring Boot
+backend/src/main/resources/application-local.properties

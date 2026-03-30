@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Team invitation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Auth page body override */
+body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:auto}
+
+/* Auth topbar */
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text-primary)}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.012em}
+.topbar-right{display:flex;align-items:center;gap:12px}
+
+/* Centered card layout */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+
+/* Invite card (special styled card) */
+.invite-card{width:100%;max-width:480px;background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:32px;text-align:center;box-shadow:var(--shadow-inset)}
+
+/* Inviter avatar */
+.inviter-av{width:52px;height:52px;border-radius:50%;background:var(--primary-ghost);color:var(--primary-text);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:600;margin:0 auto 16px}
+
+/* Headings */
+.heading{font-size:20px;font-weight:600;letter-spacing:-0.022em;margin-bottom:4px}
+.ws-name{font-size:24px;font-weight:600;color:var(--primary-text);margin-bottom:4px}
+.subheading{font-size:14px;color:var(--text-secondary);margin-bottom:16px}
+.ws-info{font-size:13px;color:var(--text-tertiary);margin-bottom:20px;display:flex;align-items:center;justify-content:center;gap:8px}
+
+/* Form group left-align */
+.invite-card .fg{text-align:left}
+
+/* Password strength */
+.pw-str{display:flex;gap:4px;margin-top:6px}
+.pw-bar{flex:1;height:3px;border-radius:2px;background:var(--bg-active);transition:background .2s}
+.pw-bar.s1{background:var(--danger)}.pw-bar.s2{background:var(--warning)}.pw-bar.s3{background:#a3d977}.pw-bar.s4{background:var(--success)}
+
+/* Auth button full-width overrides */
+.invite-card .btn{width:100%;height:40px}
+.invite-card .btn+.btn{margin-top:8px}
+
+/* Footer link */
+.footer-link{margin-top:16px;font-size:13px;color:var(--text-secondary)}
+.footer-link a{color:var(--primary-text);text-decoration:none;font-weight:500}
+.footer-link a:hover{text-decoration:underline}
+
+/* Page footer */
+.page-footer{padding:16px;text-align:center;font-size:12px;color:var(--text-tertiary);flex-shrink:0}
+.page-footer a{color:var(--text-tertiary);text-decoration:none;margin:0 8px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <div class="topbar-right"><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
+</header>
+<main class="main">
+  <div class="invite-card">
+    <div class="inviter-av">MR</div>
+    <h1 class="heading"><span data-en="Mohammed invited you to join" data-ar="محمد دعاك للانضمام إلى">Mohammed invited you to join</span></h1>
+    <div class="ws-name">Fatura Inc.</div>
+    <p class="subheading"><span data-en="Join your team on AllStak" data-ar="انضم لفريقك على AllStak">Join your team on AllStak</span></p>
+    <div class="ws-info">&#128101; <span data-en="12 members &middot; Pro plan" data-ar="12 عضواً &middot; خطة Pro">12 members &middot; Pro plan</span></div>
+    <div class="divider"></div>
+    <form onsubmit="return handleAccept(event)">
+      <div class="fg"><label><span data-en="Your full name" data-ar="الاسم الكامل">Your full name</span></label><input type="text" placeholder="Your name" required><div class="err"><span data-en="Name is required" data-ar="الاسم مطلوب">Name is required</span></div></div>
+      <div class="fg"><label><span data-en="Work email" data-ar="البريد الإلكتروني">Work email</span></label><input type="email" value="sara@fatura.io" disabled></div>
+      <div class="fg"><label><span data-en="Password" data-ar="كلمة المرور">Password</span></label><div class="pw-wrap"><input type="password" placeholder="Min 8 characters" required oninput="updateStr(this)"><button type="button" class="pw-tog" onclick="togglePw(this)" data-en="Show" data-ar="إظهار">Show</button></div>
+      <div class="pw-str"><div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div><div class="pw-bar"></div></div></div>
+      <button type="submit" class="btn btn-pri" id="accept-btn"><span data-en="Accept invitation &#8594;" data-ar="قبول الدعوة &#8592;">Accept invitation &#8594;</span></button>
+    </form>
+    <div class="divider"><span data-en="Already have an account?" data-ar="لديك حساب بالفعل؟">Already have an account?</span></div>
+    <a href="login.html" class="btn btn-sec" style="text-decoration:none"><span data-en="Sign in instead &#8594;" data-ar="تسجيل الدخول بدلاً من ذلك &#8592;">Sign in instead &#8594;</span></a>
+  </div>
+</main>
+<footer class="page-footer"><a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a><a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a></footer>
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
+function togglePw(btn){const i=btn.previousElementSibling;const lang=document.documentElement.lang;if(i.type==='password'){i.type='text';btn.textContent=lang==='ar'?'إخفاء':'Hide'}else{i.type='password';btn.textContent=lang==='ar'?'إظهار':'Show'}}
+function updateStr(ipt){const pw=ipt.value;let s=0;if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^a-zA-Z0-9]/.test(pw))s++;
+const bars=ipt.closest('.fg').querySelectorAll('.pw-bar');bars.forEach((b,i)=>{b.className='pw-bar';if(i<s)b.classList.add('s'+s)})}
+function handleAccept(e){e.preventDefault();let v=true;document.querySelectorAll('.fg').forEach(g=>{const i=g.querySelector('input:not(:disabled)');if(i&&!i.value.trim()){g.classList.add('invalid');v=false}else if(g.querySelector('input:not(:disabled)'))g.classList.remove('invalid')});
+if(!v)return false;const btn=document.getElementById('accept-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Joining...';
+setTimeout(()=>window.location.href='onboarding.html',1200);return false}
+document.querySelectorAll('.fg input').forEach(i=>i.addEventListener('input',()=>i.closest('.fg').classList.remove('invalid')));
+(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+</script>
+</body>
+</html>

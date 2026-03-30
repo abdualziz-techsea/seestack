@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Alert Rules</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Alerts Page-specific styles === */
+
+/* Primary button */
+.btn-primary{height:32px;padding:0 14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background var(--duration-normal)}
+.btn-primary:hover{background:var(--primary-hover)}
+
+/* Channel status bar */
+.channel-bar{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.channel-status{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);font-size:var(--text-sm);font-weight:500;box-shadow:var(--shadow-inset)}
+.channel-status .dot{width:7px;height:7px;border-radius:50%}
+.channel-status .dot.ok{background:var(--success)}
+.channel-status .dot.warn{background:var(--warning)}
+.channel-status-label{color:var(--text-secondary)}
+.channel-status-note{font-size:var(--text-xs);color:var(--text-tertiary);font-style:italic}
+
+/* Toggle switch */
+.toggle{position:relative;width:36px;height:20px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:var(--radius-full);cursor:pointer;transition:all var(--duration-normal)}
+.toggle-slider::before{content:'';position:absolute;width:14px;height:14px;left:2px;top:2px;background:var(--text-tertiary);border-radius:50%;transition:all var(--duration-normal)}
+.toggle input:checked+.toggle-slider{background:var(--primary);border-color:var(--primary)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(16px);background:#fff}
+[dir="rtl"] .toggle-slider::before{left:auto;right:2px}
+[dir="rtl"] .toggle input:checked+.toggle-slider::before{transform:translateX(-16px)}
+
+.rule-name{font-weight:500}
+.rule-trigger{font-size:var(--text-xs);color:var(--text-tertiary);margin-top:2px}
+
+.bdg-channel{background:var(--bg-active);color:var(--text-secondary);margin-right:4px}
+.bdg-sev-critical{background:var(--danger-ghost);color:var(--danger)}
+.bdg-sev-warning{background:var(--warning-ghost);color:var(--warning-text)}
+.bdg-sev-info{background:var(--primary-ghost);color:var(--primary-text)}
+
+.rule-date{font-size:var(--text-xs);color:var(--text-tertiary)}
+.rule-actions{display:flex;gap:4px}
+.rule-action-btn{background:none;border:none;color:var(--text-tertiary);cursor:pointer;padding:4px;font-size:14px;border-radius:var(--radius-sm);transition:all var(--duration-normal)}
+.rule-action-btn:hover{color:var(--text-primary);background:var(--bg-hover)}
+.rule-action-btn.danger:hover{color:var(--danger);background:var(--danger-ghost)}
+
+/* Modal overlay */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;display:none;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);width:560px;max-height:85vh;overflow-y:auto;box-shadow:var(--shadow-lg)}
+.modal-sm{width:400px}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:600}
+.modal-close{background:none;border:none;color:var(--text-tertiary);font-size:16px;cursor:pointer;padding:4px}
+.modal-close:hover{color:var(--text-primary)}
+.modal-body{padding:20px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid var(--border)}
+
+/* Trigger type cards */
+.trigger-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.trigger-card{padding:10px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;text-align:center;transition:all var(--duration-normal)}
+.trigger-card:hover{border-color:var(--border-strong);background:var(--bg-overlay)}
+.trigger-card.selected{border-color:var(--primary);background:var(--primary-ghost)}
+.trigger-card-ico{font-size:20px;margin-bottom:4px}
+.trigger-card-name{font-size:var(--text-xs);font-weight:500}
+
+/* Severity radio */
+.severity-options{display:flex;gap:8px}
+.severity-opt{flex:1;padding:8px;border:1px solid var(--border);border-radius:var(--radius-md);cursor:pointer;text-align:center;font-size:var(--text-xs);font-weight:500;transition:all var(--duration-normal)}
+.severity-opt:hover{border-color:var(--border-strong)}
+.severity-opt.selected{border-color:var(--primary);background:var(--primary-ghost);color:var(--primary-text)}
+.severity-opt input{display:none}
+
+/* Channel multi-select cards */
+.channel-cards{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.channel-card{display:flex;align-items:center;gap:8px;padding:10px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all var(--duration-normal)}
+.channel-card:hover{border-color:var(--border-strong)}
+.channel-card.selected{border-color:var(--primary);background:var(--primary-ghost)}
+.channel-card-ico{font-size:16px}
+.channel-card-name{font-size:var(--text-sm);font-weight:500}
+.channel-card input{display:none}
+
+/* Quiet hours */
+.quiet-hours-row{display:flex;align-items:center;gap:10px;margin-top:8px}
+.quiet-hours-row input[type="time"]{height:30px;padding:0 8px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-sm);outline:none}
+.quiet-hours-row input[type="time"]:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.quiet-hours-label{font-size:var(--text-sm);color:var(--text-tertiary)}
+
+/* Conditional config */
+.config-row{display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap}
+.config-row span{font-size:var(--text-sm);color:var(--text-secondary)}
+.config-input{width:70px;height:30px;padding:0 8px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-sm);outline:none;text-align:center}
+.config-select{height:30px;padding:0 8px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-sm);outline:none;cursor:pointer}
+
+/* Delete modal */
+.delete-msg{font-size:var(--text-base);color:var(--text-secondary);margin-bottom:8px;line-height:1.6}
+.delete-name{font-weight:600;color:var(--text-primary)}
+.btn-danger{height:32px;padding:0 14px;background:var(--danger);color:#fff;border:none;border-radius:var(--radius-md);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;transition:opacity var(--duration-normal)}
+.btn-danger:hover{opacity:.9}
+.btn-ghost{height:32px;padding:0 14px;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius-md);color:var(--text-secondary);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;transition:all var(--duration-normal)}
+.btn-ghost:hover{color:var(--text-primary);background:var(--bg-hover)}
+
+/* Empty state hidden by default */
+.empty-state{text-align:center;padding:60px 20px;color:var(--text-tertiary)}
+.empty-state-ico{font-size:40px;margin-bottom:12px}
+.empty-state-text{font-size:var(--text-md);margin-bottom:16px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right">
+    <button class="top-bell">&#128276;</button>
+    <span class="top-avatar">AK</span>
+    <div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div>
+    <div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div>
+  </div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec"><span data-en="Monitor" data-ar="المراقبة">Monitor</span></div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبات">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="SSH">SSH</span></a>
+      <a href="alerts.html" class="sb-item active"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+    </nav>
+    <div class="sb-sec"><span data-en="Team" data-ar="الفريق">Team</span></div>
+    <nav class="sb-nav">
+      <a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثة">Chat</span></a>
+      <a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a>
+    </nav>
+    <div class="sb-sec"><span data-en="Settings" data-ar="الإعدادات">Settings</span></div>
+    <nav class="sb-nav">
+      <a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a>
+      <a href="billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+
+      <!-- Page header -->
+      <div class="page-header">
+        <h1 class="page-title" data-en="Alert Rules" data-ar="قواعد التنبيه">Alert Rules</h1>
+        <button class="btn-primary" onclick="openCreateModal()">
+          <span>+</span>
+          <span data-en="Create rule" data-ar="إنشاء قاعدة">Create rule</span>
+        </button>
+      </div>
+
+      <!-- Channel status bar -->
+      <div class="channel-bar">
+        <div class="channel-status">
+          <span class="dot ok"></span>
+          <span>Slack</span>
+          <span class="channel-status-label" data-en="Connected" data-ar="متصل">Connected</span>
+        </div>
+        <div class="channel-status">
+          <span class="dot ok"></span>
+          <span>Discord</span>
+          <span class="channel-status-label" data-en="Connected" data-ar="متصل">Connected</span>
+        </div>
+        <div class="channel-status">
+          <span class="dot ok"></span>
+          <span>Email</span>
+          <span class="channel-status-label" data-en="Connected" data-ar="متصل">Connected</span>
+        </div>
+        <div class="channel-status">
+          <span class="dot warn"></span>
+          <span>Push</span>
+          <span class="channel-status-note" data-en="Setup required" data-ar="يتطلب الإعداد">Setup required</span>
+        </div>
+      </div>
+
+      <!-- Rules table -->
+      <table class="rules-table">
+        <thead>
+          <tr>
+            <th style="width:50px" data-en="Status" data-ar="الحالة">Status</th>
+            <th data-en="Rule" data-ar="القاعدة">Rule</th>
+            <th data-en="Channels" data-ar="القنوات">Channels</th>
+            <th data-en="Severity" data-ar="الخطورة">Severity</th>
+            <th data-en="Created" data-ar="تاريخ الإنشاء">Created</th>
+            <th style="width:70px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+            <td>
+              <div class="rule-name" data-en="Error spike alert" data-ar="تنبيه ارتفاع مفاجئ">Error spike alert</div>
+              <div class="rule-trigger" data-en="When error count exceeds 50 in 5 minutes" data-ar="عندما يتجاوز عدد الأخطاء 50 خلال 5 دقائق">When error count exceeds 50 in 5 minutes</div>
+            </td>
+            <td>
+              <span class="bdg bdg-channel">Slack</span>
+              <span class="bdg bdg-channel">Email</span>
+            </td>
+            <td><span class="bdg bdg-sev-critical" data-en="Critical" data-ar="حرج">Critical</span></td>
+            <td class="rule-date">Mar 15, 2026</td>
+            <td>
+              <div class="rule-actions">
+                <button class="rule-action-btn" title="Edit">&#9998;</button>
+                <button class="rule-action-btn danger" title="Delete" onclick="openDeleteModal('Error spike alert')">&#128465;</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label class="toggle">
+                <input type="checkbox" checked>
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+            <td>
+              <div class="rule-name" data-en="New error in production" data-ar="خطأ جديد في الإنتاج">New error in production</div>
+              <div class="rule-trigger" data-en="When a new error type is detected in production" data-ar="عندما يتم اكتشاف نوع خطأ جديد في الإنتاج">When a new error type is detected in production</div>
+            </td>
+            <td>
+              <span class="bdg bdg-channel">Slack</span>
+              <span class="bdg bdg-channel">Discord</span>
+            </td>
+            <td><span class="bdg bdg-sev-warning" data-en="Warning" data-ar="تحذير">Warning</span></td>
+            <td class="rule-date">Mar 10, 2026</td>
+            <td>
+              <div class="rule-actions">
+                <button class="rule-action-btn" title="Edit">&#9998;</button>
+                <button class="rule-action-btn danger" title="Delete" onclick="openDeleteModal('New error in production')">&#128465;</button>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <label class="toggle">
+                <input type="checkbox">
+                <span class="toggle-slider"></span>
+              </label>
+            </td>
+            <td>
+              <div class="rule-name" data-en="Monitor down" data-ar="توقف المراقبة">Monitor down</div>
+              <div class="rule-trigger" data-en="When a monitor is unreachable for 3 consecutive checks" data-ar="عندما يتعذر الوصول إلى المراقب لمدة 3 فحوصات متتالية">When a monitor is unreachable for 3 consecutive checks</div>
+            </td>
+            <td>
+              <span class="bdg bdg-channel">Email</span>
+            </td>
+            <td><span class="bdg bdg-sev-info" data-en="Info" data-ar="معلومات">Info</span></td>
+            <td class="rule-date">Feb 28, 2026</td>
+            <td>
+              <div class="rule-actions">
+                <button class="rule-action-btn" title="Edit">&#9998;</button>
+                <button class="rule-action-btn danger" title="Delete" onclick="openDeleteModal('Monitor down')">&#128465;</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+    </main>
+  </div>
+</div>
+
+<!-- CREATE RULE MODAL -->
+<div class="modal-overlay" id="createModal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" data-en="Create Rule" data-ar="إنشاء قاعدة">Create Rule</span>
+      <button class="modal-close" onclick="closeCreateModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+
+      <!-- Trigger type -->
+      <div class="form-group">
+        <label class="form-label" data-en="Trigger type" data-ar="نوع المحفّز">Trigger type</label>
+        <div class="trigger-cards">
+          <div class="trigger-card selected" onclick="selectTrigger(this)">
+            <div class="trigger-card-ico">&#9889;</div>
+            <div class="trigger-card-name" data-en="Error spike" data-ar="ارتفاع مفاجئ">Error spike</div>
+          </div>
+          <div class="trigger-card" onclick="selectTrigger(this)">
+            <div class="trigger-card-ico">&#10071;</div>
+            <div class="trigger-card-name" data-en="New error" data-ar="خطأ جديد">New error</div>
+          </div>
+          <div class="trigger-card" onclick="selectTrigger(this)">
+            <div class="trigger-card-ico">&#128683;</div>
+            <div class="trigger-card-name" data-en="Monitor down" data-ar="توقف المراقبة">Monitor down</div>
+          </div>
+          <div class="trigger-card" onclick="selectTrigger(this)">
+            <div class="trigger-card-ico">&#128034;</div>
+            <div class="trigger-card-name" data-en="Slow response" data-ar="استجابة بطيئة">Slow response</div>
+          </div>
+          <div class="trigger-card" onclick="selectTrigger(this)">
+            <div class="trigger-card-ico">&gt;_</div>
+            <div class="trigger-card-name" data-en="SSH session" data-ar="جلسة SSH">SSH session</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Conditional config -->
+      <div class="form-group">
+        <label class="form-label" data-en="Condition" data-ar="الشرط">Condition</label>
+        <div class="config-row">
+          <span data-en="When error count exceeds" data-ar="عندما يتجاوز عدد الأخطاء">When error count exceeds</span>
+          <input type="number" class="config-input" value="50">
+          <span data-en="in" data-ar="خلال">in</span>
+          <input type="number" class="config-input" value="5">
+          <select class="config-select">
+            <option data-en="minutes" data-ar="دقائق">minutes</option>
+            <option data-en="hours" data-ar="ساعات">hours</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Severity -->
+      <div class="form-group">
+        <label class="form-label" data-en="Severity" data-ar="الخطورة">Severity</label>
+        <div class="severity-options">
+          <label class="severity-opt selected" onclick="selectSeverity(this)">
+            <input type="radio" name="severity" value="critical" checked>
+            <span data-en="Critical" data-ar="حرج">Critical</span>
+          </label>
+          <label class="severity-opt" onclick="selectSeverity(this)">
+            <input type="radio" name="severity" value="warning">
+            <span data-en="Warning" data-ar="تحذير">Warning</span>
+          </label>
+          <label class="severity-opt" onclick="selectSeverity(this)">
+            <input type="radio" name="severity" value="info">
+            <span data-en="Info" data-ar="معلومات">Info</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Quiet hours -->
+      <div class="form-group">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="form-label" style="margin-bottom:0" data-en="Quiet hours" data-ar="ساعات الهدوء">Quiet hours</label>
+          <label class="toggle" style="width:36px;height:20px">
+            <input type="checkbox" id="quietToggle" onchange="toggleQuietHours()">
+            <span class="toggle-slider"></span>
+          </label>
+        </div>
+        <div class="quiet-hours-row" id="quietHoursRow" style="display:none">
+          <span class="quiet-hours-label" data-en="From" data-ar="من">From</span>
+          <input type="time" value="22:00">
+          <span class="quiet-hours-label" data-en="to" data-ar="إلى">to</span>
+          <input type="time" value="08:00">
+        </div>
+      </div>
+
+      <!-- Notification channels -->
+      <div class="form-group">
+        <label class="form-label" data-en="Notification channels" data-ar="قنوات الإشعارات">Notification channels</label>
+        <div class="channel-cards">
+          <label class="channel-card selected" onclick="toggleChannel(this)">
+            <input type="checkbox" checked>
+            <span class="channel-card-ico">&#128172;</span>
+            <span class="channel-card-name">Slack</span>
+          </label>
+          <label class="channel-card" onclick="toggleChannel(this)">
+            <input type="checkbox">
+            <span class="channel-card-ico">&#127918;</span>
+            <span class="channel-card-name">Discord</span>
+          </label>
+          <label class="channel-card selected" onclick="toggleChannel(this)">
+            <input type="checkbox" checked>
+            <span class="channel-card-ico">&#9993;</span>
+            <span class="channel-card-name">Email</span>
+          </label>
+          <label class="channel-card" onclick="toggleChannel(this)">
+            <input type="checkbox">
+            <span class="channel-card-ico">&#128276;</span>
+            <span class="channel-card-name">Push</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Rule name -->
+      <div class="form-group">
+        <label class="form-label" data-en="Rule name" data-ar="اسم القاعدة">Rule name</label>
+        <input type="text" class="form-input" placeholder="e.g. Error spike alert" data-en-placeholder="e.g. Error spike alert" data-ar-placeholder="مثال: تنبيه ارتفاع مفاجئ">
+      </div>
+
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeCreateModal()" data-en="Cancel" data-ar="إلغاء">Cancel</button>
+      <button class="btn-primary" onclick="closeCreateModal()" data-en="Create rule" data-ar="إنشاء قاعدة">Create rule</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRMATION MODAL -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title" data-en="Delete Rule" data-ar="حذف القاعدة">Delete Rule</span>
+      <button class="modal-close" onclick="closeDeleteModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <p class="delete-msg">
+        <span data-en="Are you sure you want to delete" data-ar="هل أنت متأكد أنك تريد حذف">Are you sure you want to delete</span>
+        <span class="delete-name" id="deleteRuleName"></span>?
+        <br>
+        <span data-en="This action cannot be undone." data-ar="لا يمكن التراجع عن هذا الإجراء.">This action cannot be undone.</span>
+      </p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeDeleteModal()" data-en="Cancel" data-ar="إلغاء">Cancel</button>
+      <button class="btn-danger" onclick="closeDeleteModal()" data-en="Delete" data-ar="حذف">Delete</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Theme toggle
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));
+}
+
+// Language toggle
+function setLang(lang){
+  document.documentElement.setAttribute('lang',lang);
+  document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));
+  swapText(lang);
+  localStorage.setItem('allstak-lang',lang);
+}
+
+function swapText(lang){
+  document.querySelectorAll('[data-'+lang+']').forEach(el=>{
+    const val=el.getAttribute('data-'+lang);
+    if(val!==null) el.textContent=val;
+  });
+  // Swap placeholders
+  document.querySelectorAll('[data-'+lang+'-placeholder]').forEach(el=>{
+    const val=el.getAttribute('data-'+lang+'-placeholder');
+    if(val!==null) el.placeholder=val;
+  });
+}
+
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+
+// Create modal
+function openCreateModal(){document.getElementById('createModal').classList.add('open')}
+function closeCreateModal(){document.getElementById('createModal').classList.remove('open')}
+
+// Delete modal
+function openDeleteModal(name){
+  document.getElementById('deleteRuleName').textContent=name;
+  document.getElementById('deleteModal').classList.add('open');
+}
+function closeDeleteModal(){document.getElementById('deleteModal').classList.remove('open')}
+
+// Trigger card selection
+function selectTrigger(card){
+  document.querySelectorAll('.trigger-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+}
+
+// Severity selection
+function selectSeverity(opt){
+  document.querySelectorAll('.severity-opt').forEach(o=>o.classList.remove('selected'));
+  opt.classList.add('selected');
+}
+
+// Channel card toggle
+function toggleChannel(card){
+  card.classList.toggle('selected');
+}
+
+// Quiet hours toggle
+function toggleQuietHours(){
+  const row=document.getElementById('quietHoursRow');
+  row.style.display=document.getElementById('quietToggle').checked?'flex':'none';
+}
+
+// Close modals on Escape
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeCreateModal();closeDeleteModal()}
+});
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{if(e.target===o){o.classList.remove('open')}});
+});
+</script>
+</body>
+</html>

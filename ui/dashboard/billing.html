@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Billing</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Billing page-specific styles === */
+
+/* Current Plan Card */
+.plan-card{background:var(--bg-surface);border:1px solid var(--primary-border);border-radius:var(--radius-xl);padding:var(--sp-6);margin-bottom:var(--sp-6);display:flex;align-items:center;justify-content:space-between}
+.plan-card-left{display:flex;align-items:center;gap:var(--sp-4)}
+.plan-icon{width:48px;height:48px;border-radius:var(--radius-xl);background:var(--primary-ghost);color:var(--primary-text);display:flex;align-items:center;justify-content:center;font-size:22px}
+.plan-info h2{font-size:var(--text-xl);font-weight:600;letter-spacing:-0.015em;display:flex;align-items:center;gap:var(--sp-2)}
+.plan-badge{font-size:var(--text-2xs);font-weight:600;background:var(--primary);color:#fff;padding:2px 8px;border-radius:var(--radius-full);text-transform:uppercase}
+.plan-price{font-size:var(--text-md);color:var(--text-secondary);margin-top:2px}
+.plan-price strong{color:var(--text-primary);font-size:28px;font-weight:600}
+.plan-billing{font-size:var(--text-sm);color:var(--text-tertiary);margin-top:2px}
+.btn-manage{height:36px;padding:0 20px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-lg);color:var(--text-primary);font-family:inherit;font-size:var(--text-base);font-weight:500;cursor:pointer;transition:all var(--duration-fast)}
+.btn-manage:hover{background:var(--bg-overlay);border-color:var(--primary-border)}
+
+/* Usage Section */
+.usage-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3);margin-bottom:var(--sp-8)}
+.usage-item{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--sp-4)}
+.usage-item.full-width{grid-column:1/-1}
+.usage-label{font-size:var(--text-sm);font-weight:500;color:var(--text-secondary);margin-bottom:var(--sp-2);display:flex;align-items:center;justify-content:space-between}
+.usage-values{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:var(--sp-2)}
+.usage-current{font-size:var(--text-xl);font-weight:600;font-family:var(--font-mono)}
+.usage-limit{font-size:var(--text-sm);color:var(--text-tertiary);font-family:var(--font-mono)}
+.usage-bar-track{height:6px;background:var(--bg-raised);border-radius:var(--radius-full);overflow:hidden}
+.usage-bar-fill{height:100%;border-radius:var(--radius-full);transition:width .4s ease}
+.usage-bar-fill.green{background:var(--primary)}
+.usage-bar-fill.orange{background:var(--warning)}
+.usage-bar-fill.red{background:var(--danger)}
+.usage-badge{display:inline-flex;align-items:center;height:22px;padding:0 10px;border-radius:var(--radius-md);font-size:var(--text-sm);font-weight:500;background:var(--primary-ghost);color:var(--primary-text)}
+
+/* Plan Comparison */
+.plan-toggle{display:flex;align-items:center;gap:var(--sp-3);margin-bottom:var(--sp-5)}
+.plan-toggle-label{font-size:var(--text-base);color:var(--text-secondary);font-weight:500}
+.plan-toggle-label.active{color:var(--text-primary)}
+.toggle-switch{width:40px;height:22px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-full);cursor:pointer;position:relative;transition:background .2s}
+.toggle-switch.on{background:var(--primary)}
+.toggle-dot{width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:2px;left:2px;transition:transform .2s}
+.toggle-switch.on .toggle-dot{transform:translateX(18px)}
+.savings-badge{font-size:var(--text-2xs);font-weight:600;color:var(--success);background:var(--success-ghost);padding:2px 8px;border-radius:var(--radius-full)}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-4);margin-bottom:var(--sp-8)}
+.plan-compare-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--sp-6);position:relative;transition:border-color var(--duration-normal)}
+.plan-compare-card:hover{border-color:var(--border-strong)}
+.plan-compare-card.current{border-color:var(--primary-border)}
+.plan-compare-card.current::after{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--primary);border-radius:var(--radius-xl) var(--radius-xl) 0 0}
+.pcc-name{font-size:var(--text-lg);font-weight:600;margin-bottom:var(--sp-1);display:flex;align-items:center;gap:var(--sp-2)}
+.pcc-current-badge{font-size:9px;font-weight:600;background:var(--primary);color:#fff;padding:2px 6px;border-radius:var(--radius-full);text-transform:uppercase}
+.pcc-price{font-size:32px;font-weight:600;letter-spacing:-0.02em;margin-bottom:2px}
+.pcc-price span{font-size:var(--text-md);font-weight:400;color:var(--text-tertiary)}
+.pcc-original{font-size:var(--text-base);color:var(--text-disabled);text-decoration:line-through;margin-bottom:var(--sp-2);height:18px}
+.pcc-desc{font-size:var(--text-sm);color:var(--text-tertiary);margin-bottom:var(--sp-4);line-height:1.5}
+.pcc-btn{width:100%;height:36px;border-radius:var(--radius-lg);font-family:inherit;font-size:var(--text-base);font-weight:500;cursor:pointer;transition:all var(--duration-fast);border:none}
+.pcc-btn-primary{background:var(--primary);color:#fff}.pcc-btn-primary:hover{background:var(--primary-hover)}
+.pcc-btn-outline{background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary)}.pcc-btn-outline:hover{background:var(--bg-hover);color:var(--text-primary)}
+.pcc-btn-current{background:var(--bg-raised);border:1px solid var(--border);color:var(--text-tertiary);cursor:default}
+.pcc-features{list-style:none;margin-top:var(--sp-4);padding-top:var(--sp-4);border-top:1px solid var(--border)}
+.pcc-features li{font-size:var(--text-sm);color:var(--text-secondary);padding:var(--sp-1) 0;display:flex;align-items:center;gap:6px}
+.pcc-features li::before{content:'\2713';color:var(--primary);font-size:var(--text-xs);font-weight:700}
+
+/* Billing History — table overrides */
+.bill-table{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
+.bill-table th{background:var(--bg-raised)}
+.bill-table tr:last-child td{border-bottom:none}
+[dir="rtl"] .bill-table th,[dir="rtl"] .bill-table td{text-align:right}
+.bdg-paid{display:inline-flex;align-items:center;gap:3px;height:20px;padding:0 8px;border-radius:var(--radius-sm);font-size:var(--text-2xs);font-weight:500;background:var(--success-ghost);color:var(--success)}
+.bill-download{color:var(--primary-text);text-decoration:none;font-size:var(--text-sm);font-weight:500;cursor:pointer}
+.bill-download:hover{text-decoration:underline}
+
+/* Upgrade Modal — page-specific overrides */
+.modal-overlay{display:flex;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:auto}
+.modal-plan-summary{background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-xl);padding:var(--sp-4);margin-bottom:var(--sp-5);display:flex;align-items:center;justify-content:space-between}
+.mps-name{font-size:var(--text-lg);font-weight:600}
+.mps-price{font-size:22px;font-weight:600;color:var(--primary-text)}
+.mps-price span{font-size:var(--text-sm);color:var(--text-tertiary);font-weight:400}
+.payment-section-title{font-size:var(--text-sm);font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary);margin-bottom:var(--sp-3)}
+.payment-methods{display:flex;flex-direction:column;gap:var(--sp-2);margin-bottom:var(--sp-5)}
+.pm-option{display:flex;align-items:center;gap:10px;padding:var(--sp-3) 14px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-lg);cursor:pointer;transition:all var(--duration-fast)}
+.pm-option:hover{border-color:var(--border-strong)}
+.pm-option.selected{border-color:var(--primary);background:var(--primary-ghost)}
+.pm-radio{width:16px;height:16px;border:2px solid var(--border-strong);border-radius:50%;position:relative;flex-shrink:0}
+.pm-option.selected .pm-radio{border-color:var(--primary)}
+.pm-option.selected .pm-radio::after{content:'';position:absolute;inset:3px;background:var(--primary);border-radius:50%}
+.pm-label{font-size:var(--text-base);font-weight:500;flex:1}
+.pm-icon{font-size:var(--text-xs);color:var(--text-tertiary);font-weight:500}
+.card-inputs{display:grid;gap:var(--sp-3);margin-bottom:var(--sp-5)}
+.card-row{display:grid;grid-template-columns:1fr 1fr;gap:var(--sp-3)}
+.card-input-group label{display:block;font-size:var(--text-xs);font-weight:500;color:var(--text-tertiary);margin-bottom:var(--sp-1)}
+.card-input-group input{width:100%;height:36px;padding:0 12px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-lg);color:var(--text-primary);font-family:var(--font-mono);font-size:var(--text-base);outline:none;transition:border-color var(--duration-fast)}
+.card-input-group input:focus{border-color:var(--primary)}
+.card-input-group input::placeholder{color:var(--text-disabled)}
+.moyasar-note{font-size:var(--text-xs);color:var(--text-tertiary);text-align:center;margin-bottom:var(--sp-4);display:flex;align-items:center;justify-content:center;gap:var(--sp-1)}
+.btn-pay{width:100%;height:42px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-lg);font-family:inherit;font-size:var(--text-md);font-weight:600;cursor:pointer;transition:background var(--duration-fast)}
+.btn-pay:hover{background:var(--primary-hover)}
+
+/* Responsive */
+@media(max-width:900px){.plans-grid{grid-template-columns:1fr}.usage-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.sidebar{display:none}.plan-card{flex-direction:column;align-items:flex-start;gap:var(--sp-4)}}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right">
+    <div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div>
+    <button class="top-bell">&#128276;</button>
+    <span class="top-avatar">AK</span>
+    <div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div>
+  </div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبات">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="SSH">SSH</span></a>
+      <a href="alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثة">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav">
+      <a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a>
+      <a href="billing.html" class="sb-item active"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+
+      <!-- Page Header -->
+      <div class="page-header"><h1 class="page-title" data-en="Billing" data-ar="الفوترة">Billing</h1></div>
+
+      <!-- Current Plan Card -->
+      <div class="plan-card">
+        <div class="plan-card-left">
+          <div class="plan-icon">&#9733;</div>
+          <div class="plan-info">
+            <h2><span data-en="Pro" data-ar="الاحترافية">Pro</span> <span class="plan-badge" data-en="CURRENT PLAN" data-ar="الخطة الحالية">CURRENT PLAN</span></h2>
+            <div class="plan-price"><strong>$49</strong> <span data-en="/ month" data-ar="/ شهرياً">/ month</span></div>
+            <div class="plan-billing" data-en="Billed monthly. Next invoice on Apr 1, 2026." data-ar="فوترة شهرية. الفاتورة القادمة في 1 أبريل 2026.">Billed monthly. Next invoice on Apr 1, 2026.</div>
+          </div>
+        </div>
+        <button class="btn-manage" data-en="Manage subscription" data-ar="إدارة الاشتراك">Manage subscription</button>
+      </div>
+
+      <!-- Usage Section -->
+      <h3 class="section-title" data-en="Usage this month" data-ar="الاستخدام هذا الشهر">Usage this month</h3>
+      <div class="usage-grid">
+        <!-- Errors -->
+        <div class="usage-item">
+          <div class="usage-label"><span data-en="Errors" data-ar="الأخطاء">Errors</span></div>
+          <div class="usage-values"><span class="usage-current">84,231</span><span class="usage-limit">/ 100,000</span></div>
+          <div class="usage-bar-track"><div class="usage-bar-fill orange" style="width:84%"></div></div>
+        </div>
+        <!-- Logs retention -->
+        <div class="usage-item">
+          <div class="usage-label"><span data-en="Logs retention" data-ar="مدة الاحتفاظ بالسجلات">Logs retention</span></div>
+          <div class="usage-values"><span class="usage-badge" data-en="30 days" data-ar="30 يوم">30 days</span></div>
+          <div class="usage-bar-track"><div class="usage-bar-fill green" style="width:100%"></div></div>
+        </div>
+        <!-- Monitors -->
+        <div class="usage-item">
+          <div class="usage-label"><span data-en="Monitors" data-ar="المراقبات">Monitors</span></div>
+          <div class="usage-values"><span class="usage-current">43</span><span class="usage-limit">/ 100</span></div>
+          <div class="usage-bar-track"><div class="usage-bar-fill green" style="width:43%"></div></div>
+        </div>
+        <!-- SSH Servers -->
+        <div class="usage-item">
+          <div class="usage-label"><span data-en="SSH Servers" data-ar="خوادم SSH">SSH Servers</span></div>
+          <div class="usage-values"><span class="usage-current">3</span><span class="usage-limit">/ 10</span></div>
+          <div class="usage-bar-track"><div class="usage-bar-fill green" style="width:30%"></div></div>
+        </div>
+        <!-- Members -->
+        <div class="usage-item">
+          <div class="usage-label"><span data-en="Members" data-ar="الأعضاء">Members</span></div>
+          <div class="usage-values"><span class="usage-current">8</span><span class="usage-limit">/ 20</span></div>
+          <div class="usage-bar-track"><div class="usage-bar-fill green" style="width:40%"></div></div>
+        </div>
+      </div>
+
+      <!-- Plan Comparison -->
+      <h3 class="section-title" data-en="Plans" data-ar="الخطط">Plans</h3>
+      <div class="plan-toggle">
+        <span class="plan-toggle-label active" id="toggle-monthly" data-en="Monthly" data-ar="شهري">Monthly</span>
+        <div class="toggle-switch" id="billing-toggle" onclick="toggleBilling()"><div class="toggle-dot"></div></div>
+        <span class="plan-toggle-label" id="toggle-annually" data-en="Annually" data-ar="سنوي">Annually</span>
+        <span class="savings-badge" data-en="Save 20%" data-ar="وفر 20%">Save 20%</span>
+      </div>
+      <div class="plans-grid">
+        <!-- Starter -->
+        <div class="plan-compare-card" data-plan="starter">
+          <div class="pcc-name" data-en="Starter" data-ar="المبتدئ">Starter</div>
+          <div class="pcc-price"><span class="price-value">$19</span><span data-en="/mo" data-ar="/شهرياً">/mo</span></div>
+          <div class="pcc-original">&nbsp;</div>
+          <div class="pcc-desc" data-en="For small teams and side projects." data-ar="للفرق الصغيرة والمشاريع الجانبية.">For small teams and side projects.</div>
+          <button class="pcc-btn pcc-btn-outline" data-en="Downgrade" data-ar="تخفيض">Downgrade</button>
+          <ul class="pcc-features">
+            <li data-en="10,000 errors/month" data-ar="10,000 خطأ/شهر">10,000 errors/month</li>
+            <li data-en="7 days log retention" data-ar="7 أيام احتفاظ بالسجلات">7 days log retention</li>
+            <li data-en="10 monitors" data-ar="10 مراقبات">10 monitors</li>
+            <li data-en="2 SSH servers" data-ar="2 خوادم SSH">2 SSH servers</li>
+            <li data-en="5 team members" data-ar="5 أعضاء">5 team members</li>
+          </ul>
+        </div>
+        <!-- Pro (Current) -->
+        <div class="plan-compare-card current" data-plan="pro">
+          <div class="pcc-name"><span data-en="Pro" data-ar="الاحترافية">Pro</span> <span class="pcc-current-badge" data-en="CURRENT" data-ar="الحالية">CURRENT</span></div>
+          <div class="pcc-price"><span class="price-value">$49</span><span data-en="/mo" data-ar="/شهرياً">/mo</span></div>
+          <div class="pcc-original">&nbsp;</div>
+          <div class="pcc-desc" data-en="For growing teams that need more power." data-ar="للفرق النامية التي تحتاج المزيد.">For growing teams that need more power.</div>
+          <button class="pcc-btn pcc-btn-current" data-en="Current plan" data-ar="الخطة الحالية">Current plan</button>
+          <ul class="pcc-features">
+            <li data-en="100,000 errors/month" data-ar="100,000 خطأ/شهر">100,000 errors/month</li>
+            <li data-en="30 days log retention" data-ar="30 يوم احتفاظ بالسجلات">30 days log retention</li>
+            <li data-en="100 monitors" data-ar="100 مراقب">100 monitors</li>
+            <li data-en="10 SSH servers" data-ar="10 خوادم SSH">10 SSH servers</li>
+            <li data-en="20 team members" data-ar="20 عضو">20 team members</li>
+          </ul>
+        </div>
+        <!-- Scale -->
+        <div class="plan-compare-card" data-plan="scale">
+          <div class="pcc-name" data-en="Scale" data-ar="المتقدمة">Scale</div>
+          <div class="pcc-price"><span class="price-value">$99</span><span data-en="/mo" data-ar="/شهرياً">/mo</span></div>
+          <div class="pcc-original">&nbsp;</div>
+          <div class="pcc-desc" data-en="For large teams and enterprise workloads." data-ar="للفرق الكبيرة والأعمال المؤسسية.">For large teams and enterprise workloads.</div>
+          <button class="pcc-btn pcc-btn-primary" onclick="openUpgradeModal('Scale','$99')" data-en="Upgrade" data-ar="ترقية">Upgrade</button>
+          <ul class="pcc-features">
+            <li data-en="1,000,000 errors/month" data-ar="1,000,000 خطأ/شهر">1,000,000 errors/month</li>
+            <li data-en="90 days log retention" data-ar="90 يوم احتفاظ بالسجلات">90 days log retention</li>
+            <li data-en="Unlimited monitors" data-ar="مراقبات غير محدودة">Unlimited monitors</li>
+            <li data-en="Unlimited SSH servers" data-ar="خوادم SSH غير محدودة">Unlimited SSH servers</li>
+            <li data-en="Unlimited members" data-ar="أعضاء غير محدودين">Unlimited members</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Billing History -->
+      <h3 class="section-title" data-en="Billing history" data-ar="سجل الفواتير">Billing history</h3>
+      <table class="bill-table">
+        <thead><tr>
+          <th data-en="Date" data-ar="التاريخ">Date</th>
+          <th data-en="Description" data-ar="الوصف">Description</th>
+          <th data-en="Amount" data-ar="المبلغ">Amount</th>
+          <th data-en="Status" data-ar="الحالة">Status</th>
+          <th data-en="Invoice" data-ar="الفاتورة">Invoice</th>
+        </tr></thead>
+        <tbody>
+          <tr>
+            <td data-en="Mar 1, 2026" data-ar="1 مارس 2026">Mar 1, 2026</td>
+            <td data-en="Pro plan — Monthly" data-ar="خطة الاحترافية — شهري">Pro plan — Monthly</td>
+            <td style="font-family:var(--font-mono)">$49.00</td>
+            <td><span class="bdg-paid" data-en="Paid" data-ar="مدفوع">Paid</span></td>
+            <td><a class="bill-download" data-en="Download PDF" data-ar="تحميل PDF">Download PDF</a></td>
+          </tr>
+          <tr>
+            <td data-en="Feb 1, 2026" data-ar="1 فبراير 2026">Feb 1, 2026</td>
+            <td data-en="Pro plan — Monthly" data-ar="خطة الاحترافية — شهري">Pro plan — Monthly</td>
+            <td style="font-family:var(--font-mono)">$49.00</td>
+            <td><span class="bdg-paid" data-en="Paid" data-ar="مدفوع">Paid</span></td>
+            <td><a class="bill-download" data-en="Download PDF" data-ar="تحميل PDF">Download PDF</a></td>
+          </tr>
+          <tr>
+            <td data-en="Jan 1, 2026" data-ar="1 يناير 2026">Jan 1, 2026</td>
+            <td data-en="Pro plan — Monthly" data-ar="خطة الاحترافية — شهري">Pro plan — Monthly</td>
+            <td style="font-family:var(--font-mono)">$49.00</td>
+            <td><span class="bdg-paid" data-en="Paid" data-ar="مدفوع">Paid</span></td>
+            <td><a class="bill-download" data-en="Download PDF" data-ar="تحميل PDF">Download PDF</a></td>
+          </tr>
+        </tbody>
+      </table>
+
+    </main>
+  </div>
+</div>
+
+<!-- Upgrade Modal -->
+<div class="modal-overlay" id="upgrade-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" data-en="Upgrade plan" data-ar="ترقية الخطة">Upgrade plan</span>
+      <button class="modal-close" onclick="closeUpgradeModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <!-- Plan summary -->
+      <div class="modal-plan-summary">
+        <div>
+          <div class="mps-name" id="modal-plan-name">Scale</div>
+          <div style="font-size:var(--text-sm);color:var(--text-tertiary)" data-en="Billed monthly" data-ar="فوترة شهرية">Billed monthly</div>
+        </div>
+        <div class="mps-price"><span id="modal-plan-price">$99</span><span data-en="/mo" data-ar="/شهرياً">/mo</span></div>
+      </div>
+
+      <!-- Payment method -->
+      <div class="payment-section-title" data-en="Payment method" data-ar="طريقة الدفع">Payment method</div>
+      <div class="payment-methods">
+        <div class="pm-option selected" onclick="selectPM(this)">
+          <div class="pm-radio"></div>
+          <span class="pm-label">mada</span>
+          <span class="pm-icon">Debit</span>
+        </div>
+        <div class="pm-option" onclick="selectPM(this)">
+          <div class="pm-radio"></div>
+          <span class="pm-label">Visa / Mastercard</span>
+          <span class="pm-icon">Credit</span>
+        </div>
+        <div class="pm-option" onclick="selectPM(this)">
+          <div class="pm-radio"></div>
+          <span class="pm-label">Apple Pay</span>
+          <span class="pm-icon">Wallet</span>
+        </div>
+      </div>
+
+      <!-- Card inputs -->
+      <div class="card-inputs">
+        <div class="card-input-group">
+          <label data-en="Card number" data-ar="رقم البطاقة">Card number</label>
+          <input type="text" placeholder="4242 4242 4242 4242" maxlength="19">
+        </div>
+        <div class="card-row">
+          <div class="card-input-group">
+            <label data-en="Expiry" data-ar="تاريخ الانتهاء">Expiry</label>
+            <input type="text" placeholder="MM / YY" maxlength="7">
+          </div>
+          <div class="card-input-group">
+            <label data-en="CVV" data-ar="CVV">CVV</label>
+            <input type="text" placeholder="123" maxlength="4">
+          </div>
+        </div>
+        <div class="card-input-group">
+          <label data-en="Cardholder name" data-ar="اسم حامل البطاقة">Cardholder name</label>
+          <input type="text" placeholder="Ahmed Al-Rashidi">
+        </div>
+      </div>
+
+      <div class="moyasar-note">&#128274; <span data-en="Payments processed securely by Moyasar" data-ar="المدفوعات تتم بشكل آمن عبر مُيسر">Payments processed securely by Moyasar</span></div>
+      <button class="btn-pay" id="btn-pay" data-en="Pay $99/mo" data-ar="ادفع $99/شهرياً">Pay $99/mo</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// Theme toggle
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));
+}
+
+// Language toggle
+let currentLang='en';
+function setLang(lang){
+  currentLang=lang;
+  const html=document.documentElement;
+  html.setAttribute('lang',lang);
+  html.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));
+  document.querySelectorAll('[data-en][data-ar]').forEach(el=>{
+    el.textContent=el.getAttribute('data-'+lang);
+  });
+}
+
+// Billing toggle (monthly/annually)
+let isAnnual=false;
+const prices={starter:{monthly:19,annual:15},pro:{monthly:49,annual:39},scale:{monthly:99,annual:79}};
+function toggleBilling(){
+  isAnnual=!isAnnual;
+  document.getElementById('billing-toggle').classList.toggle('on',isAnnual);
+  document.getElementById('toggle-monthly').classList.toggle('active',!isAnnual);
+  document.getElementById('toggle-annually').classList.toggle('active',isAnnual);
+  document.querySelectorAll('.plan-compare-card').forEach(card=>{
+    const plan=card.getAttribute('data-plan');
+    const p=prices[plan];
+    const priceEl=card.querySelector('.price-value');
+    const origEl=card.querySelector('.pcc-original');
+    if(isAnnual){
+      priceEl.textContent='$'+p.annual;
+      origEl.textContent='$'+p.monthly;
+    }else{
+      priceEl.textContent='$'+p.monthly;
+      origEl.innerHTML='&nbsp;';
+    }
+  });
+}
+
+// Upgrade modal
+function openUpgradeModal(name,price){
+  document.getElementById('modal-plan-name').textContent=name;
+  document.getElementById('modal-plan-price').textContent=price;
+  const payBtn=document.getElementById('btn-pay');
+  if(currentLang==='ar'){
+    payBtn.textContent='ادفع '+price+'/شهرياً';
+  }else{
+    payBtn.textContent='Pay '+price+'/mo';
+  }
+  document.getElementById('upgrade-modal').classList.add('open');
+}
+function closeUpgradeModal(){
+  document.getElementById('upgrade-modal').classList.remove('open');
+}
+
+// Payment method selection
+function selectPM(el){
+  document.querySelectorAll('.pm-option').forEach(o=>o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+// Close modal on Escape
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeUpgradeModal()});
+
+// Close modal on overlay click
+document.getElementById('upgrade-modal').addEventListener('click',e=>{
+  if(e.target===e.currentTarget)closeUpgradeModal();
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Page-specific: General Settings === */
+[dir="rtl"] .settings-nav{border-right:none;border-left:1px solid var(--border)}
+
+/* Cards (page-specific padding/margin) */
+.card{padding:24px;margin-bottom:20px}
+.card-title{margin-bottom:4px}
+.card-desc{font-size:12px;color:var(--text-tertiary);margin-bottom:20px}
+
+/* Form overrides for settings */
+.form-input{max-width:380px}
+.form-input::placeholder{color:var(--text-tertiary)}
+select.form-input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+
+/* Input group */
+.input-group{display:flex;align-items:stretch;max-width:380px}
+.input-prefix{display:flex;align-items:center;padding:0 10px;background:var(--bg-overlay);border:1px solid var(--border-strong);border-right:none;border-radius:var(--radius-md) 0 0 var(--radius-md);font-size:12px;color:var(--text-tertiary);white-space:nowrap;font-family:var(--font-mono)}
+.input-group .form-input{border-radius:0 var(--radius-md) var(--radius-md) 0;max-width:none;flex:1}
+
+/* Tag input */
+.tag-input-wrap{display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-height:34px;padding:4px 8px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-md);max-width:380px;cursor:text;transition:border-color .15s}
+.tag-input-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;background:var(--primary-ghost);color:var(--primary-text);border-radius:var(--radius-sm);font-size:11px;font-weight:500}
+.tag-remove{background:none;border:none;color:var(--primary-text);cursor:pointer;font-size:12px;padding:0;line-height:1;opacity:0.7}
+.tag-remove:hover{opacity:1}
+.tag-field{border:none;background:transparent;outline:none;color:var(--text-primary);font-family:inherit;font-size:12px;min-width:80px;flex:1;height:24px}
+.tag-field::placeholder{color:var(--text-tertiary)}
+
+/* Buttons */
+.btn{height:34px;padding:0 16px;border-radius:var(--radius-md);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;transition:all .15s}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-primary:disabled{opacity:0.5;cursor:not-allowed}
+.btn-primary.saved{background:var(--success)}
+.btn-outline{background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary)}
+.btn-outline:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-danger{background:transparent;border:1px solid var(--danger);color:var(--danger)}
+.btn-danger:hover{background:var(--danger-ghost)}
+.btn .spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:none}
+.btn.loading .spinner{display:block}
+.btn.loading .btn-text{display:none}
+
+/* Plan & Usage */
+.plan-header{display:flex;align-items:center;gap:10px;margin-bottom:20px}
+.plan-badge{display:inline-flex;align-items:center;padding:4px 12px;background:var(--primary-ghost);color:var(--primary-text);border-radius:var(--radius-full);font-size:13px;font-weight:600;border:1px solid var(--primary-border)}
+.usage-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.usage-label{width:80px;font-size:12px;font-weight:500;color:var(--text-secondary)}
+.usage-bar-wrap{flex:1;max-width:280px;height:6px;background:var(--bg-raised);border-radius:var(--radius-full);overflow:hidden}
+.usage-bar{height:100%;border-radius:var(--radius-full);transition:width .3s ease}
+.usage-bar.low{background:var(--success)}
+.usage-bar.mid{background:var(--warning)}
+.usage-bar.high{background:var(--danger)}
+.usage-count{font-size:11px;color:var(--text-tertiary);font-family:var(--font-mono);min-width:100px}
+
+/* Danger zone */
+.card-danger{border-color:rgba(229,72,77,0.3)}
+.card-danger .card-title{color:var(--danger)}
+.danger-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border)}
+.danger-row:last-child{border-bottom:none;padding-bottom:0}
+.danger-row:first-of-type{padding-top:0}
+.danger-row-info{flex:1}
+.danger-row-title{font-size:13px;font-weight:500;margin-bottom:2px}
+.danger-row-desc{font-size:12px;color:var(--text-tertiary)}
+
+/* Modal (page-specific overrides) */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-xl);width:420px;max-width:90vw;padding:24px}
+.modal-title{font-size:16px;font-weight:600;margin-bottom:4px}
+.modal-desc{font-size:13px;color:var(--text-tertiary);margin-bottom:20px;line-height:1.6;padding:0}
+.modal-desc code{background:var(--bg-raised);padding:2px 6px;border-radius:var(--radius-sm);font-family:var(--font-mono);font-size:12px;color:var(--danger)}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px;padding:0;border-top:none}
+
+/* Main settings padding override */
+.main{padding:32px 40px}
+.page-subtitle{font-size:13px;color:var(--text-tertiary);margin-bottom:24px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="../dashboard/index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right"><button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div><div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div></div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="../dashboard/index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="../dashboard/errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="../dashboard/logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="../dashboard/monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبة">Monitors</span></a>
+      <a href="../dashboard/ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="الخوادم">SSH</span></a>
+      <a href="../dashboard/alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+      <a href="../dashboard/billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثات">Chat</span></a><a href="members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="general.html" class="sb-item active"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+
+    <!-- Settings secondary nav -->
+    <nav class="settings-nav">
+      <div class="sn-sec">Workspace</div>
+      <div class="sn-items">
+        <a href="general.html" class="sn-item active" data-en="General" data-ar="عام">General</a>
+        <a href="members.html" class="sn-item" data-en="Members" data-ar="الأعضاء">Members</a>
+        <a href="api-keys.html" class="sn-item" data-en="API Keys" data-ar="مفاتيح API">API Keys</a>
+      </div>
+      <div class="sn-sec">Integrations</div>
+      <div class="sn-items">
+        <a href="#" class="sn-item">Slack</a>
+        <a href="#" class="sn-item">PagerDuty</a>
+        <a href="#" class="sn-item">Webhooks</a>
+      </div>
+      <div class="sn-sec">Account</div>
+      <div class="sn-items">
+        <a href="#" class="sn-item">Profile</a>
+        <a href="#" class="sn-item">Security</a>
+        <a href="#" class="sn-item">Billing</a>
+      </div>
+    </nav>
+
+    <!-- Main settings content -->
+    <main class="main">
+      <h1 class="page-title" data-en="General" data-ar="عام">General</h1>
+      <p class="page-subtitle" data-en="Manage your workspace settings and preferences." data-ar="إدارة إعدادات وتفضيلات مساحة العمل.">Manage your workspace settings and preferences.</p>
+
+      <!-- Workspace Info -->
+      <div class="card">
+        <div class="card-title">Workspace Info</div>
+        <div class="card-desc">Basic information about your workspace.</div>
+
+        <div class="form-group">
+          <label class="form-label" data-en="Workspace Name" data-ar="اسم مساحة العمل">Workspace Name</label>
+          <input type="text" class="form-input" value="Production App" id="ws-name">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Workspace URL</label>
+          <div class="input-group">
+            <span class="input-prefix">allstak.io /</span>
+            <input type="text" class="form-input" value="production-app" id="ws-url">
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Timezone</label>
+          <select class="form-input" id="ws-timezone">
+            <option value="UTC">UTC (Coordinated Universal Time)</option>
+            <option value="America/New_York">America/New_York (EST/EDT)</option>
+            <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+            <option value="America/Denver">America/Denver (MST/MDT)</option>
+            <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+            <option value="Europe/London">Europe/London (GMT/BST)</option>
+            <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+            <option value="Europe/Istanbul" selected>Europe/Istanbul (TRT)</option>
+            <option value="Asia/Dubai">Asia/Dubai (GST)</option>
+            <option value="Asia/Kolkata">Asia/Kolkata (IST)</option>
+            <option value="Asia/Shanghai">Asia/Shanghai (CST)</option>
+            <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
+            <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Allowed Email Domains</label>
+          <div class="tag-input-wrap" id="tag-wrap" onclick="document.getElementById('tag-field').focus()">
+            <span class="tag">fatura.com <button class="tag-remove" onclick="removeTag(this, event)">&times;</button></span>
+            <span class="tag">allstak.io <button class="tag-remove" onclick="removeTag(this, event)">&times;</button></span>
+            <input type="text" class="tag-field" id="tag-field" placeholder="Add domain...">
+          </div>
+        </div>
+
+        <button class="btn btn-primary" id="save-btn" onclick="handleSave()">
+          <span class="spinner"></span>
+          <span class="btn-text" data-en="Save Changes" data-ar="حفظ التغييرات">Save Changes</span>
+        </button>
+      </div>
+
+      <!-- Plan & Usage -->
+      <div class="card">
+        <div class="card-title">Plan &amp; Usage</div>
+        <div class="card-desc">Your current plan and resource usage for this billing cycle.</div>
+
+        <div class="plan-header">
+          <span class="plan-badge">&#9733; Pro Plan</span>
+        </div>
+
+        <div class="usage-row">
+          <span class="usage-label">Errors</span>
+          <div class="usage-bar-wrap"><div class="usage-bar high" style="width:84.23%"></div></div>
+          <span class="usage-count">84,231 / 100,000</span>
+        </div>
+        <div class="usage-row">
+          <span class="usage-label">Monitors</span>
+          <div class="usage-bar-wrap"><div class="usage-bar mid" style="width:43%"></div></div>
+          <span class="usage-count">43 / 100</span>
+        </div>
+        <div class="usage-row">
+          <span class="usage-label">SSH</span>
+          <div class="usage-bar-wrap"><div class="usage-bar low" style="width:30%"></div></div>
+          <span class="usage-count">3 / 10</span>
+        </div>
+        <div class="usage-row">
+          <span class="usage-label">Members</span>
+          <div class="usage-bar-wrap"><div class="usage-bar mid" style="width:40%"></div></div>
+          <span class="usage-count">8 / 20</span>
+        </div>
+
+        <div style="margin-top:20px">
+          <button class="btn btn-outline">Upgrade Plan</button>
+        </div>
+      </div>
+
+      <!-- Danger Zone -->
+      <div class="card card-danger">
+        <div class="card-title" data-en="Danger Zone" data-ar="منطقة الخطر">Danger Zone</div>
+        <div class="card-desc">Irreversible and destructive actions. Proceed with caution.</div>
+
+        <div class="danger-row">
+          <div class="danger-row-info">
+            <div class="danger-row-title">Export workspace data</div>
+            <div class="danger-row-desc">Download a full export of all errors, logs, monitors, and settings as a ZIP archive.</div>
+          </div>
+          <button class="btn btn-outline" onclick="alert('Export started. You will receive an email when it is ready.')">Export Data</button>
+        </div>
+
+        <div class="danger-row">
+          <div class="danger-row-info">
+            <div class="danger-row-title" data-en="Delete this workspace" data-ar="حذف مساحة العمل">Delete this workspace</div>
+            <div class="danger-row-desc">Permanently delete the workspace, all projects, data, and member access. This cannot be undone.</div>
+          </div>
+          <button class="btn btn-danger" onclick="openDeleteModal()" data-en="Delete Workspace" data-ar="حذف مساحة العمل">Delete Workspace</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Delete confirmation modal -->
+<div class="modal-overlay" id="delete-modal">
+  <div class="modal">
+    <div class="modal-title" data-en="Delete workspace" data-ar="حذف مساحة العمل">Delete workspace</div>
+    <div class="modal-desc">
+      This action is <strong>permanent</strong> and cannot be reversed. All data including errors, logs, monitors, SSH sessions, and member access will be permanently deleted.<br><br>
+      To confirm, type <code>delete fatura</code> below:
+    </div>
+    <div class="form-group" style="margin-bottom:0">
+      <input type="text" class="form-input" id="delete-confirm-input" placeholder="Type 'delete fatura' to confirm" style="max-width:100%" oninput="checkDeleteConfirm()">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline" onclick="closeDeleteModal()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-delete-btn" disabled onclick="confirmDelete()">Delete Workspace</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));localStorage.setItem('allstak-theme',t)}
+function setLang(lang){document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));document.querySelectorAll('[data-'+lang+']').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)});localStorage.setItem('allstak-lang',lang)}
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+
+// Save button with loading -> saved state
+function handleSave(){
+  const btn=document.getElementById('save-btn');
+  btn.classList.add('loading');
+  btn.disabled=true;
+  setTimeout(()=>{
+    btn.classList.remove('loading');
+    btn.querySelector('.btn-text').textContent='Saved';
+    btn.classList.add('saved');
+    setTimeout(()=>{
+      btn.querySelector('.btn-text').textContent='Save Changes';
+      btn.classList.remove('saved');
+      btn.disabled=false;
+    },1500);
+  },800);
+}
+
+// Tag input
+const tagField=document.getElementById('tag-field');
+const tagWrap=document.getElementById('tag-wrap');
+tagField.addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&this.value.trim()){
+    e.preventDefault();
+    const val=this.value.trim();
+    const tag=document.createElement('span');
+    tag.className='tag';
+    tag.innerHTML=val+' <button class="tag-remove" onclick="removeTag(this, event)">&times;</button>';
+    tagWrap.insertBefore(tag,this);
+    this.value='';
+  }
+  if(e.key==='Backspace'&&!this.value){
+    const tags=tagWrap.querySelectorAll('.tag');
+    if(tags.length)tags[tags.length-1].remove();
+  }
+});
+function removeTag(btn,e){e.stopPropagation();btn.parentElement.remove()}
+
+// Delete modal
+function openDeleteModal(){document.getElementById('delete-modal').classList.add('open');document.getElementById('delete-confirm-input').value='';document.getElementById('confirm-delete-btn').disabled=true}
+function closeDeleteModal(){document.getElementById('delete-modal').classList.remove('open')}
+function checkDeleteConfirm(){document.getElementById('confirm-delete-btn').disabled=document.getElementById('delete-confirm-input').value!=='delete fatura'}
+function confirmDelete(){alert('Workspace deleted.');closeDeleteModal()}
+document.getElementById('delete-modal').addEventListener('click',function(e){if(e.target===this)closeDeleteModal()});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeDeleteModal()});
+</script>
+</body>
+</html>

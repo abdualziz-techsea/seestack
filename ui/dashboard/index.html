@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Overview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+</head>
+<body>
+
+<!-- TOPBAR -->
+<header class="topbar">
+  <a href="index.html" class="top-logo">
+    <svg class="top-mark" width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>
+    AllStak
+  </a>
+  <span class="top-sep">/</span>
+  <span class="top-project">Production App &#9660;</span>
+  <div class="top-search">
+    <span class="top-search-ico">&#8981;</span>
+    <input placeholder="Search errors, logs...">
+    <span class="top-search-hint">&#8984;K</span>
+  </div>
+  <div class="top-right">
+    <button class="top-bell">&#128276;<span class="top-bell-dot"></span></button>
+    <span class="top-avatar">AK</span>
+    <div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div>
+    <div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <nav class="sb-nav">
+      <a href="index.html" class="sb-item active"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبة">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="الخوادم">SSH</span></a>
+      <a href="alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+      <a href="billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav">
+      <a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثات">Chat</span></a>
+      <a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav">
+      <a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a>
+    </nav>
+    <div class="sb-bottom">
+      <span class="sb-user-av">AK</span>
+      <span class="sb-user-name">Ahmed Al-Rashidi</span>
+      <span class="sb-plan">Pro</span>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="page-header">
+      <h1 class="page-title" data-en="Overview" data-ar="نظرة عامة">Overview</h1>
+      <div class="date-range">
+        <button class="dr-btn active" onclick="selectRange(this)">7d</button>
+        <button class="dr-btn" onclick="selectRange(this)">30d</button>
+        <button class="dr-btn" onclick="selectRange(this)">90d</button>
+      </div>
+    </div>
+
+    <!-- STAT CARDS -->
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-label" data-en="Total Errors" data-ar="إجمالي الأخطاء">Total Errors</div>
+        <div class="stat-value">1,284</div>
+        <div class="stat-trend up">&#9650; 12% this week</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-en="New Errors" data-ar="أخطاء جديدة">New Errors</div>
+        <div class="stat-value" style="color:var(--warning)">47</div>
+        <div class="stat-trend up">&#9650; 3 today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-en="Monitors Up" data-ar="المراقبة نشطة">Monitors Up</div>
+        <div class="stat-value" style="color:var(--success)">12/13</div>
+        <div class="stat-trend neutral">1 degraded</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-en="SSH Sessions" data-ar="جلسات SSH">SSH Sessions</div>
+        <div class="stat-value">8</div>
+        <div class="stat-trend neutral">last 24h</div>
+      </div>
+    </div>
+
+    <!-- TWO COLUMN -->
+    <div class="two-col">
+      <div>
+        <!-- RECENT ERRORS -->
+        <div class="section">
+          <div class="section-header"><span class="section-title" data-en="Recent Errors" data-ar="آخر الأخطاء">Recent Errors</span><a href="errors.html" class="section-link" data-en="View all &#8594;" data-ar="عرض الكل &#8592;">View all &#8594;</a></div>
+          <div class="err-list">
+            <div class="err-row">
+              <div class="err-info"><div class="err-cls">NullPointerException</div><div class="err-file">PaymentService.java:42</div></div>
+              <div class="err-meta"><span class="err-env prod">production</span><span class="err-count">47&times;</span><span class="err-time">2 min ago</span><span class="err-badge unresolved"><span class="dot"></span>unresolved</span></div>
+            </div>
+            <div class="err-row">
+              <div class="err-info"><div class="err-cls">IllegalArgumentException</div><div class="err-file">UserValidator.java:88</div></div>
+              <div class="err-meta"><span class="err-env staging">staging</span><span class="err-count">12&times;</span><span class="err-time">15 min ago</span><span class="err-badge unresolved"><span class="dot"></span>unresolved</span></div>
+            </div>
+            <div class="err-row">
+              <div class="err-info"><div class="err-cls">ConnectionTimeoutException</div><div class="err-file">DatabasePool.java:201</div></div>
+              <div class="err-meta"><span class="err-env prod">production</span><span class="err-count">3&times;</span><span class="err-time">1 hour ago</span><span class="err-badge unresolved"><span class="dot"></span>unresolved</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHART -->
+        <div class="section">
+          <div class="section-header"><span class="section-title">Error Trend (7 days)</span></div>
+          <div class="chart-wrap">
+            <div class="chart-bars" id="chart"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <!-- MONITORS -->
+        <div class="section">
+          <div class="section-header"><span class="section-title" data-en="Monitor Status" data-ar="حالة المراقبة">Monitor Status</span><a href="monitors.html" class="section-link" data-en="View all &#8594;" data-ar="عرض الكل &#8592;">View all &#8594;</a></div>
+          <div class="mon-list">
+            <div class="mon-row"><span class="mon-dot up"></span><span class="mon-name">api.myapp.com</span><span class="mon-ms fast">142ms</span><span class="mon-arrow" style="color:var(--success)">&#9650;</span></div>
+            <div class="mon-row"><span class="mon-dot up"></span><span class="mon-name">dashboard.myapp.com</span><span class="mon-ms fast">89ms</span><span class="mon-arrow" style="color:var(--success)">&#9650;</span></div>
+            <div class="mon-row"><span class="mon-dot down"></span><span class="mon-name">webhook.myapp.com</span><span class="mon-ms slow">DOWN</span><span class="mon-arrow" style="color:var(--danger)">&#9660;</span></div>
+            <div class="mon-row"><span class="mon-dot up"></span><span class="mon-name">cdn.myapp.com</span><span class="mon-ms fast">201ms</span><span class="mon-arrow" style="color:var(--success)">&#9650;</span></div>
+          </div>
+        </div>
+
+        <!-- ACTIVITY -->
+        <div class="section">
+          <div class="section-header"><span class="section-title" data-en="Recent Activity" data-ar="آخر النشاط">Recent Activity</span></div>
+          <div class="act-list">
+            <div class="act-row"><div class="act-ico" style="background:var(--danger-ghost);color:var(--danger)">&#9888;</div><div><div class="act-text">Error spike &mdash; production</div><div class="act-time">2 min ago</div></div></div>
+            <div class="act-row"><div class="act-ico" style="background:var(--info-ghost);color:var(--primary)">&#9993;</div><div><div class="act-text">Mohammed mentioned you in #production</div><div class="act-time">5 min ago</div></div></div>
+            <div class="act-row"><div class="act-ico" style="background:var(--success-ghost);color:var(--success)">&#10003;</div><div><div class="act-text">Monitor restored &mdash; api.myapp.com</div><div class="act-time">1 hour ago</div></div></div>
+            <div class="act-row"><div class="act-ico" style="background:var(--primary-ghost);color:var(--primary-text)">&gt;_</div><div><div class="act-text">SSH session started &mdash; prod-server-1</div><div class="act-time">2 hours ago</div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));localStorage.setItem('allstak-theme',t)}
+function selectRange(btn){btn.parentElement.querySelectorAll('.dr-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active')}
+function setLang(lang){document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));document.querySelectorAll('[data-'+lang+']').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)});localStorage.setItem('allstak-lang',lang)}
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+
+// Chart
+const data=[{d:'Mon',v:120},{d:'Tue',v:89},{d:'Wed',v:234},{d:'Thu',v:156},{d:'Fri',v:47},{d:'Sat',v:23},{d:'Sun',v:89}];
+const mx=Math.max(...data.map(d=>d.v));
+const chart=document.getElementById('chart');
+data.forEach(d=>{
+  const w=document.createElement('div');w.className='chart-bar-wrap';
+  const b=document.createElement('div');b.className='chart-bar';b.style.height=Math.max(8,(d.v/mx)*100)+'%';
+  b.title=d.d+': '+d.v+' errors';
+  const l=document.createElement('div');l.className='chart-label';l.textContent=d.d;
+  w.appendChild(b);w.appendChild(l);chart.appendChild(w);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Session Replay</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Replay page-specific styles === */
+
+/* RTL replay-specific */
+[dir="rtl"] .back-link{direction:rtl}
+[dir="rtl"] .back-link .arrow{transform:rotate(180deg);display:inline-block}
+[dir="rtl"] .two-col{direction:rtl}
+[dir="rtl"] .timeline-dot{margin-left:10px;margin-right:0}
+[dir="rtl"] .timeline-item{flex-direction:row-reverse;text-align:right}
+[dir="rtl"] .timeline-ts{margin-right:0;margin-left:auto;text-align:left}
+[dir="rtl"] .controls-bar{direction:rtl}
+
+/* Page header */
+.back-link{display:inline-flex;align-items:center;gap:6px;color:var(--primary-text);text-decoration:none;font-size:var(--text-sm);font-weight:500;margin-bottom:var(--sp-3);transition:color var(--duration-fast)}
+.back-link:hover{color:var(--primary)}
+.page-header-replay{margin-bottom:var(--sp-5)}
+.page-title-replay{font-size:22px;font-weight:600;letter-spacing:-0.022em;margin-bottom:6px}
+.page-badge{display:inline-flex;align-items:center;gap:6px;padding:var(--sp-1) 10px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);font-size:var(--text-xs);color:var(--text-secondary);font-family:var(--font-mono)}
+
+/* Two column layout */
+.two-col{display:flex;gap:var(--sp-5)}
+.col-left{flex:0 0 65%;min-width:0}
+.col-right{flex:0 0 calc(35% - 20px);min-width:0}
+
+/* Browser mockup */
+.browser-mock{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-xl);overflow:hidden}
+.browser-chrome{display:flex;align-items:center;gap:var(--sp-2);padding:var(--sp-2) var(--sp-3);background:var(--bg-raised);border-bottom:1px solid var(--border)}
+.browser-dots{display:flex;gap:5px}
+.browser-dot{width:10px;height:10px;border-radius:50%}
+.browser-dot.red{background:var(--danger)}
+.browser-dot.yellow{background:var(--warning)}
+.browser-dot.green{background:var(--success)}
+.browser-nav-btns{display:flex;gap:var(--sp-1)}
+.browser-nav-btn{background:none;border:none;color:var(--text-tertiary);font-size:14px;cursor:default;padding:2px var(--sp-1)}
+.browser-url{flex:1;height:26px;background:var(--bg-base);border:1px solid var(--border);border-radius:5px;padding:0 10px;font-size:var(--text-xs);color:var(--text-secondary);font-family:var(--font-mono);display:flex;align-items:center}
+.browser-body{padding:40px 32px;min-height:320px;position:relative;background:var(--bg-base)}
+
+/* Fake checkout form */
+.fake-page-title{font-size:18px;font-weight:600;margin-bottom:var(--sp-5);color:var(--text-primary)}
+.fake-form{max-width:340px}
+.fake-label{display:block;font-size:var(--text-xs);font-weight:500;color:var(--text-secondary);margin-bottom:var(--sp-1);margin-top:14px}
+.fake-input{width:100%;height:36px;background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:0 var(--sp-3);font-family:var(--font-mono);font-size:var(--text-base);color:var(--text-primary);display:flex;align-items:center}
+.fake-input-row{display:flex;gap:10px}
+.fake-input-row .fake-field{flex:1}
+.fake-pay-btn{margin-top:var(--sp-5);width:100%;height:40px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);font-size:var(--text-md);font-weight:600;font-family:inherit;cursor:default;display:flex;align-items:center;justify-content:center}
+.click-dot{position:absolute;width:18px;height:18px;border-radius:50%;background:rgba(229,72,77,0.7);border:2px solid var(--danger);top:calc(100% - 85px);left:170px;pointer-events:none;animation:pulse-dot 1.5s ease infinite}
+@keyframes pulse-dot{0%,100%{box-shadow:0 0 0 0 rgba(229,72,77,0.5)}50%{box-shadow:0 0 0 8px rgba(229,72,77,0)}}
+
+/* Controls */
+.controls-bar{padding:var(--sp-3) var(--sp-4);background:var(--bg-surface);border-top:1px solid var(--border)}
+.controls-row{display:flex;align-items:center;gap:var(--sp-2);margin-bottom:10px;justify-content:center}
+.ctrl-btn{height:30px;padding:0 var(--sp-3);border:1px solid var(--border-strong);border-radius:5px;background:transparent;color:var(--text-secondary);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;transition:all var(--duration-fast);display:flex;align-items:center;gap:var(--sp-1)}
+.ctrl-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.ctrl-btn.play-btn{background:var(--primary);color:#fff;border-color:var(--primary)}
+.ctrl-btn.play-btn:hover{background:var(--primary-hover)}
+
+/* Scrub bar */
+.scrub-row{display:flex;align-items:center;gap:10px;margin-bottom:var(--sp-2)}
+.scrub-time{font-size:var(--text-xs);font-family:var(--font-mono);color:var(--text-tertiary);min-width:32px}
+.scrub-track{flex:1;height:6px;background:var(--bg-raised);border-radius:3px;position:relative;cursor:pointer}
+.scrub-fill{height:100%;background:var(--primary);border-radius:3px;width:70%;position:relative}
+.scrub-thumb{width:14px;height:14px;background:#fff;border:2px solid var(--primary);border-radius:50%;position:absolute;right:-7px;top:50%;transform:translateY(-50%);cursor:grab;box-shadow:0 1px 4px rgba(0,0,0,0.3)}
+.scrub-marker{position:absolute;top:-4px;width:2px;height:14px;background:var(--danger);border-radius:1px}
+.speed-row{display:flex;align-items:center;gap:var(--sp-1);justify-content:center}
+.speed-btn{height:24px;padding:0 var(--sp-2);border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text-tertiary);font-family:inherit;font-size:var(--text-xs);font-weight:500;cursor:pointer;transition:all var(--duration-fast)}
+.speed-btn:hover{color:var(--text-primary)}
+.speed-btn.active{background:var(--primary-ghost);color:var(--primary-text);border-color:var(--primary-border)}
+
+/* Right column - Events */
+.events-panel{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
+.events-title{padding:14px var(--sp-4);font-size:var(--text-md);font-weight:600;border-bottom:1px solid var(--border)}
+.timeline-list{padding:var(--sp-2) 0}
+.timeline-item{display:flex;align-items:flex-start;padding:7px var(--sp-4);gap:10px;font-size:var(--text-sm);transition:background var(--duration-fast);cursor:default}
+.timeline-item:hover{background:var(--bg-hover)}
+.timeline-item.error-event{background:var(--danger-ghost)}
+.timeline-ts{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-tertiary);min-width:36px;flex-shrink:0}
+.timeline-dot{width:8px;height:8px;border-radius:50%;margin-top:4px;flex-shrink:0;margin-right:2px}
+.timeline-dot.load{background:var(--primary)}
+.timeline-dot.click{background:var(--success)}
+.timeline-dot.nav{background:var(--warning)}
+.timeline-dot.input{background:#8b5cf6}
+.timeline-dot.error{background:var(--danger)}
+.timeline-desc{color:var(--text-primary);flex:1}
+.timeline-desc code{font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-secondary);background:var(--bg-raised);padding:1px var(--sp-1);border-radius:3px}
+.timeline-desc.error-text{color:var(--danger);font-weight:600}
+
+/* Failed Requests */
+.section-block{margin-top:var(--sp-4);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-xl);overflow:hidden}
+.section-block-title{padding:var(--sp-3) var(--sp-4);font-size:var(--text-base);font-weight:600;border-bottom:1px solid var(--border)}
+.failed-req{padding:var(--sp-3) var(--sp-4)}
+.failed-req-header{display:flex;align-items:center;gap:var(--sp-2);margin-bottom:var(--sp-2);font-size:var(--text-sm)}
+.req-method{font-weight:600;font-family:var(--font-mono);color:var(--danger)}
+.req-url{font-family:var(--font-mono);color:var(--text-secondary);font-size:var(--text-xs)}
+.req-status{font-family:var(--font-mono);color:var(--danger);font-weight:600;font-size:var(--text-xs);margin-left:auto}
+.req-dur{font-family:var(--font-mono);color:var(--text-tertiary);font-size:var(--text-xs)}
+.req-json{background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius-md);padding:10px var(--sp-3);font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-primary);line-height:1.6;white-space:pre;overflow-x:auto}
+
+/* Console Logs */
+.console-block{padding:var(--sp-3) var(--sp-4)}
+.console-code{background:#0c0c0e;border:1px solid var(--border);border-radius:var(--radius-md);padding:10px var(--sp-3);font-family:var(--font-mono);font-size:var(--text-xs);line-height:1.8;overflow-x:auto}
+.console-line{display:block}
+.console-warn{color:var(--warning)}
+.console-error{color:var(--danger)}
+.console-info{color:var(--text-tertiary)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right">
+    <div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div>
+    <button class="top-bell">&#128276;</button><span class="top-avatar">AK</span>
+    <div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div>
+  </div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item active"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبات">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="SSH">SSH</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="الدردشة">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+
+      <!-- Back link -->
+      <a href="errors.html" class="back-link"><span class="arrow" data-en="&larr;" data-ar="&rarr;">&larr;</span> <span data-en="Back to error" data-ar="العودة للخطأ">Back to error</span></a>
+
+      <!-- Page header -->
+      <div class="page-header-replay">
+        <h1 class="page-title-replay"><span data-en="NullPointerException &mdash; Session Replay" data-ar="NullPointerException &mdash; تسجيل الجلسة">NullPointerException &mdash; Session Replay</span></h1>
+        <span class="page-badge" data-en="60s before error &middot; Mar 27, 2026 10:42:33" data-ar="60 ثانية قبل الخطأ &middot; 27 مارس 2026 10:42:33">60s before error &middot; Mar 27, 2026 10:42:33</span>
+      </div>
+
+      <!-- Two column layout -->
+      <div class="two-col">
+
+        <!-- LEFT: Browser mockup -->
+        <div class="col-left">
+          <div class="browser-mock">
+            <div class="browser-chrome">
+              <div class="browser-dots"><span class="browser-dot red"></span><span class="browser-dot yellow"></span><span class="browser-dot green"></span></div>
+              <div class="browser-nav-btns">
+                <button class="browser-nav-btn">&#9664;</button>
+                <button class="browser-nav-btn">&#9654;</button>
+                <button class="browser-nav-btn">&#8635;</button>
+              </div>
+              <div class="browser-url">https://myapp.com/checkout</div>
+            </div>
+            <div class="browser-body">
+              <div class="fake-page-title" data-en="Checkout" data-ar="الدفع">Checkout</div>
+              <div class="fake-form">
+                <label class="fake-label" data-en="Card Number" data-ar="رقم البطاقة">Card Number</label>
+                <div class="fake-input">&bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; &bull;&bull;&bull;&bull; 4242</div>
+                <div class="fake-input-row">
+                  <div class="fake-field">
+                    <label class="fake-label" data-en="Expiry" data-ar="تاريخ الانتهاء">Expiry</label>
+                    <div class="fake-input">12/28</div>
+                  </div>
+                  <div class="fake-field">
+                    <label class="fake-label" data-en="CVC" data-ar="CVC">CVC</label>
+                    <div class="fake-input">&bull;&bull;&bull;</div>
+                  </div>
+                </div>
+                <button class="fake-pay-btn" data-en="Pay $99" data-ar="ادفع 99$">Pay $99</button>
+              </div>
+              <!-- Click dot -->
+              <div class="click-dot"></div>
+            </div>
+            <!-- Playback controls -->
+            <div class="controls-bar">
+              <div class="controls-row">
+                <button class="ctrl-btn" data-en="&#9198; Start" data-ar="&#9198; البداية" onclick="this.blur()">&#9198; <span data-en="Start" data-ar="البداية">Start</span></button>
+                <button class="ctrl-btn" data-en="-5s" data-ar="-5 ث" onclick="this.blur()">-5s</button>
+                <button class="ctrl-btn play-btn" id="playPauseBtn" onclick="togglePlay()">&#9654; <span id="playPauseText" data-en="Play" data-ar="تشغيل">Play</span></button>
+                <button class="ctrl-btn" data-en="+5s" data-ar="+5 ث" onclick="this.blur()">+5s</button>
+                <button class="ctrl-btn" data-en="&#9197; End" data-ar="&#9197; النهاية" onclick="this.blur()">&#9197; <span data-en="End" data-ar="النهاية">End</span></button>
+              </div>
+              <div class="scrub-row">
+                <span class="scrub-time">0:00</span>
+                <div class="scrub-track" id="scrubTrack">
+                  <div class="scrub-fill" id="scrubFill" style="width:70%">
+                    <div class="scrub-thumb" id="scrubThumb"></div>
+                  </div>
+                  <div class="scrub-marker" style="left:70%"></div>
+                </div>
+                <span class="scrub-time">1:00</span>
+              </div>
+              <div class="speed-row">
+                <button class="speed-btn" onclick="setSpeed(this)">0.5x</button>
+                <button class="speed-btn active" onclick="setSpeed(this)">1x</button>
+                <button class="speed-btn" onclick="setSpeed(this)">2x</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: Event timeline -->
+        <div class="col-right">
+          <div class="events-panel">
+            <div class="events-title" data-en="Events" data-ar="الأحداث">Events</div>
+            <div class="timeline-list">
+              <div class="timeline-item">
+                <span class="timeline-ts">0:00</span>
+                <span class="timeline-dot load"></span>
+                <span class="timeline-desc" data-en="Page load <code>/checkout</code>" data-ar="تحميل الصفحة <code>/checkout</code>">Page load <code>/checkout</code></span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-ts">0:08</span>
+                <span class="timeline-dot click"></span>
+                <span class="timeline-desc" data-en="Click <code>.add-to-cart</code>" data-ar="نقر <code>.add-to-cart</code>">Click <code>.add-to-cart</code></span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-ts">0:15</span>
+                <span class="timeline-dot nav"></span>
+                <span class="timeline-desc" data-en="Navigate <code>/checkout/payment</code>" data-ar="انتقال <code>/checkout/payment</code>">Navigate <code>/checkout/payment</code></span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-ts">0:23</span>
+                <span class="timeline-dot input"></span>
+                <span class="timeline-desc" data-en="Input <code>#card-number</code> (masked)" data-ar="إدخال <code>#card-number</code> (مخفي)">Input <code>#card-number</code> (masked)</span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-ts">0:31</span>
+                <span class="timeline-dot input"></span>
+                <span class="timeline-desc" data-en="Input <code>#expiry</code>" data-ar="إدخال <code>#expiry</code>">Input <code>#expiry</code></span>
+              </div>
+              <div class="timeline-item">
+                <span class="timeline-ts">0:38</span>
+                <span class="timeline-dot click"></span>
+                <span class="timeline-desc" data-en="Click <code>#pay-button</code>" data-ar="نقر <code>#pay-button</code>">Click <code>#pay-button</code></span>
+              </div>
+              <div class="timeline-item error-event">
+                <span class="timeline-ts">0:42</span>
+                <span class="timeline-dot error"></span>
+                <span class="timeline-desc error-text" data-en="ERROR NullPointerException" data-ar="خطأ NullPointerException">ERROR NullPointerException</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Failed Requests -->
+          <div class="section-block">
+            <div class="section-block-title" data-en="Failed Requests" data-ar="الطلبات الفاشلة">Failed Requests</div>
+            <div class="failed-req">
+              <div class="failed-req-header">
+                <span class="req-method">POST</span>
+                <span class="req-url">/api/v1/payments</span>
+                <span class="req-status">500</span>
+                <span class="req-dur">342ms</span>
+              </div>
+              <div class="req-json">{
+  "error": "NullPointerException",
+  "message": "Cannot invoke method on null reference",
+  "path": "/api/v1/payments",
+  "timestamp": "2026-03-27T10:42:33.841Z",
+  "status": 500
+}</div>
+            </div>
+          </div>
+
+          <!-- Console Logs -->
+          <div class="section-block">
+            <div class="section-block-title" data-en="Console Logs" data-ar="سجل وحدة التحكم">Console Logs</div>
+            <div class="console-block">
+              <div class="console-code"><span class="console-line console-info">[10:42:31] Initializing payment flow...</span>
+<span class="console-line console-info">[10:42:32] Card tokenization complete</span>
+<span class="console-line console-warn">[10:42:33] WARN: Payment gateway timeout approaching (300ms)</span>
+<span class="console-line console-error">[10:42:33] ERROR: Uncaught NullPointerException at PaymentService.java:42</span>
+<span class="console-line console-error">[10:42:33] ERROR: POST /api/v1/payments failed with status 500</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+// Theme toggle
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));
+}
+
+// Language toggle
+function setLang(lang){
+  const html=document.documentElement;
+  html.setAttribute('lang',lang);
+  html.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));
+  document.querySelectorAll('[data-'+lang+']').forEach(el=>{
+    const val=el.getAttribute('data-'+lang);
+    if(val) el.innerHTML=val;
+  });
+}
+
+// Play/Pause toggle
+let isPlaying=false;
+function togglePlay(){
+  isPlaying=!isPlaying;
+  const btn=document.getElementById('playPauseBtn');
+  const txt=document.getElementById('playPauseText');
+  const lang=document.documentElement.getAttribute('lang')||'en';
+  if(isPlaying){
+    btn.innerHTML='&#9646;&#9646; <span id="playPauseText" data-en="Pause" data-ar="\u0625\u064A\u0642\u0627\u0641"></span>';
+    document.getElementById('playPauseText').textContent=lang==='ar'?'\u0625\u064A\u0642\u0627\u0641':'Pause';
+  }else{
+    btn.innerHTML='&#9654; <span id="playPauseText" data-en="Play" data-ar="\u062A\u0634\u063A\u064A\u0644"></span>';
+    document.getElementById('playPauseText').textContent=lang==='ar'?'\u062A\u0634\u063A\u064A\u0644':'Play';
+  }
+}
+
+// Speed buttons
+function setSpeed(btn){
+  document.querySelectorAll('.speed-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Scrub bar drag
+(function(){
+  const track=document.getElementById('scrubTrack');
+  const fill=document.getElementById('scrubFill');
+  let dragging=false;
+  function updateScrub(e){
+    const rect=track.getBoundingClientRect();
+    let pct=((e.clientX-rect.left)/rect.width)*100;
+    pct=Math.max(0,Math.min(100,pct));
+    fill.style.width=pct+'%';
+  }
+  document.getElementById('scrubThumb').addEventListener('mousedown',()=>{dragging=true});
+  track.addEventListener('mousedown',(e)=>{dragging=true;updateScrub(e)});
+  document.addEventListener('mousemove',(e)=>{if(dragging)updateScrub(e)});
+  document.addEventListener('mouseup',()=>{dragging=false});
+})();
+</script>
+</body>
+</html>

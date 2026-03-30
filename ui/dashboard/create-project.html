@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Create Project</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Create Project page-specific styles === */
+
+/* RTL support */
+[dir="rtl"] .btn-row{justify-content:flex-start}
+[dir="rtl"] .code-block .copy-btn{right:auto;left:8px}
+
+/* Main override for centered wizard */
+.main{display:flex;justify-content:center}
+.wizard{width:100%;max-width:640px;padding-top:var(--sp-4)}
+
+/* Page title override for centered layout */
+.page-title{text-align:center}
+.page-subtitle{text-align:center;margin-bottom:var(--sp-6)}
+
+/* Step indicator */
+.step-indicator{display:flex;align-items:center;gap:0;margin-bottom:var(--sp-8);justify-content:center}
+.step{display:flex;align-items:center;gap:var(--sp-2);font-size:var(--text-base);font-weight:500;color:var(--text-disabled)}
+.step.active{color:var(--primary-text)}
+.step.done{color:var(--success)}
+.step-num{width:28px;height:28px;border-radius:50%;border:2px solid var(--text-disabled);display:flex;align-items:center;justify-content:center;font-size:var(--text-sm);font-weight:600}
+.step.active .step-num{border-color:var(--primary);background:var(--primary-ghost);color:var(--primary-text)}
+.step.done .step-num{border-color:var(--success);background:var(--success-ghost);color:var(--success)}
+.step-line{width:48px;height:2px;background:var(--border-strong);margin:0 var(--sp-3)}
+.step-line.done{background:var(--success)}
+
+/* Forms — page-specific overrides */
+.form-group{margin-bottom:var(--sp-5)}
+.form-label{display:block;font-size:var(--text-sm);font-weight:500;color:var(--text-secondary);margin-bottom:6px}
+.form-input{width:100%;height:36px;padding:0 var(--sp-3);background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-base);outline:none;transition:border-color var(--duration-normal)}
+.form-input:focus{border-color:var(--primary)}
+.form-textarea{width:100%;min-height:80px;padding:10px var(--sp-3);background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-base);outline:none;resize:vertical;transition:border-color var(--duration-normal)}
+.form-textarea:focus{border-color:var(--primary)}
+
+/* Env pills */
+.env-pills{display:flex;gap:6px}
+.env-pill{padding:6px var(--sp-4);border-radius:var(--radius-full);border:1px solid var(--border-strong);background:transparent;color:var(--text-secondary);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;transition:all var(--duration-fast)}
+.env-pill:hover{background:var(--bg-hover);color:var(--text-primary)}
+.env-pill.active{background:var(--primary-ghost);color:var(--primary-text);border-color:var(--primary-border)}
+
+/* Platform grid */
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:var(--sp-6)}
+.platform-card{padding:var(--sp-5) var(--sp-3);border:2px solid var(--border-strong);border-radius:var(--radius-xl);background:var(--bg-surface);text-align:center;cursor:pointer;transition:all var(--duration-fast);display:flex;flex-direction:column;align-items:center;gap:var(--sp-2)}
+.platform-card:hover{background:var(--bg-hover);border-color:var(--text-tertiary)}
+.platform-card.selected{border-color:var(--primary);background:var(--primary-ghost)}
+.platform-icon{font-size:28px;line-height:1}
+.platform-name{font-size:var(--text-sm);font-weight:500;color:var(--text-primary)}
+
+/* Buttons */
+.btn-row{display:flex;gap:10px;margin-top:var(--sp-6);justify-content:flex-end}
+.btn{height:36px;padding:0 var(--sp-5);border-radius:var(--radius-md);font-family:inherit;font-size:var(--text-base);font-weight:500;cursor:pointer;border:none;transition:all var(--duration-fast);display:inline-flex;align-items:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary)}
+.btn-secondary:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-ghost{background:transparent;color:var(--text-tertiary);border:none}
+.btn-ghost:hover{color:var(--text-primary)}
+
+/* Step 3 — SDK install */
+.api-key-block{background:var(--bg-base);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px var(--sp-4);font-family:var(--font-mono);font-size:var(--text-sm);color:var(--primary-text);display:flex;align-items:center;justify-content:space-between;gap:var(--sp-3);margin-bottom:var(--sp-3);word-break:break-all}
+.copy-btn{height:28px;padding:0 10px;border:1px solid var(--border-strong);border-radius:var(--radius-sm);background:var(--bg-raised);color:var(--text-secondary);font-family:inherit;font-size:var(--text-xs);font-weight:500;cursor:pointer;white-space:nowrap;transition:all var(--duration-fast)}
+.copy-btn:hover{background:var(--bg-overlay);color:var(--text-primary)}
+.copy-btn.copied{background:var(--success-ghost);color:var(--success);border-color:var(--success)}
+.warning-banner{display:flex;align-items:center;gap:var(--sp-2);padding:10px 14px;background:var(--warning-ghost);border:1px solid rgba(232,163,61,0.2);border-radius:var(--radius-md);color:var(--warning);font-size:var(--text-sm);font-weight:500;margin-bottom:var(--sp-5)}
+.sdk-tabs{display:flex;gap:0;border-bottom:1px solid var(--border-strong);margin-bottom:0}
+.sdk-tab{padding:var(--sp-2) 14px;font-size:var(--text-sm);font-weight:500;color:var(--text-tertiary);cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;transition:all var(--duration-fast)}
+.sdk-tab:hover{color:var(--text-primary)}
+.sdk-tab.active{color:var(--primary-text);border-bottom-color:var(--primary)}
+.code-block{background:var(--bg-base);border:1px solid var(--border);border-top:none;border-radius:0 0 var(--radius-lg) var(--radius-lg);padding:14px var(--sp-4);font-family:var(--font-mono);font-size:var(--text-sm);color:var(--text-primary);line-height:1.7;white-space:pre;overflow-x:auto;position:relative}
+.code-block .copy-btn{position:absolute;top:8px;right:8px}
+.section-label{font-size:var(--text-sm);font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-tertiary);margin-bottom:var(--sp-2);margin-top:var(--sp-5)}
+
+/* Verification */
+.verify-box{display:flex;align-items:center;gap:10px;padding:14px var(--sp-4);background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-top:var(--sp-5)}
+.verify-spinner{width:20px;height:20px;border:2px solid var(--border-strong);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.verify-text{font-size:var(--text-base);color:var(--text-secondary)}
+.verify-box.connected{border-color:var(--success);background:var(--success-ghost)}
+.verify-box.connected .verify-text{color:var(--success);font-weight:500}
+
+.wizard-step{display:none}
+.wizard-step.active{display:block}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project" data-en="New Project" data-ar="مشروع جديد">New Project</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right">
+    <div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div>
+    <button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div>
+  </div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبات">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="SSH">SSH</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="الدردشة">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+      <div class="wizard">
+        <h1 class="page-title" data-en="Create Project" data-ar="إنشاء مشروع">Create Project</h1>
+        <p class="page-subtitle" data-en="Set up a new project in 3 easy steps" data-ar="أنشئ مشروعًا جديدًا في 3 خطوات سهلة">Set up a new project in 3 easy steps</p>
+
+        <!-- Step indicator -->
+        <div class="step-indicator">
+          <div class="step active" id="si-1"><span class="step-num">1</span><span data-en="Project Info" data-ar="معلومات المشروع">Project Info</span></div>
+          <div class="step-line" id="sl-1"></div>
+          <div class="step" id="si-2"><span class="step-num">2</span><span data-en="Platform" data-ar="المنصة">Platform</span></div>
+          <div class="step-line" id="sl-2"></div>
+          <div class="step" id="si-3"><span class="step-num">3</span><span data-en="Install SDK" data-ar="تثبيت SDK">Install SDK</span></div>
+        </div>
+
+        <!-- STEP 1: Project Info -->
+        <div class="wizard-step active" id="step-1">
+          <div class="form-group">
+            <label class="form-label" data-en="Project Name" data-ar="اسم المشروع">Project Name</label>
+            <input class="form-input" id="project-name" data-en-placeholder="My Awesome App" data-ar-placeholder="تطبيقي الرائع" placeholder="My Awesome App">
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-en="Environment" data-ar="البيئة">Environment</label>
+            <div class="env-pills">
+              <button class="env-pill active" data-en="Production" data-ar="إنتاج">Production</button>
+              <button class="env-pill" data-en="Staging" data-ar="تجريبي">Staging</button>
+              <button class="env-pill" data-en="Development" data-ar="تطوير">Development</button>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" data-en="Description (optional)" data-ar="الوصف (اختياري)">Description (optional)</label>
+            <textarea class="form-textarea" data-en-placeholder="What does this project do?" data-ar-placeholder="ما الذي يفعله هذا المشروع؟" placeholder="What does this project do?"></textarea>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-primary" onclick="goStep(2)" data-en="Next" data-ar="التالي">Next &#8594;</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Platform -->
+        <div class="wizard-step" id="step-2">
+          <div class="form-group">
+            <label class="form-label" data-en="Select your platform" data-ar="اختر منصتك">Select your platform</label>
+          </div>
+          <div class="platform-grid">
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#9881;</span><span class="platform-name">Node.js</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#9749;</span><span class="platform-name">Java</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#128013;</span><span class="platform-name">Python</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#9889;</span><span class="platform-name">Go</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#128030;</span><span class="platform-name">PHP</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#128142;</span><span class="platform-name">Ruby</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#128241;</span><span class="platform-name">React Native</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#127808;</span><span class="platform-name">Vue.js</span></div>
+            <div class="platform-card" onclick="selectPlatform(this)"><span class="platform-icon">&#10026;</span><span class="platform-name" data-en="Other" data-ar="أخرى">Other</span></div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-secondary" onclick="goStep(1)" data-en="Back" data-ar="رجوع">&#8592; Back</button>
+            <button class="btn btn-primary" id="btn-step2-next" disabled onclick="goStep(3)" data-en="Next" data-ar="التالي">Next &#8594;</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Install SDK -->
+        <div class="wizard-step" id="step-3">
+          <div class="section-label" data-en="Your API Key" data-ar="مفتاح API الخاص بك">Your API Key</div>
+          <div class="api-key-block">
+            <span id="api-key-value">ask_live_7f3a9b2c4d5e6f1a8b9c0d1e2f3a4b5c</span>
+            <button class="copy-btn" onclick="copyKey(this)" data-en="Copy" data-ar="نسخ">Copy</button>
+          </div>
+          <div class="warning-banner">&#9888; <span data-en="Save this key now — you won't be able to see it again." data-ar="احفظ هذا المفتاح الآن — لن تتمكن من رؤيته مرة أخرى.">Save this key now — you won't be able to see it again.</span></div>
+
+          <div class="section-label" data-en="Install the SDK" data-ar="تثبيت SDK">Install the SDK</div>
+          <div class="sdk-tabs" id="install-tabs">
+            <button class="sdk-tab active" onclick="switchTab('install-tabs','install-code',0)">npm</button>
+            <button class="sdk-tab" onclick="switchTab('install-tabs','install-code',1)">yarn</button>
+            <button class="sdk-tab" onclick="switchTab('install-tabs','install-code',2)">pnpm</button>
+          </div>
+          <div id="install-code">
+            <div class="code-block active">npm install @allstak/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <div class="code-block" style="display:none">yarn add @allstak/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <div class="code-block" style="display:none">pnpm add @allstak/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          </div>
+
+          <div class="section-label" data-en="Initialize" data-ar="التهيئة">Initialize</div>
+          <div class="sdk-tabs" id="init-tabs">
+            <button class="sdk-tab active" onclick="switchTab('init-tabs','init-code',0)">JavaScript</button>
+            <button class="sdk-tab" onclick="switchTab('init-tabs','init-code',1)">TypeScript</button>
+          </div>
+          <div id="init-code">
+            <div class="code-block active">import { AllStak } from '@allstak/sdk';
+
+AllStak.init({
+  apiKey: 'ask_live_7f3a9b2c4d5e6f1a8b9c0d1e2f3a4b5c',
+  environment: 'production',
+});<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <div class="code-block" style="display:none">import { AllStak } from '@allstak/sdk';
+
+AllStak.init({
+  apiKey: 'ask_live_7f3a9b2c4d5e6f1a8b9c0d1e2f3a4b5c' as string,
+  environment: 'production' as const,
+});<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+          </div>
+
+          <div class="verify-box" id="verify-box">
+            <div class="verify-spinner" id="verify-spinner"></div>
+            <span class="verify-text" id="verify-text" data-en="Waiting for first event..." data-ar="في انتظار أول حدث...">Waiting for first event...</span>
+          </div>
+
+          <div class="btn-row" id="final-btns" style="margin-top:var(--sp-5)">
+            <button class="btn btn-secondary" onclick="goStep(2)" data-en="Back" data-ar="رجوع">&#8592; Back</button>
+            <button class="btn btn-ghost" onclick="window.location.href='index.html'" data-en="I'll do this later" data-ar="سأفعل هذا لاحقًا">I'll do this later</button>
+            <button class="btn btn-primary" id="btn-goto-project" disabled onclick="window.location.href='index.html'" data-en="Go to Project" data-ar="الذهاب إلى المشروع">Go to Project &#8594;</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+/* Theme */
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
+
+/* Language toggle */
+let currentLang='en';
+function setLang(lang){
+  currentLang=lang;
+  document.documentElement.setAttribute('lang',lang);
+  document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));
+  document.querySelectorAll('[data-'+lang+']').forEach(el=>{
+    el.textContent=el.getAttribute('data-'+lang);
+  });
+  document.querySelectorAll('[data-'+lang+'-placeholder]').forEach(el=>{
+    el.placeholder=el.getAttribute('data-'+lang+'-placeholder');
+  });
+}
+
+/* Env pills */
+document.querySelectorAll('.env-pills').forEach(g=>{
+  g.addEventListener('click',e=>{
+    if(e.target.classList.contains('env-pill')){
+      g.querySelectorAll('.env-pill').forEach(b=>b.classList.remove('active'));
+      e.target.classList.add('active');
+    }
+  });
+});
+
+/* Platform selection */
+function selectPlatform(card){
+  document.querySelectorAll('.platform-card').forEach(c=>c.classList.remove('selected'));
+  card.classList.add('selected');
+  document.getElementById('btn-step2-next').disabled=false;
+}
+
+/* Wizard steps */
+function goStep(n){
+  document.querySelectorAll('.wizard-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById('step-'+n).classList.add('active');
+  // Update step indicator
+  for(let i=1;i<=3;i++){
+    const si=document.getElementById('si-'+i);
+    si.classList.remove('active','done');
+    if(i<n) si.classList.add('done');
+    else if(i===n) si.classList.add('active');
+  }
+  for(let i=1;i<=2;i++){
+    const sl=document.getElementById('sl-'+i);
+    sl.classList.toggle('done',i<n);
+  }
+  // Start verification on step 3
+  if(n===3) startVerification();
+}
+
+/* Tab switching */
+function switchTab(tabGroupId,codeGroupId,index){
+  const tabs=document.getElementById(tabGroupId).querySelectorAll('.sdk-tab');
+  const codes=document.getElementById(codeGroupId).querySelectorAll('.code-block');
+  tabs.forEach((t,i)=>{t.classList.toggle('active',i===index)});
+  codes.forEach((c,i)=>{c.style.display=i===index?'block':'none'});
+}
+
+/* Copy API key */
+function copyKey(btn){
+  const key=document.getElementById('api-key-value').textContent;
+  navigator.clipboard.writeText(key).then(()=>{
+    btn.classList.add('copied');
+    btn.textContent=currentLang==='ar'?'تم النسخ!':'Copied!';
+    setTimeout(()=>{btn.classList.remove('copied');btn.textContent=currentLang==='ar'?'نسخ':'Copy'},1500);
+  });
+}
+
+/* Copy code block */
+function copyCode(btn){
+  const block=btn.parentElement;
+  const code=block.textContent.replace('Copy','').replace('Copied!','').trim();
+  navigator.clipboard.writeText(code).then(()=>{
+    btn.classList.add('copied');
+    btn.textContent=currentLang==='ar'?'تم النسخ!':'Copied!';
+    setTimeout(()=>{btn.classList.remove('copied');btn.textContent=currentLang==='ar'?'نسخ':'Copy'},1500);
+  });
+}
+
+/* Verification simulation */
+let verifyTimeout;
+function startVerification(){
+  const box=document.getElementById('verify-box');
+  const spinner=document.getElementById('verify-spinner');
+  const text=document.getElementById('verify-text');
+  const btn=document.getElementById('btn-goto-project');
+  box.classList.remove('connected');
+  spinner.style.display='block';
+  text.textContent=currentLang==='ar'?'في انتظار أول حدث...':'Waiting for first event...';
+  btn.disabled=true;
+  clearTimeout(verifyTimeout);
+  verifyTimeout=setTimeout(()=>{
+    box.classList.add('connected');
+    spinner.style.display='none';
+    text.textContent=currentLang==='ar'?'متصل — تم استلام الحدث الأول!':'Connected — first event received!';
+    btn.disabled=false;
+  },4000);
+}
+</script>
+</body>
+</html>

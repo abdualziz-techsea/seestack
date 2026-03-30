@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Errors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Page-specific: push filter-search to the right */
+.filter-search{margin-left:auto}
+.chk-col{width:32px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right"><button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div><div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div></div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item active"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبة">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="الخوادم">SSH</span></a>
+      <a href="alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+      <a href="billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثات">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+      <div class="page-header"><h1 class="page-title" data-en="Errors" data-ar="الأخطاء">Errors</h1></div>
+      <div class="filters">
+        <div class="filter-group"><button class="filter-btn active" data-en="All" data-ar="الكل">All</button><button class="filter-btn" data-en="Unresolved" data-ar="غير محلول">Unresolved</button><button class="filter-btn" data-en="Resolved" data-ar="محلول">Resolved</button><button class="filter-btn" data-en="Ignored" data-ar="متجاهل">Ignored</button></div>
+        <div class="filter-group"><button class="filter-btn active">All Envs</button><button class="filter-btn">Production</button><button class="filter-btn">Staging</button></div>
+        <div class="filter-group"><button class="filter-btn active">24h</button><button class="filter-btn">7d</button><button class="filter-btn">30d</button></div>
+        <input class="filter-search" placeholder="Search errors...">
+      </div>
+      <table class="err-table">
+        <thead><tr><th class="chk-col"><input type="checkbox" class="chk"></th><th>Status</th><th>Error</th><th>Env</th><th>Count</th><th>Last Seen</th><th>Assigned</th></tr></thead>
+        <tbody>
+          <tr onclick="openDetail(this)" class="selected"><td><input type="checkbox" class="chk"></td><td><span class="bdg bdg-unresolved"><span class="bdg-dot"></span>unresolved</span></td><td><div class="err-name">NullPointerException</div><div class="err-sub">PaymentService.java:42</div></td><td class="env-prod">production</td><td style="font-family:var(--font-mono);font-size:12px">47</td><td style="font-size:11px;color:var(--text-tertiary)">2 min ago</td><td><span class="assigned-av" style="background:var(--primary-ghost);color:var(--primary-text)">AK</span></td></tr>
+          <tr onclick="openDetail(this)"><td><input type="checkbox" class="chk"></td><td><span class="bdg bdg-unresolved"><span class="bdg-dot"></span>unresolved</span></td><td><div class="err-name">IllegalArgumentException</div><div class="err-sub">UserValidator.java:88</div></td><td class="env-staging">staging</td><td style="font-family:var(--font-mono);font-size:12px">12</td><td style="font-size:11px;color:var(--text-tertiary)">15 min ago</td><td style="color:var(--text-disabled)">&mdash;</td></tr>
+          <tr onclick="openDetail(this)"><td><input type="checkbox" class="chk"></td><td><span class="bdg bdg-ignored"><span class="bdg-dot"></span>ignored</span></td><td><div class="err-name">ConnectionTimeoutException</div><div class="err-sub">DatabasePool.java:201</div></td><td class="env-prod">production</td><td style="font-family:var(--font-mono);font-size:12px">3</td><td style="font-size:11px;color:var(--text-tertiary)">1 hour ago</td><td><span class="assigned-av" style="background:var(--info-ghost);color:var(--primary-text)">MH</span></td></tr>
+          <tr onclick="openDetail(this)"><td><input type="checkbox" class="chk"></td><td><span class="bdg bdg-resolved"><span class="bdg-dot"></span>resolved</span></td><td><div class="err-name">OutOfMemoryError</div><div class="err-sub">CacheService.java:56</div></td><td class="env-prod">production</td><td style="font-family:var(--font-mono);font-size:12px">1</td><td style="font-size:11px;color:var(--text-tertiary)">3 hours ago</td><td><span class="assigned-av" style="background:var(--success-ghost);color:var(--success)">SK</span></td></tr>
+          <tr onclick="openDetail(this)"><td><input type="checkbox" class="chk"></td><td><span class="bdg bdg-unresolved"><span class="bdg-dot"></span>unresolved</span></td><td><div class="err-name">SocketTimeoutException</div><div class="err-sub">HttpClient.java:134</div></td><td class="env-prod">production</td><td style="font-family:var(--font-mono);font-size:12px">8</td><td style="font-size:11px;color:var(--text-tertiary)">4 hours ago</td><td style="color:var(--text-disabled)">&mdash;</td></tr>
+        </tbody>
+      </table>
+    </main>
+
+    <!-- DETAIL PANEL -->
+    <aside class="detail-panel open" id="detail-panel">
+      <div class="dp-header">
+        <span class="dp-title">NullPointerException</span>
+        <div class="dp-actions">
+          <button class="dp-btn">&#10003; Resolve</button>
+          <button class="dp-btn">&#128683; Ignore</button>
+          <button class="dp-btn">&#128100; Assign</button>
+          <button class="dp-btn-close" onclick="closeDetail()">&#10005;</button>
+        </div>
+      </div>
+      <div class="dp-body">
+        <div class="dp-badges">
+          <span class="bdg bdg-unresolved"><span class="bdg-dot"></span>unresolved</span>
+          <span class="bdg" style="background:var(--danger-ghost);color:var(--danger)">production</span>
+          <span class="bdg" style="background:var(--danger-ghost);color:var(--danger)">error</span>
+          <span class="bdg" style="background:var(--bg-active);color:var(--text-secondary)">47 occurrences</span>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title" data-en="Stack Trace" data-ar="تتبع الأخطاء">Stack Trace</div>
+          <div class="dp-code">java.lang.NullPointerException
+  at com.myapp.service.PaymentService.processPayment(PaymentService.java:42)
+  at com.myapp.controller.PaymentController.pay(PaymentController.java:18)
+  at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:897)
+  at javax.servlet.http.HttpServlet.service(HttpServlet.java:750)
+  at org.apache.catalina.core.StandardWrapper.service(StandardWrapper.java:1580)</div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">User Context</div>
+          <div class="dp-grid">
+            <div class="dp-grid-item"><div class="dp-grid-label">User ID</div><div class="dp-grid-value">user-123</div></div>
+            <div class="dp-grid-item"><div class="dp-grid-label">Email</div><div class="dp-grid-value">ahmed@example.com</div></div>
+            <div class="dp-grid-item"><div class="dp-grid-label">IP</div><div class="dp-grid-value">192.168.1.1</div></div>
+            <div class="dp-grid-item"><div class="dp-grid-label">Browser</div><div class="dp-grid-value">Chrome 121</div></div>
+          </div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">Occurrences (7 days)</div>
+          <div class="dp-chart" id="dp-chart"></div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-title">Session Replay</div>
+          <div class="dp-replay"><span class="dp-replay-ico">&#127916;</span><span class="dp-replay-text">Watch Replay (60s before error)</span></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));localStorage.setItem('allstak-theme',t)}
+function setLang(lang){document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));document.querySelectorAll('[data-'+lang+']').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)});localStorage.setItem('allstak-lang',lang)}
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+document.querySelectorAll('.filter-group').forEach(g=>{g.addEventListener('click',e=>{if(e.target.classList.contains('filter-btn')){g.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));e.target.classList.add('active')}})});
+function openDetail(row){document.querySelectorAll('.err-table tr').forEach(r=>r.classList.remove('selected'));row.classList.add('selected');document.getElementById('detail-panel').classList.add('open')}
+function closeDetail(){document.getElementById('detail-panel').classList.remove('open');document.querySelectorAll('.err-table tr').forEach(r=>r.classList.remove('selected'))}
+// Mini chart
+const dpChart=document.getElementById('dp-chart');
+[12,8,23,34,47,18,5].forEach(v=>{const b=document.createElement('div');b.className='dp-chart-bar';b.style.height=Math.max(8,(v/47)*100)+'%';dpChart.appendChild(b)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail()});
+</script>
+</body>
+</html>

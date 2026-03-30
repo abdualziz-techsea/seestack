@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Logs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Page-specific: content-area needs column direction for live-bar at bottom */
+.content-area{flex-direction:column}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right"><button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div><div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div></div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item active"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبة">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="الخوادم">SSH</span></a>
+      <a href="alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+      <a href="billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثات">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+      <div class="page-header"><h1 class="page-title" data-en="Logs" data-ar="السجلات">Logs</h1></div>
+      <div class="filters">
+        <div class="filter-group"><button class="filter-btn active">All</button><button class="filter-btn">Debug</button><button class="filter-btn">Info</button><button class="filter-btn">Warn</button><button class="filter-btn">Error</button><button class="filter-btn">Fatal</button></div>
+        <div class="filter-group"><button class="filter-btn active">All</button><button class="filter-btn">api</button><button class="filter-btn">worker</button><button class="filter-btn">scheduler</button></div>
+        <div class="filter-group"><button class="filter-btn active">15m</button><button class="filter-btn">1h</button><button class="filter-btn">6h</button><button class="filter-btn">24h</button><button class="filter-btn">7d</button></div>
+        <input class="filter-search" placeholder="Search logs...">
+        <div class="live-toggle" id="liveTail" onclick="toggleLiveTail()">
+          <span class="live-dot"></span>
+          <span class="live-toggle-label">Live tail</span>
+          <span class="live-toggle-switch"></span>
+        </div>
+      </div>
+      <table class="log-table">
+        <thead><tr><th>Timestamp</th><th>Level</th><th>Service</th><th>Message</th></tr></thead>
+        <tbody id="logBody">
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:07.412</td>
+            <td class="col-level"><span class="lvl lvl-error">ERROR</span></td>
+            <td class="col-svc">api</td>
+            <td class="col-msg">Failed to process payment: connection refused to stripe.com:443</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "request_id": "req_8f3a2b1c",
+  "user_id": "user-4821",
+  "method": "POST",
+  "path": "/api/v1/payments",
+  "duration_ms": 30042,
+  "error_code": "ECONNREFUSED",
+  "retry_attempt": 3
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:06.891</td>
+            <td class="col-level"><span class="lvl lvl-warn">WARN</span></td>
+            <td class="col-svc">worker</td>
+            <td class="col-msg">Queue depth exceeds threshold: 1,247 pending jobs (limit: 1,000)</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "queue": "email-notifications",
+  "depth": 1247,
+  "threshold": 1000,
+  "oldest_job_age_sec": 342,
+  "consumer_count": 4
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:05.204</td>
+            <td class="col-level"><span class="lvl lvl-info">INFO</span></td>
+            <td class="col-svc">api</td>
+            <td class="col-msg">User authentication successful, session created</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "request_id": "req_7e2d9a4f",
+  "user_id": "user-1192",
+  "method": "POST",
+  "path": "/api/v1/auth/login",
+  "duration_ms": 87,
+  "ip": "203.0.113.42",
+  "user_agent": "Mozilla/5.0 Chrome/124.0"
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:04.558</td>
+            <td class="col-level"><span class="lvl lvl-fatal">FATAL</span></td>
+            <td class="col-svc">worker</td>
+            <td class="col-msg">Out of memory: heap allocation failed, process restarting</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "pid": 28441,
+  "heap_used_mb": 1893,
+  "heap_limit_mb": 1900,
+  "rss_mb": 2104,
+  "uptime_sec": 84720,
+  "restart_count": 3
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:03.117</td>
+            <td class="col-level"><span class="lvl lvl-debug">DEBUG</span></td>
+            <td class="col-svc">scheduler</td>
+            <td class="col-msg">Cron job "cleanup-temp-files" scheduled, next run in 300s</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "job_id": "cron_cleanup_tmp",
+  "schedule": "*/5 * * * *",
+  "last_run": "2026-03-27T14:18:03Z",
+  "next_run": "2026-03-27T14:28:03Z",
+  "last_duration_ms": 1204
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:02.743</td>
+            <td class="col-level"><span class="lvl lvl-info">INFO</span></td>
+            <td class="col-svc">api</td>
+            <td class="col-msg">GET /api/v1/projects/proj-89/monitors 200 OK (14ms)</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "request_id": "req_3c8f1d7e",
+  "method": "GET",
+  "path": "/api/v1/projects/proj-89/monitors",
+  "status": 200,
+  "duration_ms": 14,
+  "response_size_bytes": 4821
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:01.389</td>
+            <td class="col-level"><span class="lvl lvl-warn">WARN</span></td>
+            <td class="col-svc">api</td>
+            <td class="col-msg">Rate limit approaching for client app-mobile-ios: 892/1000 req/min</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "client_id": "app-mobile-ios",
+  "current_rate": 892,
+  "limit": 1000,
+  "window": "1m",
+  "ip": "198.51.100.17",
+  "endpoint": "/api/v1/feed"
+}</div></td></tr>
+
+          <tr class="log-row" onclick="toggleExpand(this)">
+            <td class="col-ts">2026-03-27 14:23:00.052</td>
+            <td class="col-level"><span class="lvl lvl-debug">DEBUG</span></td>
+            <td class="col-svc">scheduler</td>
+            <td class="col-msg">Health check passed for all 6 upstream services (avg 22ms)</td>
+          </tr>
+          <tr class="log-expand"><td colspan="4"><div class="log-meta">{
+  "services_checked": 6,
+  "services_healthy": 6,
+  "avg_latency_ms": 22,
+  "max_latency_ms": 48,
+  "check_id": "hc_2026032714230005",
+  "results": {
+    "postgres": "ok",
+    "redis": "ok",
+    "stripe": "ok",
+    "s3": "ok",
+    "sendgrid": "ok",
+    "elasticsearch": "ok"
+  }
+}</div></td></tr>
+        </tbody>
+      </table>
+    </main>
+    <div class="live-bar" id="liveBar">
+      <span class="live-bar-dot"></span>
+      <span class="live-bar-text">Streaming 3 new logs/sec</span>
+      <span class="live-bar-spacer"></span>
+      <button class="live-bar-btn" onclick="pauseLiveTail()">Pause</button>
+      <button class="live-bar-btn" onclick="clearLogs()">Clear</button>
+    </div>
+  </div>
+</div>
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));localStorage.setItem('allstak-theme',t)}
+function setLang(lang){document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));document.querySelectorAll('[data-'+lang+']').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)});localStorage.setItem('allstak-lang',lang)}
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+document.querySelectorAll('.filter-group').forEach(g=>{g.addEventListener('click',e=>{if(e.target.classList.contains('filter-btn')){g.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));e.target.classList.add('active')}})});
+
+function toggleExpand(row){
+  const expandRow=row.nextElementSibling;
+  const wasOpen=expandRow.classList.contains('show');
+  // close all
+  document.querySelectorAll('.log-expand.show').forEach(r=>{r.classList.remove('show');r.previousElementSibling.classList.remove('expanded')});
+  if(!wasOpen){expandRow.classList.add('show');row.classList.add('expanded')}
+}
+
+let liveTailOn=false;
+let livePaused=false;
+function toggleLiveTail(){
+  liveTailOn=!liveTailOn;
+  document.getElementById('liveTail').classList.toggle('on',liveTailOn);
+  document.getElementById('liveBar').classList.toggle('show',liveTailOn);
+  if(!liveTailOn)livePaused=false;
+  updatePauseBtn();
+}
+function pauseLiveTail(){
+  livePaused=!livePaused;
+  updatePauseBtn();
+}
+function updatePauseBtn(){
+  const btn=document.querySelector('.live-bar-btn');
+  const txt=document.querySelector('.live-bar-text');
+  if(livePaused){btn.textContent='Resume';txt.textContent='Paused'}
+  else{btn.textContent='Pause';txt.textContent='Streaming 3 new logs/sec'}
+}
+function clearLogs(){
+  document.getElementById('logBody').innerHTML='';
+}
+</script>
+</body>
+</html>

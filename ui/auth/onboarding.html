@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Set up your workspace</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Auth page body override */
+body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:auto}
+
+/* Auth topbar */
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text-primary)}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.012em}
+.topbar-right{display:flex;align-items:center;gap:12px}
+
+/* Progress */
+.progress-wrap{padding:0 24px;flex-shrink:0}
+.progress-bar-bg{height:3px;background:var(--bg-raised);border-radius:2px;overflow:hidden}
+.progress-bar-fill{height:100%;background:var(--primary);border-radius:2px;transition:width .3s ease}
+.progress-info{display:flex;align-items:center;justify-content:space-between;padding:8px 0;font-size:12px;color:var(--text-tertiary)}
+.steps-dots{display:flex;gap:8px;align-items:center}
+.step-dot{width:24px;height:24px;border-radius:50%;border:1px solid var(--border-strong);font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;color:var(--text-tertiary);transition:all .2s}
+.step-dot.active{background:var(--primary);border-color:var(--primary);color:#fff}
+.step-dot.done{background:var(--success-ghost);border-color:var(--success);color:var(--success)}
+
+/* Main layout */
+.main{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:32px 24px}
+.card{width:100%;max-width:520px}
+.heading{font-size:24px;font-weight:600;letter-spacing:-0.022em;margin-bottom:4px}
+.subheading{font-size:14px;color:var(--text-secondary);margin-bottom:24px}
+
+/* Select override for auth pages */
+.fg select{width:100%;height:34px;padding:8px 12px;background:rgba(255,255,255,0.027);border:1px solid var(--border-strong);border-radius:6px;color:var(--text-primary);font-family:inherit;font-size:14px;outline:none;transition:border .12s,box-shadow .12s;appearance:none;cursor:pointer;padding-right:32px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%238a8f98'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+.fg select:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.25)}
+.fg .helper{font-size:11px;color:var(--text-tertiary);margin-top:3px}
+[data-theme="light"] .fg input,[data-theme="light"] .fg select{background:var(--bg-surface);border-color:rgba(0,0,0,.14)}
+
+/* Input group */
+.input-group{display:flex;align-items:center;border:1px solid var(--border-strong);border-radius:6px;overflow:hidden;background:rgba(255,255,255,0.027)}
+.input-group .prefix{padding:0 10px;font-size:13px;color:var(--text-tertiary);background:var(--bg-raised);border-right:1px solid var(--border);height:34px;display:flex;align-items:center;white-space:nowrap}
+.input-group input{border:none;border-radius:0;background:transparent;flex:1}
+.input-group input:focus{box-shadow:none}
+.input-group:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.25)}
+
+/* Pills */
+.pills{display:flex;gap:6px;margin-bottom:14px}
+.pill{flex:1;height:34px;border:1px solid var(--border-strong);border-radius:6px;background:transparent;color:var(--text-secondary);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center}
+.pill:hover{background:var(--bg-hover);color:var(--text-primary)}
+.pill.active{background:var(--primary-ghost);border-color:var(--primary-border);color:var(--primary-text)}
+
+/* Platform grid */
+.platform-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.platform-card{padding:16px 12px;border:1px solid var(--border-strong);border-radius:8px;text-align:center;cursor:pointer;transition:all .12s;background:transparent}
+.platform-card:hover{background:var(--bg-hover);border-color:var(--text-tertiary)}
+.platform-card.selected{border-color:var(--primary);background:var(--primary-ghost)}
+.platform-icon{font-size:24px;margin-bottom:6px}
+.platform-name{font-size:12px;font-weight:500}
+
+/* Email tags */
+.email-input-wrap{min-height:34px;border:1px solid var(--border-strong);border-radius:6px;padding:4px 8px;display:flex;flex-wrap:wrap;gap:4px;align-items:center;background:rgba(255,255,255,0.027);transition:border .12s}
+.email-input-wrap:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.25)}
+.email-tag{display:flex;align-items:center;gap:4px;padding:2px 8px;background:var(--bg-raised);border:1px solid var(--border);border-radius:4px;font-size:12px}
+.email-tag .remove{background:none;border:none;color:var(--text-tertiary);font-size:12px;cursor:pointer;padding:0 2px}.email-tag .remove:hover{color:var(--text-primary)}
+.email-input-wrap input{border:none;background:transparent;color:var(--text-primary);font-family:inherit;font-size:13px;outline:none;flex:1;min-width:120px;height:24px}
+[data-theme="light"] .email-input-wrap{background:var(--bg-surface)}
+
+/* Code block */
+.code-block{background:var(--bg-base);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.code-head{display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:var(--bg-surface);border-bottom:1px solid var(--border);font-size:11px;color:var(--text-tertiary)}
+.code-copy{background:none;border:none;color:var(--text-tertiary);cursor:pointer;font-size:11px;font-family:inherit;padding:2px 6px;border-radius:3px}
+.code-copy:hover{color:var(--text-primary);background:var(--bg-hover)}
+.code-block pre{padding:10px 14px;font-family:'Geist Mono',monospace;font-size:12px;color:var(--text-primary);overflow-x:auto;line-height:1.6;margin:0}
+
+/* Tabs */
+.tab-row{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:12px}
+.tab-btn{padding:6px 12px;font-size:13px;color:var(--text-secondary);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-1px;font-family:inherit;font-weight:500;transition:all .12s}
+.tab-btn:hover{color:var(--text-primary)}
+.tab-btn.active{color:var(--primary-text);border-bottom-color:var(--primary)}
+
+/* Status */
+.status-indicator{display:flex;align-items:center;gap:8px;padding:12px 16px;background:var(--bg-surface);border:1px solid var(--border);border-radius:8px;font-size:13px;margin-bottom:14px}
+.status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.status-dot.waiting{background:var(--text-tertiary);animation:pulse 1.5s ease-in-out infinite}
+.status-dot.received{background:var(--success)}
+@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* Share link */
+.share-row{display:flex;gap:6px;margin-bottom:14px}
+.share-row input{flex:1;height:34px;padding:8px 12px;background:var(--bg-raised);border:1px solid var(--border);border-radius:6px;color:var(--text-secondary);font-family:'Geist Mono',monospace;font-size:12px;outline:none}
+.share-copy{height:34px;padding:0 12px;border:1px solid var(--border-strong);border-radius:6px;background:var(--bg-raised);color:var(--text-primary);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;transition:all .12s}
+.share-copy:hover{background:var(--bg-overlay)}
+
+/* Button overrides for onboarding */
+.btn-row{display:flex;gap:8px;margin-top:24px}
+.btn{height:40px;border:none;border-radius:6px;font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;transition:all .12s;display:flex;align-items:center;justify-content:center;gap:8px;padding:0 16px}
+.btn-pri{background:var(--primary);color:#fff;flex:1}.btn-pri:hover{background:var(--primary-hover)}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid transparent}.btn-ghost:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-sm{height:32px;padding:0 12px;font-size:12px}
+
+.step{display:none}.step.active{display:block}
+
+/* Page footer */
+.page-footer{padding:16px;text-align:center;font-size:12px;color:var(--text-tertiary);flex-shrink:0}.page-footer a{color:var(--text-tertiary);text-decoration:none;margin:0 8px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="#" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <div class="topbar-right"><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
+</header>
+
+<div class="progress-wrap">
+  <div class="progress-bar-bg"><div class="progress-bar-fill" id="progress-fill" style="width:25%"></div></div>
+  <div class="progress-info">
+    <span id="progress-text"><span data-en="Step 1 of 4" data-ar="الخطوة 1 من 4">Step 1 of 4</span></span>
+    <div class="steps-dots">
+      <span class="step-dot active" id="dot-1">1</span>
+      <span class="step-dot" id="dot-2">2</span>
+      <span class="step-dot" id="dot-3">3</span>
+      <span class="step-dot" id="dot-4">4</span>
+    </div>
+  </div>
+</div>
+
+<main class="main">
+  <div class="card">
+    <!-- STEP 1: Workspace -->
+    <div class="step active" id="step-1">
+      <h1 class="heading"><span data-en="Set up your workspace" data-ar="إعداد مساحة العمل">Set up your workspace</span></h1>
+      <p class="subheading"><span data-en="You can always change this later" data-ar="يمكنك تغيير هذا لاحقاً">You can always change this later</span></p>
+      <div class="fg"><label><span data-en="Workspace name" data-ar="اسم مساحة العمل">Workspace name</span></label><input type="text" value="Fatura Inc." id="ws-name"></div>
+      <div class="fg"><label><span data-en="Workspace URL" data-ar="رابط مساحة العمل">Workspace URL</span></label><div class="input-group"><span class="prefix">allstak.io /</span><input type="text" value="fatura" id="ws-slug"></div><div class="helper"><span data-en="This is your team's unique URL" data-ar="هذا هو الرابط الفريد لفريقك">This is your team's unique URL</span></div></div>
+      <div class="fg"><label><span data-en="Your role" data-ar="دورك">Your role</span></label><select><option>CTO / Tech Lead</option><option>Senior Developer</option><option>Developer</option><option>DevOps Engineer</option><option>Other</option></select></div>
+      <div class="fg"><label><span data-en="Team size" data-ar="حجم الفريق">Team size</span></label></div>
+      <div class="pills"><button class="pill active" onclick="selectPill(this)">1-5</button><button class="pill" onclick="selectPill(this)">6-15</button><button class="pill" onclick="selectPill(this)">16-50</button><button class="pill" onclick="selectPill(this)">50+</button></div>
+      <div class="btn-row"><button class="btn btn-ghost" disabled><span data-en="&#8592; Back" data-ar="العودة &#8594;">&#8592; Back</span></button><button class="btn btn-pri" onclick="goStep(2)"><span data-en="Continue &#8594;" data-ar="متابعة &#8592;">Continue &#8594;</span></button></div>
+    </div>
+
+    <!-- STEP 2: Project -->
+    <div class="step" id="step-2">
+      <h1 class="heading"><span data-en="Create your first project" data-ar="إنشاء مشروعك الأول">Create your first project</span></h1>
+      <p class="subheading"><span data-en="A project connects your app to AllStak" data-ar="المشروع يربط تطبيقك بـ AllStak">A project connects your app to AllStak</span></p>
+      <div class="fg"><label><span data-en="Project name" data-ar="اسم المشروع">Project name</span></label><input type="text" placeholder="My App" id="proj-name"></div>
+      <div class="fg"><label><span data-en="Platform / Framework" data-ar="المنصة / الإطار">Platform / Framework</span></label></div>
+      <div class="platform-grid">
+        <div class="platform-card selected" onclick="selectPlatform(this)"><div class="platform-icon">&#9883;</div><div class="platform-name">Node.js</div></div>
+        <div class="platform-card" onclick="selectPlatform(this)"><div class="platform-icon">&#9749;</div><div class="platform-name">Java / Spring</div></div>
+        <div class="platform-card" onclick="selectPlatform(this)"><div class="platform-icon">&#128013;</div><div class="platform-name">Python</div></div>
+        <div class="platform-card" onclick="selectPlatform(this)"><div class="platform-icon">&#128640;</div><div class="platform-name">Go</div></div>
+        <div class="platform-card" onclick="selectPlatform(this)"><div class="platform-icon">&#128142;</div><div class="platform-name">Ruby</div></div>
+        <div class="platform-card" onclick="selectPlatform(this)"><div class="platform-icon">&#8943;</div><div class="platform-name">Other</div></div>
+      </div>
+      <div class="fg"><label><span data-en="Environment" data-ar="البيئة">Environment</span></label></div>
+      <div class="tab-row"><button class="tab-btn active" onclick="selectTab(this)">Production</button><button class="tab-btn" onclick="selectTab(this)">Staging</button><button class="tab-btn" onclick="selectTab(this)">Development</button></div>
+      <div class="code-block"><div class="code-head"><span><span data-en="Install SDK" data-ar="تثبيت SDK">Install SDK</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>npm install @allstak/js</pre></div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(1)"><span data-en="&#8592; Back" data-ar="العودة &#8594;">&#8592; Back</span></button><button class="btn btn-pri" onclick="goStep(3)"><span data-en="Create project &#8594;" data-ar="إنشاء المشروع &#8592;">Create project &#8594;</span></button></div>
+    </div>
+
+    <!-- STEP 3: Invite -->
+    <div class="step" id="step-3">
+      <h1 class="heading"><span data-en="Invite your team" data-ar="دعوة فريقك">Invite your team</span></h1>
+      <p class="subheading"><span data-en="AllStak works best when your whole team is here" data-ar="AllStak يعمل بشكل أفضل عندما يكون فريقك بالكامل هنا">AllStak works best when your whole team is here</span></p>
+      <div class="fg"><label><span data-en="Email addresses" data-ar="عناوين البريد الإلكتروني">Email addresses</span></label>
+        <div class="email-input-wrap" id="email-wrap">
+          <div class="email-tag">mohammed@fatura.io <button class="remove" onclick="this.parentElement.remove()">&#10005;</button></div>
+          <input type="email" placeholder="Enter email, press Enter" id="email-input" onkeydown="handleEmailKey(event)">
+        </div>
+      </div>
+      <div class="fg"><label><span data-en="Role" data-ar="الدور">Role</span></label><select><option>Developer</option><option>Admin</option><option>Viewer</option></select></div>
+      <div style="margin-bottom:14px"><div style="font-size:13px;font-weight:500;margin-bottom:6px"><span data-en="Or share invite link" data-ar="أو شارك رابط الدعوة">Or share invite link</span></div>
+        <div class="share-row"><input value="https://allstak.io/invite/fatura-abc123" readonly id="share-link"><button class="share-copy" onclick="copyLink()"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(2)"><span data-en="&#8592; Back" data-ar="العودة &#8594;">&#8592; Back</span></button><button class="btn btn-ghost btn-sm" onclick="goStep(4)"><span data-en="Skip for now" data-ar="تخطي الآن">Skip for now</span></button><button class="btn btn-pri" onclick="goStep(4)"><span data-en="Send invitations &#8594;" data-ar="إرسال الدعوات &#8592;">Send invitations &#8594;</span></button></div>
+    </div>
+
+    <!-- STEP 4: Install SDK -->
+    <div class="step" id="step-4">
+      <h1 class="heading"><span data-en="Install the SDK" data-ar="تثبيت SDK">Install the SDK</span></h1>
+      <p class="subheading"><span data-en="Start capturing errors in 2 minutes" data-ar="ابدأ بالتقاط الأخطاء في دقيقتين">Start capturing errors in 2 minutes</span></p>
+      <div class="tab-row"><button class="tab-btn active" onclick="selectTab(this)">npm</button><button class="tab-btn" onclick="selectTab(this)">yarn</button><button class="tab-btn" onclick="selectTab(this)">pnpm</button></div>
+      <div class="code-block"><div class="code-head"><span><span data-en="Install" data-ar="تثبيت">Install</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>npm install @allstak/js</pre></div>
+      <div class="tab-row"><button class="tab-btn active" onclick="selectTab(this)">JavaScript</button><button class="tab-btn" onclick="selectTab(this)">TypeScript</button></div>
+      <div class="code-block"><div class="code-head"><span><span data-en="Initialize" data-ar="تهيئة">Initialize</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>import AllStak from '@allstak/js'
+
+AllStak.init({
+  apiKey: 'ask_live_••••••••••••••••',
+  environment: 'production'
+})</pre></div>
+      <div class="status-indicator" id="sdk-status">
+        <span class="status-dot waiting" id="sdk-dot"></span>
+        <span id="sdk-text"><span data-en="Waiting for first event..." data-ar="في انتظار أول حدث...">Waiting for first event...</span></span>
+      </div>
+      <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(3)"><span data-en="&#8592; Back" data-ar="العودة &#8594;">&#8592; Back</span></button><button class="btn btn-ghost btn-sm" onclick="showToast('Coming soon!')"><span data-en="I'll do this later" data-ar="سأفعل هذا لاحقاً">I'll do this later</span></button><button class="btn btn-pri" onclick="showToast('Dashboard coming soon!')"><span data-en="Go to dashboard &#8594;" data-ar="الذهاب للوحة التحكم &#8592;">Go to dashboard &#8594;</span></button></div>
+    </div>
+  </div>
+</main>
+
+<footer class="page-footer"><a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a><a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a></footer>
+<div class="toast-wrap" id="tw"></div>
+
+<script>
+let currentStep=1;
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
+
+function goStep(n){
+  document.getElementById('step-'+currentStep).classList.remove('active');
+  document.getElementById('step-'+n).classList.add('active');
+  // Update progress
+  document.getElementById('progress-fill').style.width=(n*25)+'%';
+  document.getElementById('progress-text').textContent='Step '+n+' of 4';
+  // Update dots
+  for(let i=1;i<=4;i++){
+    const d=document.getElementById('dot-'+i);
+    d.className='step-dot';
+    if(i<n)d.classList.add('done');
+    else if(i===n)d.classList.add('active');
+  }
+  currentStep=n;
+  // Trigger SDK check on step 4
+  if(n===4)setTimeout(simulateEvent,4000);
+}
+
+function selectPill(btn){btn.closest('.pills').querySelectorAll('.pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active')}
+function selectPlatform(card){card.closest('.platform-grid').querySelectorAll('.platform-card').forEach(c=>c.classList.remove('selected'));card.classList.add('selected')}
+function selectTab(btn){btn.closest('.tab-row').querySelectorAll('.tab-btn').forEach(t=>t.classList.remove('active'));btn.classList.add('active')}
+
+function handleEmailKey(e){
+  if(e.key==='Enter'||e.key===','){
+    e.preventDefault();
+    const input=document.getElementById('email-input');
+    const email=input.value.trim().replace(',','');
+    if(email&&email.includes('@')){
+      const tag=document.createElement('div');tag.className='email-tag';
+      tag.innerHTML=email+' <button class="remove" onclick="this.parentElement.remove()">&#10005;</button>';
+      document.getElementById('email-wrap').insertBefore(tag,input);
+      input.value='';
+    }
+  }
+}
+
+function copyCode(btn){btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy',1500)}
+function copyLink(){const i=document.getElementById('share-link');navigator.clipboard&&navigator.clipboard.writeText(i.value);showToast('Link copied!')}
+
+function simulateEvent(){
+  const dot=document.getElementById('sdk-dot');
+  const text=document.getElementById('sdk-text');
+  dot.className='status-dot received';
+  text.innerHTML='&#10003; Event received! AllStak is working.';
+  text.style.color='var(--success)';
+}
+
+function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('tw').appendChild(t);setTimeout(()=>t.remove(),2500)}
+(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+</script>
+</body>
+</html>

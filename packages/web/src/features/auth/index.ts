@@ -1,0 +1,8 @@
+export { LoginPage } from './pages/LoginPage'
+export { RegisterPage } from './pages/RegisterPage'
+export { ForgotPasswordPage } from './pages/ForgotPasswordPage'
+export { ResetPasswordPage } from './pages/ResetPasswordPage'
+export { VerifyEmailPage } from './pages/VerifyEmailPage'
+export { OnboardingPage } from './pages/OnboardingPage'
+export { InvitePage } from './pages/InvitePage'
+export { SSOPage } from './pages/SSOPage'

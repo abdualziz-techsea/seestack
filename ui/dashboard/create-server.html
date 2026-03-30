@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Add SSH Server</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Page-specific: Create Server form === */
+.main{display:flex;justify-content:center}
+.form-container{width:100%;max-width:600px;padding-top:8px}
+.form-section{margin-bottom:28px}
+.form-section-title{font-size:14px;font-weight:600;letter-spacing:-0.01em;margin-bottom:14px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+.form-input{max-width:none}
+.form-textarea{width:100%;min-height:120px;padding:10px 12px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-md);color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:none;resize:vertical;transition:border-color .15s}
+.form-textarea:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-row-3{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+.form-helper{font-size:11px;color:var(--text-tertiary);margin-top:4px}
+.form-select{width:100%}
+
+/* Auth radio cards */
+.auth-options{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.auth-option{padding:12px 14px;border:2px solid var(--border-strong);border-radius:var(--radius-lg);cursor:pointer;transition:all .12s;display:flex;align-items:center;gap:10px}
+.auth-option:hover{border-color:var(--text-tertiary)}
+.auth-option.active{border-color:var(--primary);background:var(--primary-ghost)}
+.auth-radio{width:16px;height:16px;border-radius:50%;border:2px solid var(--border-strong);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.auth-option.active .auth-radio{border-color:var(--primary)}
+.auth-option.active .auth-radio::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--primary)}
+.auth-label{font-size:13px;font-weight:500}
+.auth-rec{font-size:10px;color:var(--text-tertiary);font-weight:400}
+
+/* Drag/drop zone */
+.drop-zone{border:2px dashed var(--border-strong);border-radius:var(--radius-lg);padding:20px;text-align:center;color:var(--text-tertiary);font-size:12px;cursor:pointer;transition:all .15s;margin-top:8px}
+.drop-zone:hover,.drop-zone.dragover{border-color:var(--primary);background:var(--primary-ghost);color:var(--primary-text)}
+
+/* Warning banner */
+.warning-banner{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--warning-ghost);border:1px solid rgba(232,163,61,0.2);border-radius:var(--radius-md);color:var(--warning);font-size:12px;font-weight:500;margin-bottom:14px}
+
+/* Toggle switch (form-specific) */
+.toggle-row{display:flex;align-items:center;gap:12px;padding:12px 0}
+.toggle-switch{position:relative;width:40px;height:22px;flex-shrink:0}
+.toggle-switch input{opacity:0;width:0;height:0}
+.toggle-switch .toggle-slider{position:absolute;cursor:pointer;inset:0;background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:var(--radius-full);transition:all .2s}
+.toggle-switch .toggle-slider::before{content:'';position:absolute;height:16px;width:16px;left:2px;bottom:2px;background:var(--text-tertiary);border-radius:50%;transition:all .2s}
+.toggle-switch input:checked+.toggle-slider{background:var(--primary-ghost);border-color:var(--primary)}
+.toggle-switch input:checked+.toggle-slider::before{transform:translateX(18px);background:var(--primary)}
+.toggle-info{flex:1}
+.toggle-label{font-size:13px;font-weight:500}
+.toggle-helper{font-size:11px;color:var(--text-tertiary);margin-top:2px}
+
+/* Tags input */
+.tags-input{display:flex;flex-wrap:wrap;gap:6px;padding:6px 10px;min-height:36px;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-md);align-items:center;cursor:text;transition:border-color .15s}
+.tags-input:focus-within{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.tag{display:inline-flex;align-items:center;gap:4px;height:22px;padding:0 8px;background:var(--primary-ghost);color:var(--primary-text);border-radius:var(--radius-sm);font-size:11px;font-weight:500}
+.tag-remove{cursor:pointer;font-size:13px;line-height:1;opacity:.7}
+.tag-remove:hover{opacity:1}
+.tags-input input{border:none;background:none;color:var(--text-primary);font-family:inherit;font-size:12px;outline:none;flex:1;min-width:60px}
+.tags-input input::placeholder{color:var(--text-tertiary)}
+
+/* Buttons (page-specific overrides) */
+.btn{height:36px;padding:0 20px;border-radius:var(--radius-md);font-family:inherit;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .12s;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:transparent;border:1px solid var(--border-strong);color:var(--text-secondary)}
+.btn-secondary:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-full{width:100%}
+.btn-row{display:flex;gap:10px;margin-top:20px}
+
+/* Connection test */
+.test-result{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;margin-top:10px}
+.test-result.testing{color:var(--text-secondary)}
+.test-result.success{color:var(--success)}
+.test-result.fail{color:var(--danger)}
+.test-spinner{width:14px;height:14px;border:2px solid var(--border-strong);border-top-color:var(--primary);border-radius:50%;animation:spin 1s linear infinite;display:inline-block}
+
+/* Success state */
+.success-state{display:none;text-align:center;padding:60px 20px}
+.success-icon{width:64px;height:64px;border-radius:50%;background:var(--success-ghost);color:var(--success);display:inline-flex;align-items:center;justify-content:center;font-size:32px;margin-bottom:16px}
+.success-title{font-size:20px;font-weight:600;margin-bottom:6px}
+.success-sub{font-size:13px;color:var(--text-tertiary);margin-bottom:24px}
+.success-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* RTL support (page-specific) */
+html[dir="rtl"]{font-family:'Rubik','Geist',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif}
+
+/* Language toggle (alias for shared .lang-btn) */
+.lang-toggle{display:flex;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-full);padding:2px;margin-right:4px}
+.lang-toggle button{border:none;background:transparent;color:var(--text-tertiary);padding:2px 8px;border-radius:var(--radius-full);font-size:10px;font-family:inherit;cursor:pointer;font-weight:500;transition:all .15s}
+.lang-toggle button.on{background:var(--primary);color:#fff}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right">
+    <div class="lang-toggle"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div>
+    <button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div>
+  </div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبات">Monitors</span></a>
+      <a href="ssh.html" class="sb-item active"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="SSH">SSH</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="الدردشة">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+      <div class="form-container">
+        <div class="page-header"><h1 class="page-title" data-en="Add SSH Server" data-ar="إضافة خادم SSH">Add SSH Server</h1></div>
+
+        <!-- Form state -->
+        <div id="form-state">
+          <!-- Server Details -->
+          <div class="form-section">
+            <div class="form-section-title" data-en="Server Details" data-ar="تفاصيل الخادم">Server Details</div>
+            <div class="form-group">
+              <label class="form-label" data-en="Server Name" data-ar="اسم الخادم">Server Name</label>
+              <input class="form-input" id="server-name" data-en-placeholder="e.g. Production API" data-ar-placeholder="مثال: خادم الإنتاج" placeholder="e.g. Production API">
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label class="form-label" data-en="Host / IP Address" data-ar="المضيف / عنوان IP">Host / IP Address</label>
+                <input class="form-input" data-en-placeholder="192.168.1.100 or server.example.com" data-ar-placeholder="192.168.1.100 أو server.example.com" placeholder="192.168.1.100 or server.example.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label" data-en="Port" data-ar="المنفذ">Port</label>
+                <input class="form-input" type="number" value="22">
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-en="Username" data-ar="اسم المستخدم">Username</label>
+              <input class="form-input" data-en-placeholder="root" data-ar-placeholder="root" placeholder="root">
+            </div>
+          </div>
+
+          <!-- Authentication -->
+          <div class="form-section">
+            <div class="form-section-title" data-en="Authentication" data-ar="المصادقة">Authentication</div>
+            <div class="auth-options">
+              <div class="auth-option active" onclick="setAuth('key')">
+                <span class="auth-radio"></span>
+                <div><div class="auth-label" data-en="SSH Key" data-ar="مفتاح SSH">SSH Key</div><div class="auth-rec" data-en="Recommended" data-ar="مُوصى به">Recommended</div></div>
+              </div>
+              <div class="auth-option" onclick="setAuth('password')">
+                <span class="auth-radio"></span>
+                <div><div class="auth-label" data-en="Password" data-ar="كلمة المرور">Password</div><div class="auth-rec" data-en="Less secure" data-ar="أقل أمانًا">Less secure</div></div>
+              </div>
+            </div>
+
+            <!-- SSH Key auth -->
+            <div id="auth-key">
+              <div class="form-group">
+                <label class="form-label" data-en="Private Key" data-ar="المفتاح الخاص">Private Key</label>
+                <textarea class="form-textarea" data-en-placeholder="Paste your private key here..." data-ar-placeholder="الصق مفتاحك الخاص هنا..." placeholder="Paste your private key here..." style="min-height:100px"></textarea>
+              </div>
+              <div class="drop-zone" id="drop-zone" data-en="Or drag &amp; drop your key file here" data-ar="أو اسحب وأفلت ملف المفتاح هنا">Or drag &amp; drop your key file here</div>
+              <div class="form-group" style="margin-top:14px">
+                <label class="form-label" data-en="Passphrase (optional)" data-ar="عبارة المرور (اختياري)">Passphrase (optional)</label>
+                <input class="form-input" type="password" data-en-placeholder="Leave empty if no passphrase" data-ar-placeholder="اتركه فارغًا إذا لم تكن هناك عبارة مرور" placeholder="Leave empty if no passphrase">
+              </div>
+            </div>
+
+            <!-- Password auth -->
+            <div id="auth-password" style="display:none">
+              <div class="warning-banner">&#9888; <span data-en="Password authentication is less secure. SSH keys are strongly recommended." data-ar="مصادقة كلمة المرور أقل أمانًا. يُوصى بشدة باستخدام مفاتيح SSH.">Password authentication is less secure. SSH keys are strongly recommended.</span></div>
+              <div class="form-group">
+                <label class="form-label" data-en="Password" data-ar="كلمة المرور">Password</label>
+                <input class="form-input" type="password" data-en-placeholder="Enter server password" data-ar-placeholder="أدخل كلمة مرور الخادم" placeholder="Enter server password">
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings -->
+          <div class="form-section">
+            <div class="form-section-title" data-en="Settings" data-ar="الإعدادات">Settings</div>
+            <div class="form-group">
+              <label class="form-label" data-en="Project" data-ar="المشروع">Project</label>
+              <select class="form-select">
+                <option data-en="Production App" data-ar="تطبيق الإنتاج">Production App</option>
+                <option data-en="Staging App" data-ar="التطبيق التجريبي">Staging App</option>
+                <option data-en="Development" data-ar="التطوير">Development</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" data-en="Tags" data-ar="العلامات">Tags</label>
+              <div class="tags-input" id="tags-input" onclick="this.querySelector('input').focus()">
+                <span class="tag">api <span class="tag-remove" onclick="this.parentElement.remove();event.stopPropagation()">&times;</span></span>
+                <input data-en-placeholder="Add tag and press Enter..." data-ar-placeholder="أضف علامة واضغط Enter..." placeholder="Add tag and press Enter..." id="tag-field">
+              </div>
+            </div>
+            <div class="toggle-row">
+              <label class="toggle-switch"><input type="checkbox"><span class="toggle-slider"></span></label>
+              <div class="toggle-info">
+                <div class="toggle-label" data-en="Require approval for commands" data-ar="طلب موافقة للأوامر">Require approval for commands</div>
+                <div class="toggle-helper" data-en="Team admins must approve before commands execute on this server" data-ar="يجب أن يوافق مسؤولو الفريق قبل تنفيذ الأوامر على هذا الخادم">Team admins must approve before commands execute on this server</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Test connection -->
+          <button class="btn btn-secondary btn-full" onclick="testConnection()" id="test-btn" data-en="Test Connection" data-ar="اختبار الاتصال">Test Connection</button>
+          <div id="test-result"></div>
+
+          <!-- Submit -->
+          <div class="btn-row" style="justify-content:flex-end">
+            <button class="btn btn-secondary" onclick="window.location.href='ssh.html'" data-en="Cancel" data-ar="إلغاء">Cancel</button>
+            <button class="btn btn-primary" onclick="submitServer()" data-en="Add Server" data-ar="إضافة خادم">Add Server</button>
+          </div>
+        </div>
+
+        <!-- Success state -->
+        <div class="success-state" id="success-state">
+          <div class="success-icon">&#10003;</div>
+          <div class="success-title" data-en="Server Added" data-ar="تمت إضافة الخادم">Server Added</div>
+          <div class="success-sub" data-en="Your server has been configured and is ready to use." data-ar="تم إعداد خادمك وهو جاهز للاستخدام.">Your server has been configured and is ready to use.</div>
+          <div class="success-btns">
+            <button class="btn btn-primary" onclick="window.location.href='ssh.html'" data-en="Open Terminal" data-ar="فتح الطرفية">Open Terminal</button>
+            <button class="btn btn-secondary" onclick="resetForm()" data-en="Add Another" data-ar="إضافة آخر">Add Another</button>
+            <button class="btn btn-secondary" onclick="window.location.href='ssh.html'" data-en="Back to SSH" data-ar="العودة إلى SSH">Back to SSH</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script>
+/* Theme */
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
+
+/* Language toggle */
+let currentLang='en';
+function setLang(lang){
+  currentLang=lang;
+  document.documentElement.setAttribute('lang',lang);
+  document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
+  document.querySelectorAll('.lang-toggle button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));
+  document.querySelectorAll('[data-'+lang+']').forEach(el=>{
+    el.textContent=el.getAttribute('data-'+lang);
+  });
+  document.querySelectorAll('[data-'+lang+'-placeholder]').forEach(el=>{
+    el.placeholder=el.getAttribute('data-'+lang+'-placeholder');
+  });
+}
+
+/* Auth toggle */
+function setAuth(mode){
+  document.querySelectorAll('.auth-option').forEach(o=>o.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  document.getElementById('auth-key').style.display=mode==='key'?'block':'none';
+  document.getElementById('auth-password').style.display=mode==='password'?'block':'none';
+}
+
+/* Tags input */
+document.getElementById('tag-field').addEventListener('keydown',function(e){
+  if(e.key==='Enter'&&this.value.trim()){
+    e.preventDefault();
+    const tag=document.createElement('span');
+    tag.className='tag';
+    tag.innerHTML=this.value.trim()+' <span class="tag-remove" onclick="this.parentElement.remove();event.stopPropagation()">&times;</span>';
+    this.parentElement.insertBefore(tag,this);
+    this.value='';
+  }
+});
+
+/* Drag and drop */
+const dropZone=document.getElementById('drop-zone');
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('dragover')});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop',e=>{
+  e.preventDefault();dropZone.classList.remove('dragover');
+  const file=e.dataTransfer.files[0];
+  if(file){
+    const reader=new FileReader();
+    reader.onload=ev=>{document.querySelector('#auth-key textarea').value=ev.target.result};
+    reader.readAsText(file);
+    dropZone.textContent=currentLang==='ar'?'تم تحميل: '+file.name:'Loaded: '+file.name;
+  }
+});
+
+/* Test connection */
+function testConnection(){
+  const resultEl=document.getElementById('test-result');
+  const btn=document.getElementById('test-btn');
+  btn.disabled=true;
+  resultEl.innerHTML='<div class="test-result testing"><span class="test-spinner"></span> '+(currentLang==='ar'?'جارٍ الاختبار...':'Testing...')+'</div>';
+  setTimeout(()=>{
+    const success=Math.random()>0.3;
+    if(success){
+      resultEl.innerHTML='<div class="test-result success">&#10004; '+(currentLang==='ar'?'متصل':'Connected')+'</div>';
+    }else{
+      resultEl.innerHTML='<div class="test-result fail">&#10008; '+(currentLang==='ar'?'فشل الاتصال':'Connection failed — check credentials')+'</div>';
+    }
+    btn.disabled=false;
+  },2000);
+}
+
+/* Submit */
+function submitServer(){
+  document.getElementById('form-state').style.display='none';
+  document.getElementById('success-state').style.display='block';
+}
+
+/* Reset form */
+function resetForm(){
+  document.getElementById('form-state').style.display='block';
+  document.getElementById('success-state').style.display='none';
+  document.getElementById('server-name').value='';
+  document.getElementById('test-result').innerHTML='';
+}
+</script>
+</body>
+</html>

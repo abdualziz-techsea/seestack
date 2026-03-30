@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — API Keys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Page-specific: API Keys === */
+[dir="rtl"] .settings-nav{border-right:none;border-left:1px solid var(--border)}
+[dir="rtl"] .settings-nav a{border-left:none;border-right:2px solid transparent}
+[dir="rtl"] .settings-nav a.active{border-left-color:transparent;border-right-color:var(--primary)}
+
+/* Settings nav (custom link-style items) */
+.settings-nav-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-tertiary);padding:0 16px 8px}
+.settings-nav a{display:block;padding:6px 16px;font-size:13px;color:var(--text-secondary);text-decoration:none;font-weight:400;transition:all .08s;border-left:2px solid transparent}
+.settings-nav a:hover{color:var(--text-primary);background:var(--bg-hover)}
+.settings-nav a.active{color:var(--primary-text);background:var(--primary-ghost);border-left-color:var(--primary);font-weight:500}
+
+/* Main content wrapper */
+.main{display:flex;overflow:hidden}
+.settings-content{flex:1;overflow-y:auto;padding:24px 32px}
+
+/* Buttons */
+.btn-primary{height:32px;padding:0 14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-md);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s}
+.btn-primary:hover{background:var(--primary-hover)}
+.btn-secondary{height:32px;padding:0 14px;background:transparent;color:var(--text-secondary);border:1px solid var(--border-strong);border-radius:var(--radius-md);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .12s}
+.btn-secondary:hover{background:var(--bg-hover);color:var(--text-primary)}
+.btn-danger{height:32px;padding:0 14px;background:var(--danger);color:#fff;border:none;border-radius:var(--radius-md);font-family:inherit;font-size:12px;font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background .12s}
+.btn-danger:hover{background:#d44;opacity:.9}
+.btn-sm{height:26px;padding:0 8px;font-size:11px}
+
+/* Key table specifics */
+.key-name{font-weight:500}
+.key-value{font-family:var(--font-mono);font-size:11px;color:var(--text-tertiary);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;vertical-align:middle}
+.key-actions{display:flex;gap:4px}
+.key-action-btn{background:none;border:none;color:var(--text-tertiary);font-size:11px;cursor:pointer;padding:4px 6px;border-radius:var(--radius-sm);font-family:inherit;transition:all .1s}
+.key-action-btn:hover{background:var(--bg-active);color:var(--text-primary)}
+.key-action-btn.revoke:hover{color:var(--danger)}
+.env-pill{display:inline-flex;align-items:center;height:20px;padding:0 8px;border-radius:var(--radius-sm);font-size:10px;font-weight:500}
+.env-production{background:var(--danger-ghost);color:var(--danger)}
+.env-test{background:var(--warning-ghost);color:var(--warning)}
+.time-ago{font-size:11px;color:var(--text-tertiary)}
+.date-text{font-size:11px;color:var(--text-secondary)}
+
+/* Modal overrides */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:100;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .15s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-xl);width:440px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,0.5);transform:scale(0.96);transition:transform .15s}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border)}
+.modal-title{font-size:16px;font-weight:600;letter-spacing:-0.012em}
+.modal-close{background:none;border:none;color:var(--text-tertiary);font-size:18px;cursor:pointer;padding:4px}
+.modal-close:hover{color:var(--text-primary)}
+.modal-body{padding:20px}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding:16px 20px;border-top:1px solid var(--border)}
+
+/* Radio pills */
+.radio-pills{display:flex;gap:0;border:1px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden}
+.radio-pill{flex:1;text-align:center;padding:6px 12px;font-size:12px;font-weight:500;background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all .12s}
+.radio-pill:not(:last-child){border-right:1px solid var(--border-strong)}
+.radio-pill:hover{color:var(--text-primary);background:var(--bg-hover)}
+.radio-pill.active{background:var(--primary-ghost);color:var(--primary-text)}
+
+/* New key display */
+.new-key-block{background:var(--bg-base);border:1px solid var(--border-strong);border-radius:var(--radius-lg);padding:14px;font-family:var(--font-mono);font-size:12px;color:var(--text-primary);word-break:break-all;line-height:1.6;margin-bottom:12px;position:relative}
+.new-key-copy-btn{position:absolute;top:8px;right:8px}
+.new-key-warning{font-size:11px;color:var(--warning);margin-bottom:16px;display:flex;align-items:center;gap:6px}
+.confirm-checkbox{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text-secondary);cursor:pointer}
+.confirm-checkbox input{width:14px;height:14px;border:1px solid var(--border-strong);border-radius:3px;background:var(--bg-raised);cursor:pointer;appearance:none;outline:none;flex-shrink:0}
+.confirm-checkbox input:checked{background:var(--primary);border-color:var(--primary)}
+
+/* Revoke modal */
+.revoke-warning{font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:8px}
+.revoke-key-name{font-weight:600;color:var(--text-primary)}
+
+/* Copied tooltip */
+.copied-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--bg-overlay);border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:6px 14px;font-size:12px;font-weight:500;color:var(--success);opacity:0;pointer-events:none;transition:all .2s;z-index:200}
+.copied-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="../dashboard/index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right"><button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div><div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div></div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="../dashboard/index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="../dashboard/errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="../dashboard/logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="../dashboard/monitors.html" class="sb-item"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبة">Monitors</span></a>
+      <a href="../dashboard/ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="الخوادم">SSH</span></a>
+      <a href="../dashboard/alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+      <a href="../dashboard/billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثات">Chat</span></a><a href="members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="general.html" class="sb-item active"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+      <!-- Settings secondary nav -->
+      <nav class="settings-nav">
+        <div class="settings-nav-title" data-en="Settings" data-ar="الإعدادات">Settings</div>
+        <a href="general.html" data-en="General" data-ar="عام">General</a>
+        <a href="members.html" data-en="Members" data-ar="الأعضاء">Members</a>
+        <a href="api-keys.html" class="active" data-en="API Keys" data-ar="مفاتيح API">API Keys</a>
+      </nav>
+
+      <!-- Settings content -->
+      <div class="settings-content">
+        <div class="page-header">
+          <h1 class="page-title" data-en="API Keys" data-ar="مفاتيح API">API Keys</h1>
+          <button class="btn-primary" onclick="openCreateModal()">+ Create API key</button>
+        </div>
+
+        <div class="info-banner">
+          <span class="info-banner-ico">&#128273;</span>
+          API keys authenticate your SDK. Keep keys secret.
+        </div>
+
+        <table class="keys-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Project</th>
+              <th>Environment</th>
+              <th>Last Used</th>
+              <th>Created</th>
+              <th>Key</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="key-name">Production Key</span></td>
+              <td>Production App</td>
+              <td><span class="env-pill env-production">production</span></td>
+              <td><span class="time-ago">2 min ago</span></td>
+              <td><span class="date-text">Jan 5, 2026</span></td>
+              <td><span class="key-value">ask_live_a1b2c3d4e5f6g7h8i9j0...</span></td>
+              <td>
+                <div class="key-actions">
+                  <button class="key-action-btn" onclick="copyKey('ask_live_a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6')">Copy</button>
+                  <button class="key-action-btn" onclick="renameKey(this, 'Production Key')">Rename</button>
+                  <button class="key-action-btn revoke" onclick="openRevokeModal('Production Key')">Revoke</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="key-name">CI/CD Pipeline</span></td>
+              <td>Production App</td>
+              <td><span class="env-pill env-production">production</span></td>
+              <td><span class="time-ago">3 days ago</span></td>
+              <td><span class="date-text">Jan 3, 2026</span></td>
+              <td><span class="key-value">ask_live_x9y8w7v6u5t4s3r2q1p0...</span></td>
+              <td>
+                <div class="key-actions">
+                  <button class="key-action-btn" onclick="copyKey('ask_live_x9y8w7v6u5t4s3r2q1p0a9b8c7d6e5f4')">Copy</button>
+                  <button class="key-action-btn" onclick="renameKey(this, 'CI/CD Pipeline')">Rename</button>
+                  <button class="key-action-btn revoke" onclick="openRevokeModal('CI/CD Pipeline')">Revoke</button>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td><span class="key-name">Local Dev</span></td>
+              <td>Staging App</td>
+              <td><span class="env-pill env-test">test</span></td>
+              <td><span class="time-ago">1 hour ago</span></td>
+              <td><span class="date-text">Dec 28, 2025</span></td>
+              <td><span class="key-value">ask_test_m3n4o5p6q7r8s9t0u1v2...</span></td>
+              <td>
+                <div class="key-actions">
+                  <button class="key-action-btn" onclick="copyKey('ask_test_m3n4o5p6q7r8s9t0u1v2w3x4y5z6a7b8')">Copy</button>
+                  <button class="key-action-btn" onclick="renameKey(this, 'Local Dev')">Rename</button>
+                  <button class="key-action-btn revoke" onclick="openRevokeModal('Local Dev')">Revoke</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Create Key Modal -->
+<div class="modal-overlay" id="create-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Create API Key</span>
+      <button class="modal-close" onclick="closeCreateModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Key Name</label>
+        <input class="form-input" id="key-name-input" type="text" placeholder="e.g. Production Key">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Project</label>
+        <select class="form-select" id="key-project-select">
+          <option>Production App</option>
+          <option>Staging App</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Environment</label>
+        <div class="radio-pills">
+          <button class="radio-pill active" onclick="selectEnv(this)">production</button>
+          <button class="radio-pill" onclick="selectEnv(this)">test</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeCreateModal()">Cancel</button>
+      <button class="btn-primary" onclick="createKey()">Create</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Key Display Modal -->
+<div class="modal-overlay" id="newkey-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">New Key Created</span>
+      <button class="modal-close" onclick="closeNewKeyModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <div class="new-key-warning">&#9888; This key will only be shown once. Copy it now.</div>
+      <div class="new-key-block" id="new-key-display">
+        ask_live_g8h9i0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7
+        <button class="key-action-btn new-key-copy-btn" onclick="copyNewKey()">Copy to clipboard</button>
+      </div>
+      <label class="confirm-checkbox">
+        <input type="checkbox" id="copied-checkbox" onchange="toggleDoneBtn()">
+        I've copied my key
+      </label>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="done-btn" disabled onclick="closeNewKeyModal()">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- Revoke Confirmation Modal -->
+<div class="modal-overlay" id="revoke-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Revoke API Key</span>
+      <button class="modal-close" onclick="closeRevokeModal()">&#10005;</button>
+    </div>
+    <div class="modal-body">
+      <p class="revoke-warning">Are you sure you want to revoke <span class="revoke-key-name" id="revoke-key-name"></span>? Any applications using this key will immediately lose access. This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeRevokeModal()">Cancel</button>
+      <button class="btn-danger" onclick="confirmRevoke()">Revoke</button>
+    </div>
+  </div>
+</div>
+
+<!-- Copied toast -->
+<div class="copied-toast" id="copied-toast">Copied!</div>
+
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));localStorage.setItem('allstak-theme',t)}
+function setLang(lang){document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));document.querySelectorAll('[data-'+lang+']').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)});localStorage.setItem('allstak-lang',lang)}
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+
+// Modal helpers
+function openCreateModal(){document.getElementById('create-modal').classList.add('open')}
+function closeCreateModal(){document.getElementById('create-modal').classList.remove('open')}
+function openRevokeModal(name){document.getElementById('revoke-key-name').textContent=name;document.getElementById('revoke-modal').classList.add('open')}
+function closeRevokeModal(){document.getElementById('revoke-modal').classList.remove('open')}
+function closeNewKeyModal(){document.getElementById('newkey-modal').classList.remove('open');document.getElementById('copied-checkbox').checked=false;document.getElementById('done-btn').disabled=true}
+
+// Environment radio pills
+function selectEnv(btn){btn.parentElement.querySelectorAll('.radio-pill').forEach(p=>p.classList.remove('active'));btn.classList.add('active')}
+
+// Create key flow
+function createKey(){
+  closeCreateModal();
+  document.getElementById('newkey-modal').classList.add('open');
+}
+
+// Copy key to clipboard
+function copyKey(key){
+  navigator.clipboard.writeText(key).then(()=>showCopied()).catch(()=>showCopied());
+}
+
+function copyNewKey(){
+  const keyText=document.getElementById('new-key-display').childNodes[0].textContent.trim();
+  navigator.clipboard.writeText(keyText).then(()=>showCopied()).catch(()=>showCopied());
+}
+
+function showCopied(){
+  const toast=document.getElementById('copied-toast');
+  toast.classList.add('show');
+  setTimeout(()=>toast.classList.remove('show'),1500);
+}
+
+// Done button toggle
+function toggleDoneBtn(){
+  document.getElementById('done-btn').disabled=!document.getElementById('copied-checkbox').checked;
+}
+
+// Revoke confirm
+function confirmRevoke(){
+  closeRevokeModal();
+}
+
+// Rename key (inline prompt)
+function renameKey(btn,currentName){
+  const newName=prompt('Rename key:',currentName);
+  if(newName&&newName!==currentName){
+    const row=btn.closest('tr');
+    row.querySelector('.key-name').textContent=newName;
+    // Update revoke button
+    const revokeBtn=row.querySelector('.key-action-btn.revoke');
+    revokeBtn.setAttribute('onclick',"openRevokeModal('"+newName.replace(/'/g,"\\'")+"')");
+  }
+}
+
+// Close modals on overlay click
+document.querySelectorAll('.modal-overlay').forEach(overlay=>{
+  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.classList.remove('open')});
+});
+
+// Close modals on Escape
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Monitors</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* === Monitors Page-specific styles === */
+
+/* Add monitor button */
+.btn-primary{height:32px;padding:0 14px;background:var(--primary);color:#fff;border:none;border-radius:var(--radius-sm);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:background var(--duration-normal)}
+.btn-primary:hover{background:var(--primary-hover)}
+
+/* Summary bar */
+.summary-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:20px;font-size:var(--text-base);color:var(--text-secondary);box-shadow:var(--shadow-inset)}
+.summary-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.summary-dot.green{background:var(--success)}
+.summary-dot.orange{background:var(--warning)}
+.summary-dot.red{background:var(--danger)}
+.summary-sep{color:var(--text-disabled)}
+.summary-check{margin-left:auto;font-size:var(--text-xs);color:var(--text-tertiary)}
+
+/* Monitor grid */
+.monitor-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* Monitor card */
+.monitor-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;box-shadow:var(--shadow-inset);transition:border-color var(--duration-normal)}
+.monitor-card:hover{border-color:var(--border-strong)}
+.mc-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.mc-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.mc-status-dot.up{background:var(--success)}
+.mc-status-dot.down{background:var(--danger)}
+.mc-status-dot.degraded{background:var(--warning)}
+.mc-url{font-size:var(--text-md);font-weight:500;font-family:var(--font-mono);letter-spacing:-0.01em}
+.mc-status-label{margin-left:auto;font-size:var(--text-2xs);font-weight:500;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:var(--radius-sm)}
+.mc-status-label.up{background:var(--success-ghost);color:var(--success)}
+.mc-status-label.down{background:var(--danger-ghost);color:var(--danger)}
+.mc-status-label.degraded{background:var(--warning-ghost);color:var(--warning-text)}
+
+.mc-metrics{display:flex;gap:16px;margin-bottom:14px}
+.mc-metric{display:flex;flex-direction:column}
+.mc-metric-label{font-size:var(--text-2xs);color:var(--text-tertiary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:1px}
+.mc-metric-value{font-size:var(--text-md);font-weight:600;font-family:var(--font-mono)}
+
+.mc-sparkline{margin-bottom:12px}
+.mc-sparkline svg{display:block;width:100%;height:32px}
+
+.mc-footer{display:flex;align-items:center;justify-content:space-between}
+.mc-interval{font-size:var(--text-xs);color:var(--text-tertiary)}
+.mc-actions{display:flex;gap:4px}
+.mc-btn{height:26px;padding:0 8px;border:1px solid var(--border);border-radius:var(--radius-sm);background:transparent;color:var(--text-secondary);font-family:inherit;font-size:var(--text-xs);font-weight:500;cursor:pointer;transition:all var(--duration-normal)}
+.mc-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.mc-btn.danger:hover{background:var(--danger-ghost);color:var(--danger);border-color:transparent}
+
+/* Modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);display:flex;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity var(--duration-normal)}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg-surface);border:1px solid var(--border-strong);border-radius:var(--radius-xl);width:440px;max-width:90vw;padding:24px;box-shadow:var(--shadow-lg);transform:translateY(8px);transition:transform var(--duration-normal)}
+.modal-overlay.open .modal{transform:translateY(0)}
+.modal-title{font-size:18px;font-weight:600;margin-bottom:20px;letter-spacing:-0.015em}
+.modal-field{margin-bottom:14px}
+.modal-label{display:block;font-size:var(--text-sm);font-weight:500;color:var(--text-secondary);margin-bottom:5px}
+.modal-input{width:100%;height:34px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-base);outline:none;transition:border-color var(--duration-fast)}
+.modal-input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.modal-input::placeholder{color:var(--text-tertiary)}
+
+/* Radio pills */
+.radio-pills{display:flex;gap:0;border:1px solid var(--border-strong);border-radius:var(--radius-md);overflow:hidden}
+.radio-pill{padding:6px 14px;font-size:var(--text-sm);font-weight:500;background:transparent;border:none;color:var(--text-secondary);cursor:pointer;font-family:inherit;transition:all var(--duration-normal)}
+.radio-pill:hover{color:var(--text-primary);background:var(--bg-hover)}
+.radio-pill.active{background:var(--primary-ghost);color:var(--primary-text)}
+.radio-pill+.radio-pill{border-left:1px solid var(--border-strong)}
+
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;margin-top:20px}
+.btn-ghost{height:32px;padding:0 14px;background:transparent;border:1px solid var(--border-strong);border-radius:var(--radius-md);color:var(--text-secondary);font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;transition:all var(--duration-normal)}
+.btn-ghost:hover{background:var(--bg-hover);color:var(--text-primary)}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
+  <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
+  <div class="top-right"><button class="top-bell">&#128276;</button><span class="top-avatar">AK</span><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div><div class="lang-btn"><button class="on" onclick="setLang('en')">EN</button><button onclick="setLang('ar')">AR</button></div></div>
+</header>
+<div class="app">
+  <aside class="sidebar">
+    <nav class="sb-nav"><a href="index.html" class="sb-item"><span class="ico">&#9673;</span><span data-en="Overview" data-ar="نظرة عامة">Overview</span></a></nav>
+    <div class="sb-sec" data-en="Monitor" data-ar="المراقبة">Monitor</div>
+    <nav class="sb-nav">
+      <a href="errors.html" class="sb-item"><span class="ico">&#9888;</span><span data-en="Errors" data-ar="الأخطاء">Errors</span></a>
+      <a href="logs.html" class="sb-item"><span class="ico">&#9783;</span><span data-en="Logs" data-ar="السجلات">Logs</span></a>
+      <a href="monitors.html" class="sb-item active"><span class="ico">&#8635;</span><span data-en="Monitors" data-ar="المراقبة">Monitors</span></a>
+      <a href="ssh.html" class="sb-item"><span class="ico">&gt;_</span><span data-en="SSH" data-ar="الخوادم">SSH</span></a>
+      <a href="alerts.html" class="sb-item"><span class="ico">&#128276;</span><span data-en="Alerts" data-ar="التنبيهات">Alerts</span></a>
+      <a href="billing.html" class="sb-item"><span class="ico">&#128179;</span><span data-en="Billing" data-ar="الفوترة">Billing</span></a>
+    </nav>
+    <div class="sb-sec" data-en="Team" data-ar="الفريق">Team</div>
+    <nav class="sb-nav"><a href="../chat.html" class="sb-item"><span class="ico">&#9993;</span><span data-en="Chat" data-ar="المحادثات">Chat</span></a><a href="../settings/members.html" class="sb-item"><span class="ico">&#128101;</span><span data-en="Members" data-ar="الأعضاء">Members</span></a></nav>
+    <div class="sb-sec" data-en="Settings" data-ar="الإعدادات">Settings</div>
+    <nav class="sb-nav"><a href="../settings/general.html" class="sb-item"><span class="ico">&#9881;</span><span data-en="Settings" data-ar="الإعدادات">Settings</span></a></nav>
+    <div class="sb-bottom"><span class="sb-user-av">AK</span><span class="sb-user-name">Ahmed Al-Rashidi</span><span class="sb-plan">Pro</span></div>
+  </aside>
+  <div class="content-area">
+    <main class="main">
+      <div class="page-header">
+        <h1 class="page-title" data-en="Monitors" data-ar="المراقبة">Monitors</h1>
+        <button class="btn-primary" onclick="openModal()">+ Add monitor</button>
+      </div>
+
+      <div class="summary-bar">
+        <span class="summary-dot green"></span> <strong style="color:var(--success)">12</strong> Operational
+        <span class="summary-sep">&middot;</span>
+        <span class="summary-dot orange"></span> <strong style="color:var(--warning)">1</strong> Degraded
+        <span class="summary-sep">&middot;</span>
+        <span class="summary-dot red"></span> <strong style="color:var(--danger)">1</strong> Down
+        <span class="summary-check">Last checked 30s ago</span>
+      </div>
+
+      <div class="monitor-grid">
+
+        <!-- api.myapp.com -->
+        <div class="monitor-card">
+          <div class="mc-header">
+            <span class="mc-status-dot up"></span>
+            <span class="mc-url">api.myapp.com</span>
+            <span class="mc-status-label up">Up</span>
+          </div>
+          <div class="mc-metrics">
+            <div class="mc-metric"><span class="mc-metric-label">Response</span><span class="mc-metric-value">142ms</span></div>
+            <div class="mc-metric"><span class="mc-metric-label">Uptime</span><span class="mc-metric-value">99.98%</span></div>
+          </div>
+          <div class="mc-sparkline">
+            <svg viewBox="0 0 240 32" preserveAspectRatio="none">
+              <rect x="0" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="10" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="20" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="30" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="40" y="1" width="8" height="31" rx="1" fill="var(--primary)" opacity=".75"/>
+              <rect x="50" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="60" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="70" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="80" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="90" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="100" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="110" y="1" width="8" height="31" rx="1" fill="var(--primary)" opacity=".75"/>
+              <rect x="120" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="130" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="140" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="150" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="160" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="170" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="180" y="1" width="8" height="31" rx="1" fill="var(--primary)" opacity=".75"/>
+              <rect x="190" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="200" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="210" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="220" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="230" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+            </svg>
+          </div>
+          <div class="mc-footer">
+            <span class="mc-interval">Every 1m</span>
+            <div class="mc-actions">
+              <button class="mc-btn">Edit</button>
+              <button class="mc-btn">Pause</button>
+              <button class="mc-btn danger">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- webhook.myapp.com -->
+        <div class="monitor-card">
+          <div class="mc-header">
+            <span class="mc-status-dot down"></span>
+            <span class="mc-url">webhook.myapp.com</span>
+            <span class="mc-status-label down">Down</span>
+          </div>
+          <div class="mc-metrics">
+            <div class="mc-metric"><span class="mc-metric-label">Response</span><span class="mc-metric-value" style="color:var(--danger)">TIMEOUT</span></div>
+            <div class="mc-metric"><span class="mc-metric-label">Uptime</span><span class="mc-metric-value">94.12%</span></div>
+          </div>
+          <div class="mc-sparkline">
+            <svg viewBox="0 0 240 32" preserveAspectRatio="none">
+              <rect x="0" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="10" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="20" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="30" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="40" y="1" width="8" height="31" rx="1" fill="var(--primary)" opacity=".75"/>
+              <rect x="50" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="60" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="70" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="80" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="90" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="100" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="110" y="1" width="8" height="31" rx="1" fill="var(--primary)" opacity=".75"/>
+              <rect x="120" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="130" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="140" y="2" width="8" height="30" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="150" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="160" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="170" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="180" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="190" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="200" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="210" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="220" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+              <rect x="230" y="0" width="8" height="32" rx="1" fill="var(--danger)" opacity=".7"/>
+            </svg>
+          </div>
+          <div class="mc-footer">
+            <span class="mc-interval">Every 1m</span>
+            <div class="mc-actions">
+              <button class="mc-btn">Edit</button>
+              <button class="mc-btn">Pause</button>
+              <button class="mc-btn danger">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- dashboard.myapp.com -->
+        <div class="monitor-card">
+          <div class="mc-header">
+            <span class="mc-status-dot degraded"></span>
+            <span class="mc-url">dashboard.myapp.com</span>
+            <span class="mc-status-label degraded">Degraded</span>
+          </div>
+          <div class="mc-metrics">
+            <div class="mc-metric"><span class="mc-metric-label">Response</span><span class="mc-metric-value" style="color:var(--warning)">487ms</span></div>
+            <div class="mc-metric"><span class="mc-metric-label">Uptime</span><span class="mc-metric-value">99.41%</span></div>
+          </div>
+          <div class="mc-sparkline">
+            <svg viewBox="0 0 240 32" preserveAspectRatio="none">
+              <rect x="0" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="10" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="20" y="10" width="8" height="22" rx="1" fill="var(--primary)" opacity=".45"/>
+              <rect x="30" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="40" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="50" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="60" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".45"/>
+              <rect x="70" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="80" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="90" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="100" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="110" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="120" y="4" width="8" height="28" rx="1" fill="var(--primary)" opacity=".65"/>
+              <rect x="130" y="6" width="8" height="26" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="140" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".45"/>
+              <rect x="150" y="3" width="8" height="29" rx="1" fill="var(--primary)" opacity=".7"/>
+              <rect x="160" y="5" width="8" height="27" rx="1" fill="var(--primary)" opacity=".6"/>
+              <rect x="170" y="2" width="8" height="30" rx="1" fill="var(--warning)" opacity=".6"/>
+              <rect x="180" y="1" width="8" height="31" rx="1" fill="var(--warning)" opacity=".65"/>
+              <rect x="190" y="0" width="8" height="32" rx="1" fill="var(--warning)" opacity=".7"/>
+              <rect x="200" y="1" width="8" height="31" rx="1" fill="var(--warning)" opacity=".65"/>
+              <rect x="210" y="0" width="8" height="32" rx="1" fill="var(--warning)" opacity=".7"/>
+              <rect x="220" y="1" width="8" height="31" rx="1" fill="var(--warning)" opacity=".65"/>
+              <rect x="230" y="0" width="8" height="32" rx="1" fill="var(--warning)" opacity=".7"/>
+            </svg>
+          </div>
+          <div class="mc-footer">
+            <span class="mc-interval">Every 5m</span>
+            <div class="mc-actions">
+              <button class="mc-btn">Edit</button>
+              <button class="mc-btn">Pause</button>
+              <button class="mc-btn danger">Delete</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- cdn.myapp.com -->
+        <div class="monitor-card">
+          <div class="mc-header">
+            <span class="mc-status-dot up"></span>
+            <span class="mc-url">cdn.myapp.com</span>
+            <span class="mc-status-label up">Up</span>
+          </div>
+          <div class="mc-metrics">
+            <div class="mc-metric"><span class="mc-metric-label">Response</span><span class="mc-metric-value">23ms</span></div>
+            <div class="mc-metric"><span class="mc-metric-label">Uptime</span><span class="mc-metric-value">100.00%</span></div>
+          </div>
+          <div class="mc-sparkline">
+            <svg viewBox="0 0 240 32" preserveAspectRatio="none">
+              <rect x="0" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="10" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="20" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="30" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="40" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="50" y="10" width="8" height="22" rx="1" fill="var(--primary)" opacity=".45"/>
+              <rect x="60" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="70" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="80" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="90" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="100" y="10" width="8" height="22" rx="1" fill="var(--primary)" opacity=".45"/>
+              <rect x="110" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="120" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="130" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="140" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="150" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="160" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="170" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="180" y="10" width="8" height="22" rx="1" fill="var(--primary)" opacity=".45"/>
+              <rect x="190" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="200" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+              <rect x="210" y="9" width="8" height="23" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="220" y="8" width="8" height="24" rx="1" fill="var(--primary)" opacity=".5"/>
+              <rect x="230" y="7" width="8" height="25" rx="1" fill="var(--primary)" opacity=".55"/>
+            </svg>
+          </div>
+          <div class="mc-footer">
+            <span class="mc-interval">Every 5m</span>
+            <div class="mc-actions">
+              <button class="mc-btn">Edit</button>
+              <button class="mc-btn">Pause</button>
+              <button class="mc-btn danger">Delete</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Add Monitor Modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">Add Monitor</div>
+    <div class="modal-field">
+      <label class="modal-label">URL</label>
+      <input class="modal-input" type="url" placeholder="https://example.com/health">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Name</label>
+      <input class="modal-input" type="text" placeholder="My API Health Check">
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Check Interval</label>
+      <div class="radio-pills">
+        <button class="radio-pill active" onclick="selectPill(this)">1m</button>
+        <button class="radio-pill" onclick="selectPill(this)">5m</button>
+        <button class="radio-pill" onclick="selectPill(this)">10m</button>
+      </div>
+    </div>
+    <div class="modal-field">
+      <label class="modal-label">Alert Threshold (ms)</label>
+      <input class="modal-input" type="number" placeholder="500" value="500">
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn-primary" onclick="closeModal()">Add Monitor</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'));localStorage.setItem('allstak-theme',t)}
+function setLang(lang){document.documentElement.setAttribute('lang',lang);document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));document.querySelectorAll('[data-'+lang+']').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)});localStorage.setItem('allstak-lang',lang)}
+(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+function openModal(){document.getElementById('modal-overlay').classList.add('open')}
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open')}
+function selectPill(el){el.parentElement.querySelectorAll('.radio-pill').forEach(p=>p.classList.remove('active'));el.classList.add('active')}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal()});
+</script>
+</body>
+</html>

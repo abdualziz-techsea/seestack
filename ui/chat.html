@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Chat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared.css">
+<style>
+/* ===== CHAT-SPECIFIC: SIDEBAR OVERRIDES ===== */
+.sidebar{width:240px;padding:0}
+.sb-header{height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;padding:0 12px;border-bottom:1px solid var(--border);flex-shrink:0}
+.sb-workspace{display:flex;align-items:center;gap:6px;font-size:var(--text-base);font-weight:600}
+.sb-ws-mark{width:18px;height:18px;background:var(--primary);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;color:#fff;font-size:8px;font-weight:700}
+.sb-search{padding:var(--sp-2) var(--sp-3);flex-shrink:0}
+.sb-search input{width:100%;height:28px;padding:0 8px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-sm);color:var(--text-primary);font-family:inherit;font-size:var(--text-sm);outline:none;transition:border var(--duration-fast)}
+.sb-search input::placeholder{color:var(--text-tertiary)}
+.sb-search input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.sb-section{font-size:var(--text-2xs);font-weight:500;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-tertiary);padding:var(--sp-3) var(--sp-3) var(--sp-1)}
+.sb-item .hash{color:var(--text-tertiary);font-size:14px;width:16px;text-align:center;flex-shrink:0}
+.sb-item.active .hash{color:var(--text-secondary)}
+.sb-item .unread{margin-left:auto;min-width:18px;height:16px;padding:0 5px;border-radius:var(--radius-full);background:var(--primary);color:#fff;font-size:var(--text-2xs);font-weight:600;display:flex;align-items:center;justify-content:center}
+.sb-item.has-unread{color:var(--text-primary);font-weight:500}
+.sb-dm-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.sb-dm-dot.on{background:var(--success)}.sb-dm-dot.off{background:var(--text-disabled)}
+.sb-add{display:flex;align-items:center;gap:6px;padding:0 8px;height:28px;font-size:var(--text-sm);color:var(--text-tertiary);cursor:pointer;border-radius:var(--radius-sm);transition:all var(--duration-fast)}
+.sb-add:hover{background:var(--bg-hover);color:var(--text-secondary)}
+.sb-avatar{width:28px;height:28px;border-radius:50%;background:var(--primary-ghost);color:var(--primary-text);display:flex;align-items:center;justify-content:center;font-size:var(--text-2xs);font-weight:600;position:relative}
+.sb-avatar .st{position:absolute;bottom:-1px;right:-1px;width:8px;height:8px;border-radius:50%;background:var(--success);border:2px solid var(--bg-surface)}
+.sb-settings{background:none;border:none;color:var(--text-tertiary);font-size:15px;cursor:pointer;padding:4px;transition:color var(--duration-fast)}
+.sb-settings:hover{color:var(--text-primary)}
+
+/* ===== MAIN CHAT ===== */
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.ch-header{height:var(--topbar-h);display:flex;align-items:center;padding:0 var(--sp-4);border-bottom:1px solid var(--border);flex-shrink:0;gap:var(--sp-2)}
+.ch-name{font-size:var(--text-lg);font-weight:600;letter-spacing:-0.012em;display:flex;align-items:center;gap:6px}
+.ch-hash{color:var(--text-tertiary);font-size:16px}
+.ch-meta{margin-left:var(--sp-2);font-size:var(--text-sm);color:var(--text-tertiary)}
+.ch-actions{margin-left:auto;display:flex;gap:4px}
+.ch-action-btn{background:none;border:none;color:var(--text-tertiary);font-size:14px;padding:6px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--duration-fast)}
+.ch-action-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+
+/* Messages area */
+.messages{flex:1;overflow-y:auto;padding:var(--sp-4) var(--sp-5);display:flex;flex-direction:column}
+.date-divider{display:flex;align-items:center;gap:12px;margin:var(--sp-4) 0;font-size:var(--text-sm);color:var(--text-tertiary);font-weight:500}
+.date-divider::before,.date-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.msg{display:flex;gap:10px;padding:6px 0;position:relative;transition:background var(--duration-fast)}
+.msg:hover{background:var(--bg-hover);border-radius:var(--radius-md);margin:0 -8px;padding:6px 8px}
+.msg-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--text-sm);font-weight:600;flex-shrink:0}
+.msg-body{flex:1;min-width:0}
+.msg-header{display:flex;align-items:baseline;gap:var(--sp-2);margin-bottom:1px}
+.msg-name{font-size:var(--text-base);font-weight:600}
+.msg-time{font-size:var(--text-xs);color:var(--text-tertiary)}
+.msg-text{font-size:var(--text-base);line-height:1.5;word-break:break-word}
+.msg-cont{padding:2px 0 2px 46px}
+.msg-cont .msg-text{font-size:var(--text-base)}
+
+/* @mention */
+.mention{background:var(--primary-ghost);color:var(--primary-text);border-radius:3px;padding:0 3px;font-weight:500}
+
+/* Hover actions */
+.msg-actions{position:absolute;top:-10px;right:4px;display:none;background:var(--bg-raised);border:1px solid var(--border-strong);border-radius:var(--radius-md);padding:2px;gap:2px;box-shadow:var(--shadow-md)}
+.msg:hover .msg-actions{display:flex}
+.msg-action{background:none;border:none;color:var(--text-tertiary);font-size:14px;padding:4px 6px;border-radius:var(--radius-sm);cursor:pointer;transition:all var(--duration-fast)}
+.msg-action:hover{background:var(--bg-hover);color:var(--text-primary)}
+
+/* Reactions */
+.reactions{display:flex;gap:4px;margin-top:4px}
+.reaction{display:flex;align-items:center;gap:3px;padding:2px 6px;border:1px solid var(--border);border-radius:10px;font-size:var(--text-sm);cursor:pointer;transition:all var(--duration-normal);background:transparent}
+.reaction:hover{border-color:var(--border-accent);background:var(--primary-ghost)}
+.reaction-count{font-size:var(--text-xs);color:var(--text-secondary)}
+
+/* Linked error card */
+.linked-error{background:var(--primary-ghost);border:1px solid var(--border-accent);border-radius:var(--radius-lg);padding:10px 12px;margin-top:6px;max-width:420px}
+.le-header{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+.le-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.le-class{font-size:var(--text-base);font-weight:600}
+.le-file{font-size:var(--text-sm);color:var(--text-secondary);margin-bottom:6px;font-family:var(--font-mono)}
+.le-meta{display:flex;gap:6px;align-items:center;margin-bottom:var(--sp-2);flex-wrap:wrap}
+.le-badge{height:18px;padding:0 6px;border-radius:var(--radius-sm);font-size:var(--text-xs);font-weight:500;display:inline-flex;align-items:center;gap:3px}
+.le-link{display:inline-flex;align-items:center;gap:4px;font-size:var(--text-sm);color:var(--primary-text);cursor:pointer;font-weight:500;transition:color var(--duration-fast)}
+.le-link:hover{text-decoration:underline}
+
+/* Thread preview */
+.thread-preview{display:flex;align-items:center;gap:6px;margin-top:6px;padding:4px 0;cursor:pointer}
+.thread-preview:hover .tp-text{text-decoration:underline}
+.tp-avatars{display:flex}
+.tp-avatars .tp-av{width:20px;height:20px;border-radius:50%;border:2px solid var(--bg-base);margin-left:-4px;display:flex;align-items:center;justify-content:center;font-size:7px;font-weight:600}
+.tp-avatars .tp-av:first-child{margin-left:0}
+.tp-text{font-size:var(--text-sm);color:var(--primary-text);font-weight:500}
+.tp-time{font-size:var(--text-xs);color:var(--text-tertiary)}
+
+/* Typing indicator */
+.typing{padding:4px var(--sp-5);font-size:var(--text-sm);color:var(--text-tertiary);flex-shrink:0;height:24px;display:flex;align-items:center;gap:4px}
+.typing-dots{display:flex;gap:2px}
+.typing-dots span{width:4px;height:4px;border-radius:50%;background:var(--text-tertiary);animation:typingDot 1.2s ease-in-out infinite}
+.typing-dots span:nth-child(2){animation-delay:.2s}
+.typing-dots span:nth-child(3){animation-delay:.4s}
+@keyframes typingDot{0%,100%{opacity:.3}50%{opacity:1}}
+
+/* Message input */
+.msg-input-area{padding:0 var(--sp-4) var(--sp-4);flex-shrink:0}
+.msg-input-box{border:1px solid var(--border-strong);border-radius:var(--radius-lg);overflow:hidden;background:var(--bg-raised)}
+.msg-toolbar{display:flex;align-items:center;padding:4px 8px;gap:2px;border-bottom:1px solid var(--border)}
+.msg-tb-btn{background:none;border:none;color:var(--text-tertiary);font-size:var(--text-base);padding:4px 6px;border-radius:var(--radius-sm);cursor:pointer;font-weight:600;font-family:inherit;transition:all var(--duration-fast)}
+.msg-tb-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.msg-textarea{width:100%;min-height:40px;max-height:120px;padding:8px 12px;border:none;background:transparent;color:var(--text-primary);font-family:inherit;font-size:var(--text-base);resize:none;outline:none;line-height:1.5}
+.msg-textarea::placeholder{color:var(--text-tertiary)}
+.msg-bottom{display:flex;align-items:center;justify-content:space-between;padding:4px 8px}
+.msg-bottom-left{display:flex;gap:2px}
+.msg-bottom-btn{background:none;border:none;color:var(--text-tertiary);font-size:var(--text-sm);padding:4px 8px;border-radius:var(--radius-sm);cursor:pointer;display:flex;align-items:center;gap:4px;font-family:inherit;transition:all var(--duration-fast)}
+.msg-bottom-btn:hover{background:var(--bg-hover);color:var(--text-primary)}
+.msg-send{height:28px;padding:0 12px;border:none;border-radius:var(--radius-sm);background:var(--primary);color:#fff;font-family:inherit;font-size:var(--text-sm);font-weight:500;cursor:pointer;display:flex;align-items:center;gap:4px;transition:background var(--duration-fast)}
+.msg-send:hover{background:var(--primary-hover)}
+.msg-send:disabled{opacity:.35;cursor:not-allowed}
+
+/* ===== THREAD PANEL ===== */
+.thread-panel{width:320px;background:var(--bg-surface);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;transform:translateX(100%);transition:transform var(--duration-slow) var(--ease-out);position:relative}
+.thread-panel.open{transform:translateX(0)}
+.thread-head{height:var(--topbar-h);display:flex;align-items:center;justify-content:space-between;padding:0 var(--sp-4);border-bottom:1px solid var(--border);flex-shrink:0}
+.thread-head h3{font-size:var(--text-md);font-weight:600}
+.thread-close{background:none;border:none;color:var(--text-tertiary);font-size:16px;cursor:pointer;padding:4px;transition:color var(--duration-fast)}
+.thread-close:hover{color:var(--text-primary)}
+.thread-messages{flex:1;overflow-y:auto;padding:var(--sp-3) var(--sp-4)}
+.thread-divider{display:flex;align-items:center;gap:8px;margin:12px 0;font-size:var(--text-xs);color:var(--text-tertiary)}
+.thread-divider::before,.thread-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.thread-input{padding:var(--sp-3);border-top:1px solid var(--border);flex-shrink:0}
+.thread-input-box{display:flex;gap:6px;align-items:center}
+.thread-input input{flex:1;height:32px;padding:0 10px;background:var(--bg-raised);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-family:inherit;font-size:var(--text-base);outline:none;transition:border var(--duration-fast)}
+.thread-input input::placeholder{color:var(--text-tertiary)}
+.thread-input input:focus{border-color:var(--primary);box-shadow:0 0 0 2px rgba(91,141,239,.15)}
+.thread-send{width:32px;height:32px;border:none;border-radius:var(--radius-md);background:var(--primary);color:#fff;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background var(--duration-fast)}
+.thread-send:hover{background:var(--primary-hover)}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar">
+  <div class="top-logo"><span class="top-mark">A</span>AllStak</div>
+  <div class="top-search"><input placeholder="Search messages, errors, channels..."></div>
+  <div class="top-right">
+    <div class="theme-btn"><button class="on" onclick="setTheme('dark')">Dark</button><button onclick="setTheme('light')">Light</button></div>
+  </div>
+</header>
+
+<div class="app">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-header">
+      <div class="sb-workspace"><span class="sb-ws-mark">A</span>AllStak HQ</div>
+      <span style="color:var(--text-tertiary);font-size:11px">&#9660;</span>
+    </div>
+    <div class="sb-search"><input placeholder="Search..."></div>
+    <div class="sb-section">Channels</div>
+    <nav class="sb-nav">
+      <div class="sb-item" data-ch="general" onclick="switchChannel(this)"><span class="hash">#</span>general<span class="unread">3</span></div>
+      <div class="sb-item active" data-ch="production" onclick="switchChannel(this)"><span class="hash">#</span>production</div>
+      <div class="sb-item has-unread" data-ch="bugs" onclick="switchChannel(this)"><span class="hash">#</span>bugs<span class="unread">7</span></div>
+      <div class="sb-item" data-ch="deployments" onclick="switchChannel(this)"><span class="hash">#</span>deployments</div>
+      <div class="sb-add">+ Add a channel</div>
+    </nav>
+    <div class="sb-section">Direct Messages</div>
+    <nav class="sb-nav">
+      <div class="sb-item" onclick="switchChannel(this)" data-ch="dm-ahmed"><span class="sb-dm-dot on"></span>Ahmed (you)</div>
+      <div class="sb-item" onclick="switchChannel(this)" data-ch="dm-mohammed"><span class="sb-dm-dot off"></span>Mohammed</div>
+      <div class="sb-item" onclick="switchChannel(this)" data-ch="dm-sara"><span class="sb-dm-dot on"></span>Sara</div>
+      <div class="sb-item" onclick="switchChannel(this)" data-ch="dm-khalid"><span class="sb-dm-dot off"></span>Khalid</div>
+      <div class="sb-add">+ Add teammates</div>
+    </nav>
+    <div class="sb-bottom">
+      <div class="sb-avatar">AK<span class="st"></span></div>
+      <span class="sb-user-name">Ahmed Al-Rashidi</span>
+      <button class="sb-settings">&#9881;</button>
+    </div>
+  </aside>
+
+  <!-- CHAT MAIN -->
+  <section class="chat-main">
+    <div class="ch-header">
+      <span class="ch-name"><span class="ch-hash">#</span><span id="ch-title">production</span></span>
+      <span class="ch-meta">6 members</span>
+      <div class="ch-actions">
+        <button class="ch-action-btn" title="Pin">&#128204;</button>
+        <button class="ch-action-btn" title="Search">&#128269;</button>
+        <button class="ch-action-btn" title="Members">&#128101;</button>
+      </div>
+    </div>
+
+    <div class="messages" id="msg-list">
+      <div class="date-divider">Yesterday</div>
+
+      <div class="msg">
+        <div class="msg-avatar" style="background:var(--info-ghost);color:var(--primary-text)">MR</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Mohammed</span><span class="msg-time">4:12 PM</span></div>
+          <div class="msg-text">Seeing some elevated error rates on the payment service. Anyone else noticing this?</div>
+        </div>
+        <div class="msg-actions"><button class="msg-action" title="React">&#128077;</button><button class="msg-action" onclick="openThread()" title="Reply">&#8617;</button><button class="msg-action" title="More">&#8943;</button></div>
+      </div>
+
+      <div class="msg-cont"><div class="msg-text" style="color:var(--text-secondary)">I'm seeing about 3x the normal rate in the last hour</div></div>
+
+      <div class="msg">
+        <div class="msg-avatar" style="background:var(--success-ghost);color:var(--success)">SK</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Sara</span><span class="msg-time">4:15 PM</span></div>
+          <div class="msg-text">Yeah, looks like something broke in the latest deploy. <span class="mention">@Ahmed</span> can you check?</div>
+          <div class="reactions"><span class="reaction">&#128077; <span class="reaction-count">2</span></span><span class="reaction">&#9989; <span class="reaction-count">1</span></span></div>
+        </div>
+        <div class="msg-actions"><button class="msg-action" title="React">&#128077;</button><button class="msg-action" onclick="openThread()" title="Reply">&#8617;</button><button class="msg-action" title="More">&#8943;</button></div>
+      </div>
+
+      <div class="date-divider">Today</div>
+
+      <div class="msg">
+        <div class="msg-avatar" style="background:var(--primary-ghost);color:var(--primary-text)">AK</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Ahmed Al-Rashidi</span><span class="msg-time">10:42 AM</span></div>
+          <div class="msg-text">Fixed the payment null pointer. Deployed to staging, monitoring now.</div>
+          <div class="linked-error">
+            <div class="le-header"><span class="le-dot" style="background:var(--danger)"></span><span class="le-class">NullPointerException</span></div>
+            <div class="le-file">PaymentService.processPayment (line 42)</div>
+            <div class="le-meta">
+              <span class="le-badge" style="background:var(--danger-ghost);color:var(--danger)">production</span>
+              <span class="le-badge" style="background:var(--warning-ghost);color:var(--warning)">unresolved</span>
+              <span style="font-size:11px;color:var(--text-tertiary)">47 occurrences &middot; 2h ago</span>
+            </div>
+            <span class="le-link">View in AllStak &#8594;</span>
+          </div>
+          <div class="reactions"><span class="reaction">&#128588; <span class="reaction-count">3</span></span></div>
+        </div>
+        <div class="msg-actions"><button class="msg-action" title="React">&#128077;</button><button class="msg-action" onclick="openThread()" title="Reply">&#8617;</button><button class="msg-action" title="More">&#8943;</button></div>
+      </div>
+
+      <div class="msg-cont"><div class="msg-text">Going to monitor for 30 mins before pushing to prod</div></div>
+
+      <div class="msg">
+        <div class="msg-avatar" style="background:var(--info-ghost);color:var(--primary-text)">MR</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Mohammed</span><span class="msg-time">10:45 AM</span></div>
+          <div class="msg-text"><span class="mention">@Ahmed</span> looks good, I can see errors dropped to 0 on staging</div>
+          <div class="thread-preview" onclick="openThread()">
+            <div class="tp-avatars">
+              <div class="tp-av" style="background:var(--primary-ghost);color:var(--primary-text)">AK</div>
+              <div class="tp-av" style="background:var(--success-ghost);color:var(--success)">SK</div>
+            </div>
+            <span class="tp-text">3 replies</span>
+            <span class="tp-time">Last reply 2 min ago &#8594;</span>
+          </div>
+        </div>
+        <div class="msg-actions"><button class="msg-action" title="React">&#128077;</button><button class="msg-action" onclick="openThread()" title="Reply">&#8617;</button><button class="msg-action" title="More">&#8943;</button></div>
+      </div>
+
+      <div class="msg">
+        <div class="msg-avatar" style="background:var(--success-ghost);color:var(--success)">SK</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Sara</span><span class="msg-time">11:02 AM</span></div>
+          <div class="msg-text">Pushed to prod. Error rate is stable. Closing the incident.</div>
+          <div class="reactions"><span class="reaction">&#9989; <span class="reaction-count">4</span></span><span class="reaction">&#128588; <span class="reaction-count">2</span></span></div>
+        </div>
+        <div class="msg-actions"><button class="msg-action" title="React">&#128077;</button><button class="msg-action" onclick="openThread()" title="Reply">&#8617;</button><button class="msg-action" title="More">&#8943;</button></div>
+      </div>
+    </div>
+
+    <div class="typing" id="typing">
+      <span>Mohammed is typing</span>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <div class="msg-input-area">
+      <div class="msg-input-box">
+        <div class="msg-toolbar">
+          <button class="msg-tb-btn" title="Bold">B</button>
+          <button class="msg-tb-btn" title="Italic" style="font-style:italic">I</button>
+          <button class="msg-tb-btn" title="Strikethrough">~</button>
+          <button class="msg-tb-btn" title="Code" style="font-family:var(--font-mono,monospace);font-weight:400">&lt;/&gt;</button>
+          <button class="msg-tb-btn" title="Link">&#128279;</button>
+          <button class="msg-tb-btn" title="List">&#8801;</button>
+        </div>
+        <textarea class="msg-textarea" id="msg-input" placeholder="Message #production" rows="1" onkeydown="handleMsgKey(event)"></textarea>
+        <div class="msg-bottom">
+          <div class="msg-bottom-left">
+            <button class="msg-bottom-btn">&#128206; Attach</button>
+            <button class="msg-bottom-btn">&#128279; Link error</button>
+            <button class="msg-bottom-btn">@ Mention</button>
+          </div>
+          <button class="msg-send" id="send-btn" onclick="sendMessage()">Send &#9650;</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- THREAD PANEL -->
+  <aside class="thread-panel" id="thread-panel">
+    <div class="thread-head">
+      <h3>Thread</h3>
+      <button class="thread-close" onclick="closeThread()">&#10005;</button>
+    </div>
+    <div class="thread-messages">
+      <div class="msg" style="padding:8px 0">
+        <div class="msg-avatar" style="background:var(--primary-ghost);color:var(--primary-text)">AK</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Ahmed Al-Rashidi</span><span class="msg-time">10:42 AM</span></div>
+          <div class="msg-text">Fixed the payment null pointer. Deployed to staging.</div>
+          <div class="linked-error" style="max-width:100%">
+            <div class="le-header"><span class="le-dot" style="background:var(--danger)"></span><span class="le-class">NullPointerException</span></div>
+            <div class="le-file">PaymentService.java:42</div>
+            <div class="le-meta"><span class="le-badge" style="background:var(--danger-ghost);color:var(--danger)">production</span><span style="font-size:11px;color:var(--text-tertiary)">47 occurrences</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="thread-divider">3 replies</div>
+      <div class="msg" style="padding:6px 0">
+        <div class="msg-avatar" style="background:var(--info-ghost);color:var(--primary-text);width:28px;height:28px;font-size:9px">MR</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Mohammed</span><span class="msg-time">10:45 AM</span></div>
+          <div class="msg-text">Looks clean &#128077;</div>
+        </div>
+      </div>
+      <div class="msg" style="padding:6px 0">
+        <div class="msg-avatar" style="background:var(--success-ghost);color:var(--success);width:28px;height:28px;font-size:9px">SK</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Sara</span><span class="msg-time">10:47 AM</span></div>
+          <div class="msg-text"><span class="mention">@Ahmed</span> what was the root cause?</div>
+        </div>
+      </div>
+      <div class="msg" style="padding:6px 0">
+        <div class="msg-avatar" style="background:var(--primary-ghost);color:var(--primary-text);width:28px;height:28px;font-size:9px">AK</div>
+        <div class="msg-body">
+          <div class="msg-header"><span class="msg-name">Ahmed</span><span class="msg-time">10:50 AM</span></div>
+          <div class="msg-text">ThreadLocal wasn't being cleared between requests. Classic race condition.</div>
+        </div>
+      </div>
+    </div>
+    <div class="thread-input">
+      <div class="thread-input-box">
+        <input placeholder="Reply to thread..." onkeydown="if(event.key==='Enter'){event.preventDefault()}">
+        <button class="thread-send">&#9650;</button>
+      </div>
+    </div>
+  </aside>
+</div>
+
+<script>
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent.trim().toLowerCase()===t));
+}
+
+function switchChannel(el){
+  document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
+  el.classList.add('active');
+  const ch=el.dataset.ch||el.textContent.trim();
+  document.getElementById('ch-title').textContent=ch.replace('dm-','');
+  // Remove unread badge
+  const badge=el.querySelector('.unread');
+  if(badge)badge.remove();
+  el.classList.remove('has-unread');
+  // Update placeholder
+  document.getElementById('msg-input').placeholder='Message #'+ch.replace('dm-','');
+}
+
+function openThread(){
+  document.getElementById('thread-panel').classList.add('open');
+}
+function closeThread(){
+  document.getElementById('thread-panel').classList.remove('open');
+}
+
+function handleMsgKey(e){
+  if(e.key==='Enter'&&!e.shiftKey){
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendMessage(){
+  const input=document.getElementById('msg-input');
+  const text=input.value.trim();
+  if(!text)return;
+
+  // Parse @mentions
+  const parsed=text.replace(/@(\w+)/g,'<span class="mention">@$1</span>');
+
+  const msgList=document.getElementById('msg-list');
+  const now=new Date();
+  const time=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+
+  const msg=document.createElement('div');
+  msg.className='msg';
+  msg.innerHTML=`
+    <div class="msg-avatar" style="background:var(--primary-ghost);color:var(--primary-text)">AK</div>
+    <div class="msg-body">
+      <div class="msg-header"><span class="msg-name">Ahmed Al-Rashidi</span><span class="msg-time">${time}</span></div>
+      <div class="msg-text">${parsed}</div>
+    </div>
+    <div class="msg-actions"><button class="msg-action">&#128077;</button><button class="msg-action" onclick="openThread()">&#8617;</button><button class="msg-action">&#8943;</button></div>
+  `;
+  msgList.appendChild(msg);
+  input.value='';
+  // Scroll to bottom
+  const container=document.querySelector('.messages');
+  container.scrollTop=container.scrollHeight;
+}
+
+// Auto-resize textarea
+const textarea=document.getElementById('msg-input');
+textarea.addEventListener('input',function(){
+  this.style.height='auto';
+  this.style.height=Math.min(this.scrollHeight,120)+'px';
+});
+
+// Scroll messages to bottom on load
+window.addEventListener('load',()=>{
+  const container=document.querySelector('.messages');
+  container.scrollTop=container.scrollHeight;
+});
+</script>
+</body>
+</html>

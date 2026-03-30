@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AllStak — Verify email</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared.css">
+<style>
+/* Auth page body override */
+body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:auto}
+
+/* Auth topbar */
+.topbar{height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text-primary)}
+.logo-text{font-size:15px;font-weight:600;letter-spacing:-0.012em}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.skip-link{font-size:12px;color:var(--primary-text);text-decoration:none;font-weight:500}
+.skip-link:hover{text-decoration:underline}
+
+/* Centered card layout */
+.main{flex:1;display:flex;align-items:center;justify-content:center;padding:24px}
+.card{width:100%;max-width:440px;text-align:center;background:transparent;border:none;border-radius:0;box-shadow:none}
+
+/* Icons */
+.ico{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 20px}
+.ico-mail{background:var(--primary-ghost);color:var(--primary)}
+.ico-check{background:var(--success-ghost);color:var(--success)}
+
+/* Headings */
+.heading{font-size:24px;font-weight:600;letter-spacing:-0.022em;margin-bottom:6px}
+.subheading{font-size:14px;color:var(--text-secondary);margin-bottom:24px;line-height:1.5}
+.email-hl{color:var(--primary-text);font-weight:600}
+
+/* Steps card */
+.steps-card{background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:20px 24px;text-align:left;margin-bottom:20px}
+.steps-card ol{padding-left:20px;color:var(--text-secondary);font-size:13px}
+.steps-card li{margin-bottom:6px}
+
+/* Auth button full-width overrides */
+.card .btn{width:100%;height:40px}
+.card .btn+.btn{margin-top:8px}
+
+/* Resend area */
+.resend-area{margin-top:16px;font-size:13px;color:var(--text-secondary)}
+.resend-link{color:var(--primary-text);text-decoration:none;font-weight:500;cursor:pointer}
+.resend-link:hover{text-decoration:underline}
+.resend-link.disabled{color:var(--text-disabled);cursor:not-allowed;text-decoration:none}
+
+/* Footer link */
+.footer-link{margin-top:20px;font-size:13px;color:var(--text-secondary)}
+.footer-link a{color:var(--primary-text);text-decoration:none;font-weight:500}
+.footer-link a:hover{text-decoration:underline}
+
+/* Page footer */
+.page-footer{padding:16px;text-align:center;font-size:12px;color:var(--text-tertiary);flex-shrink:0}
+.page-footer a{color:var(--text-tertiary);text-decoration:none;margin:0 8px}
+
+/* Verify animation */
+.verify-anim{display:none;text-align:center;padding:32px 0}
+.verify-spinner{width:32px;height:32px;border:3px solid var(--border-strong);border-top-color:var(--primary);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 16px}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <div class="topbar-right"><a href="onboarding.html" class="skip-link"><span data-en="Skip for demo &#8594;" data-ar="تخطي للعرض &#8592;">Skip for demo &#8594;</span></a><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
+</header>
+<main class="main">
+  <div class="card" id="card-main">
+    <div class="ico ico-mail">&#9993;</div>
+    <h1 class="heading"><span data-en="Check your inbox" data-ar="تحقق من بريدك">Check your inbox</span></h1>
+    <p class="subheading"><span data-en="We sent a verification link to" data-ar="أرسلنا رابط التحقق إلى">We sent a verification link to</span><br><span class="email-hl">ahmed@fatura.io</span></p>
+    <div class="steps-card">
+      <ol>
+        <li><span data-en="Open the email from AllStak" data-ar="افتح البريد الإلكتروني من AllStak">Open the email from AllStak</span></li>
+        <li><span data-en='Click "Verify my email"' data-ar='انقر على "تحقق من بريدي"'>Click "Verify my email"</span></li>
+        <li><span data-en="You'll be redirected back here automatically" data-ar="ستتم إعادة توجيهك هنا تلقائياً">You'll be redirected back here automatically</span></li>
+      </ol>
+    </div>
+    <button class="btn btn-sec"><span data-en="Open Gmail" data-ar="فتح Gmail">Open Gmail</span></button>
+    <button class="btn btn-sec"><span data-en="Open Outlook" data-ar="فتح Outlook">Open Outlook</span></button>
+    <div class="divider"></div>
+    <div class="resend-area">
+      <span data-en="Didn't receive it?" data-ar="لم تستلمه؟">Didn't receive it?</span>
+      <span class="resend-link" id="resend-btn" onclick="handleResend()"><span data-en="Resend verification email" data-ar="إعادة إرسال بريد التحقق">Resend verification email</span></span>
+      <span id="resend-cd" style="display:none"></span>
+    </div>
+    <div class="footer-link"><span data-en="Wrong email?" data-ar="بريد خاطئ؟">Wrong email?</span> <a href="register.html"><span data-en="Go back and change it" data-ar="عد وقم بتغييره">Go back and change it</span></a></div>
+  </div>
+  <div class="verify-anim" id="verify-anim">
+    <div class="verify-spinner"></div>
+    <div class="heading" style="font-size:18px"><span data-en="Verifying..." data-ar="جاري التحقق...">Verifying...</span></div>
+    <p class="subheading" style="margin-top:8px"><span data-en="Redirecting to your workspace" data-ar="إعادة التوجيه إلى مساحة عملك">Redirecting to your workspace</span></p>
+  </div>
+</main>
+<footer class="page-footer"><a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a><a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a></footer>
+<script>
+function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
+function handleResend(){
+  const btn=document.getElementById('resend-btn'),cd=document.getElementById('resend-cd');
+  btn.style.display='none';cd.style.display='inline';
+  let s=58;cd.textContent='Sent! Resend in '+s+'s';cd.style.color='var(--text-tertiary)';
+  const iv=setInterval(()=>{s--;cd.textContent='Resend in '+s+'s';if(s<=0){clearInterval(iv);btn.style.display='inline';cd.style.display='none'}},1000);
+}
+// Auto verify simulation after 5s
+setTimeout(()=>{
+  document.getElementById('card-main').style.display='none';
+  document.getElementById('verify-anim').style.display='block';
+  setTimeout(()=>window.location.href='onboarding.html',2000);
+},5000);
+(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+</script>
+</body>
+</html>
