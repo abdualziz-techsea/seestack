@@ -1,0 +1,228 @@
+---
+title: HTTP Monitoring
+description: Track inbound and outbound HTTP requests with timing, status codes, and path information.
+---
+
+HTTP monitoring captures every HTTP request your application makes or receives, recording method, host, path, status code, duration, and payload sizes. Requests are batched (up to 100 per call) for efficient delivery.
+
+## Auto-Instrumentation
+
+The simplest way to start is to enable automatic instrumentation. This patches your runtime's HTTP client to capture all requests without code changes.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="app.js"
+    import SeeStack from '@seestack/sdk';
+
+    SeeStack.init({ apiKey: '...', host: '...' });
+    SeeStack.instrumentHttp();
+    // All fetch() and XMLHttpRequest calls are now tracked
+    ```
+
+    **What gets patched:**
+    - `fetch()` (browser and Node.js)
+    - `XMLHttpRequest` (browser)
+    - `http.request` / `https.request` (Node.js)
+  </Tab>
+  <Tab value="Python">
+    ```python title="app.py"
+    import seestack
+
+    seestack.init(api_key="...", host="...")
+    seestack.instrument_http()
+    # All requests via urllib3, httpx, and aiohttp are now tracked
+    ```
+
+    **What gets patched:**
+    - `urllib3` (used by `requests`)
+    - `httpx`
+    - `aiohttp`
+  </Tab>
+  <Tab value="Go">
+    ```go title="main.go"
+    // Use the SeeStack transport wrapper for http.Client
+    client := &http.Client{
+        Transport: seestack.NewHTTPTransport(http.DefaultTransport),
+    }
+
+    resp, err := client.Get("https://api.example.com/data")
+    ```
+
+    Go does not support monkey-patching. Use the transport wrapper on HTTP clients you want to monitor.
+  </Tab>
+</Tabs>
+
+## Request Direction
+
+Each captured request is tagged with a direction:
+
+| Direction | Meaning | Example |
+|-----------|---------|---------|
+| `inbound` | A request your application **received** | An incoming API call to your server |
+| `outbound` | A request your application **made** | A call to a third-party API or microservice |
+
+Auto-instrumentation captures **outbound** requests by default. For **inbound** request tracking, use middleware in your web framework.
+
+## Captured Data
+
+<TypeTable
+  type={{
+    traceId: {
+      type: 'string',
+      required: true,
+      description: 'Unique trace or request ID, generated per request.',
+    },
+    direction: {
+      type: '"inbound" | "outbound"',
+      required: true,
+      description: 'Whether the request was received or made by your application.',
+    },
+    method: {
+      type: 'string',
+      required: true,
+      description: 'HTTP verb: GET, POST, PUT, DELETE, etc.',
+    },
+    host: {
+      type: 'string',
+      required: true,
+      description: 'Target hostname (e.g. api.example.com). No protocol prefix.',
+    },
+    path: {
+      type: 'string',
+      required: true,
+      description: 'URL path without query parameters.',
+    },
+    statusCode: {
+      type: 'number',
+      required: true,
+      description: 'HTTP response status code.',
+    },
+    durationMs: {
+      type: 'number',
+      required: true,
+      description: 'Total round-trip time in milliseconds.',
+    },
+    requestSize: {
+      type: 'number',
+      required: true,
+      description: 'Request body size in bytes.',
+    },
+    responseSize: {
+      type: 'number',
+      required: true,
+      description: 'Response body size in bytes.',
+    },
+    timestamp: {
+      type: 'string',
+      required: true,
+      description: 'ISO-8601 UTC datetime when the request started.',
+    },
+    userId: {
+      type: 'string',
+      description: 'Authenticated user who made or received the request.',
+    },
+  }}
+/>
+
+## Batching
+
+HTTP requests are batched for efficiency:
+
+- Up to **100 items** per batch request
+- Flushed every **5 seconds** or when the batch reaches **50 items** (whichever comes first)
+- Requests are buffered in a ring buffer (default: 500 items)
+
+<Callout type="warn">
+  Query parameters are automatically stripped from captured paths to prevent leaking secrets (tokens, API keys, etc.). Only the path portion of the URL is recorded.
+</Callout>
+
+<Callout type="info">
+  Sensitive headers (`Authorization`, `Cookie`, `X-SeeStack-Key`) are never captured. See [Privacy & Data Masking](/docs/guides/privacy-masking) for the full list.
+</Callout>
+
+## Inbound Request Middleware
+
+For server-side SDKs, use middleware to track inbound requests:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="Express middleware"
+    import express from 'express';
+
+    const app = express();
+
+    app.use((req, res, next) => {
+      const start = Date.now();
+      res.on('finish', () => {
+        SeeStack.captureHttpRequest({
+          traceId: req.headers['x-request-id'] || crypto.randomUUID(),
+          direction: 'inbound',
+          method: req.method,
+          host: req.hostname,
+          path: req.path,
+          statusCode: res.statusCode,
+          durationMs: Date.now() - start,
+          requestSize: Number(req.headers['content-length'] || 0),
+          responseSize: Number(res.getHeader('content-length') || 0),
+          timestamp: new Date(start).toISOString(),
+        });
+      });
+      next();
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="Django middleware"
+    import time
+    import uuid
+    from seestack import capture_http_request
+
+    class SeeStackMiddleware:
+        def __init__(self, get_response):
+            self.get_response = get_response
+
+        def __call__(self, request):
+            start = time.time()
+            response = self.get_response(request)
+            duration_ms = int((time.time() - start) * 1000)
+
+            capture_http_request(
+                trace_id=request.headers.get("X-Request-ID", str(uuid.uuid4())),
+                direction="inbound",
+                method=request.method,
+                host=request.get_host(),
+                path=request.path,
+                status_code=response.status_code,
+                duration_ms=duration_ms,
+                request_size=len(request.body),
+                response_size=len(response.content),
+                timestamp=start,
+            )
+            return response
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="net/http middleware"
+    func SeeStackMiddleware(next http.Handler) http.Handler {
+        return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+            start := time.Now()
+            rw := &responseWriter{ResponseWriter: w}
+            next.ServeHTTP(rw, r)
+
+            seestack.CaptureHTTPRequest(seestack.HTTPRequest{
+                TraceID:      r.Header.Get("X-Request-ID"),
+                Direction:    "inbound",
+                Method:       r.Method,
+                Host:         r.Host,
+                Path:         r.URL.Path,
+                StatusCode:   rw.statusCode,
+                DurationMs:   int(time.Since(start).Milliseconds()),
+                RequestSize:  int(r.ContentLength),
+                ResponseSize: rw.bytesWritten,
+                Timestamp:    start.UTC().Format(time.RFC3339),
+            })
+        })
+    }
+    ```
+  </Tab>
+</Tabs>

@@ -1,0 +1,125 @@
+---
+title: Quick Start
+description: Get up and running with SeeStack in under 5 minutes.
+icon: Rocket
+---
+
+Follow these four steps to start capturing telemetry from your application.
+
+<Steps>
+<Step>
+
+## Install the SDK
+
+Follow the [Installation](/docs/introduction/installation) guide for your language and package manager.
+
+</Step>
+<Step>
+
+## Initialize SeeStack
+
+Call `init` once at application startup with your API key and host URL. You can find your API key in the SeeStack console under **Project Settings > API Keys**.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="app.js"
+    import SeeStack from '@seestack/sdk';
+
+    SeeStack.init({
+      apiKey: 'seestack_live_your_key_here',
+      host: 'https://your-seestack-instance.com',
+      environment: 'production',
+      release: 'v1.0.0',
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="app.py"
+    import seestack
+
+    seestack.init(
+        api_key="seestack_live_your_key_here",
+        host="https://your-seestack-instance.com",
+        environment="production",
+        release="v1.0.0",
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="main.go"
+    package main
+
+    import "github.com/seestack/seestack-go"
+
+    func main() {
+        seestack.Init(seestack.Config{
+            APIKey:      "seestack_live_your_key_here",
+            Host:        "https://your-seestack-instance.com",
+            Environment: "production",
+            Release:     "v1.0.0",
+        })
+        defer seestack.Flush()
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  Set `debug: true` during development to see all outgoing payloads logged to your console.
+</Callout>
+
+</Step>
+<Step>
+
+## Capture Your First Error
+
+Trigger a test error to verify data flows end-to-end.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    try {
+      throw new Error('Test error from SeeStack SDK');
+    } catch (e) {
+      SeeStack.captureError(e);
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    try:
+        raise ValueError("Test error from SeeStack SDK")
+    except Exception as e:
+        seestack.capture_error(e)
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    import "errors"
+
+    err := errors.New("Test error from SeeStack SDK")
+    seestack.CaptureError(err, nil)
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+<Step>
+
+## Verify in the Dashboard
+
+Open the SeeStack console and navigate to **Errors**. You should see your test error appear within a few seconds. If `debug` mode is enabled, you will also see the HTTP request and response logged in your terminal.
+
+</Step>
+</Steps>
+
+## What's Next?
+
+<Cards>
+  <Card title="Configuration" href="/docs/introduction/configuration" />
+  <Card title="Error Tracking" href="/docs/features/error-tracking" />
+  <Card title="Log Ingestion" href="/docs/features/log-ingestion" />
+  <Card title="HTTP Monitoring" href="/docs/features/http-monitoring" />
+  <Card title="Session Replay" href="/docs/features/session-replay" />
+  <Card title="Cron Monitoring" href="/docs/features/cron-monitoring" />
+</Cards>

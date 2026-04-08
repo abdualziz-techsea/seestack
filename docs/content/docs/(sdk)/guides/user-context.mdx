@@ -1,0 +1,176 @@
+---
+title: User Context
+description: Set and manage user identity for all SDK telemetry.
+---
+
+Setting user context lets you associate errors, logs, and other events with a specific user. Once set, user context is automatically attached to all subsequent SDK calls until cleared.
+
+## Set User Context
+
+Call `setUser` after authentication (e.g. after login or session validation):
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.setUser({
+      id: 'usr_1234',
+      email: 'user@example.com',
+      ip: '192.168.1.100',
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.set_user(
+        id="usr_1234",
+        email="user@example.com",
+        ip="192.168.1.100",
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.SetUser(seestack.User{
+        ID:    "usr_1234",
+        Email: "user@example.com",
+        IP:    "192.168.1.100",
+    })
+    ```
+  </Tab>
+</Tabs>
+
+## User Fields
+
+<TypeTable
+  type={{
+    id: {
+      type: 'string',
+      description: 'Internal user identifier (e.g. database ID or UUID).',
+    },
+    email: {
+      type: 'string',
+      description: 'User email address.',
+    },
+    ip: {
+      type: 'string',
+      description: 'User IP address.',
+    },
+  }}
+/>
+
+All fields are optional. Include whichever fields are useful for your debugging workflow.
+
+## Clear User Context
+
+Call `clearUser` on logout or when the session ends:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.clearUser();
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.clear_user()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.ClearUser()
+    ```
+  </Tab>
+</Tabs>
+
+## How Context Propagates
+
+Once set, user context is automatically included in:
+
+| Feature | Where It Appears |
+|---------|------------------|
+| Error tracking | `user` field on the error payload |
+| HTTP monitoring | `userId` field on captured requests |
+| Session replay | Linked to the user's session |
+| Logs | Available via metadata correlation |
+
+## Example: Login / Logout Flow
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="auth.js"
+    async function onLogin(credentials) {
+      const user = await authenticate(credentials);
+
+      // Set user context so all subsequent events are associated
+      SeeStack.setUser({
+        id: user.id,
+        email: user.email,
+      });
+    }
+
+    function onLogout() {
+      SeeStack.clearUser();
+      SeeStack.flush(); // Ensure pending events with user context are sent
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="auth.py"
+    def on_login(credentials):
+        user = authenticate(credentials)
+        seestack.set_user(id=user.id, email=user.email)
+
+    def on_logout():
+        seestack.clear_user()
+        seestack.flush()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="auth.go"
+    func onLogin(credentials Credentials) {
+        user := authenticate(credentials)
+        seestack.SetUser(seestack.User{ID: user.ID, Email: user.Email})
+    }
+
+    func onLogout() {
+        seestack.ClearUser()
+        seestack.Flush()
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  User context is optional on all events. If you don't set it globally, you can still pass user information per-event in the `captureError` context parameter.
+</Callout>
+
+## Per-Event Override
+
+You can override or supplement the global user context on individual calls:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    // Global context is "usr_1234", but this error is attributed to a different user
+    SeeStack.captureError(error, {
+      user: { id: 'usr_5678', email: 'other@example.com' },
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.capture_error(error, context={
+        "user": {"id": "usr_5678", "email": "other@example.com"},
+    })
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.CaptureError(err, &seestack.ErrorContext{
+        User: &seestack.User{ID: "usr_5678", Email: "other@example.com"},
+    })
+    ```
+  </Tab>
+</Tabs>
+
+Per-event user context takes precedence over the global context for that specific event.

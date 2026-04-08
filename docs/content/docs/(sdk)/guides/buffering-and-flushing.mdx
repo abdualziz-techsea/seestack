@@ -1,0 +1,154 @@
+---
+title: Buffering & Flushing
+description: How the SDK buffers telemetry data and when it flushes to the backend.
+---
+
+The SeeStack SDK buffers events in memory and sends them in the background. This ensures that capture calls (`captureError`, `captureLog`, etc.) return instantly and never block your application.
+
+## How Buffering Works
+
+Each feature maintains its own in-memory **ring buffer**:
+
+| Property | Value |
+|----------|-------|
+| Buffer type | Ring buffer (bounded FIFO) |
+| Default size | 500 items per feature |
+| Eviction policy | Oldest item dropped when full (tail-drop) |
+| Features with separate buffers | Errors, Logs, HTTP Requests, Replay Events |
+
+When the buffer is full, the oldest item is silently dropped to make room. The SDK emits a single internal warning (visible in debug mode) but does not throw an error.
+
+## Flush Triggers
+
+The buffer is flushed (sent to the backend) in four situations:
+
+| Trigger | Behavior |
+|---------|----------|
+| **Timer** | Every `flushIntervalMs` (default: 5,000ms) |
+| **Capacity** | When the buffer reaches 80% full |
+| **Manual** | When you call `flush()` |
+| **Shutdown** | Best-effort drain on application exit (5-second deadline) |
+
+## Feature-Specific Behavior
+
+Not all features use the same delivery strategy:
+
+| Feature | Delivery | Batching |
+|---------|----------|----------|
+| **Errors** | Sent immediately (not buffered) | No — 1 per request |
+| **Logs** | Buffered, flushed on timer | No — 1 per request |
+| **HTTP Requests** | Buffered, flushed on timer or at 50 items | Yes — up to 100 per request |
+| **Session Replay** | Buffered, flushed every 5s or at 50 events | Yes — unbounded batch size |
+| **Cron Heartbeats** | Sent immediately after job completes | No — 1 per request |
+
+## Manual Flush
+
+Call `flush()` to force-send all buffered events. This is useful before:
+
+- Application shutdown or process exit
+- Serverless function completion
+- Test assertions that verify backend receipt
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    // Flush and wait for completion
+    await SeeStack.flush();
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    # Flush and wait for completion
+    seestack.flush()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    // Flush and wait for completion
+    seestack.Flush()
+    ```
+  </Tab>
+</Tabs>
+
+## Shutdown Drain
+
+On process exit, the SDK attempts to flush all remaining buffered events within a **5-second deadline**. This is best-effort — if the deadline expires, remaining events are discarded.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="server.js"
+    // Node.js: ensure graceful shutdown
+    process.on('SIGTERM', async () => {
+      await SeeStack.flush();
+      process.exit(0);
+    });
+    ```
+
+    ```js title="browser.js"
+    // Browser: use sendBeacon-based flush before page unload
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        SeeStack.flush();
+      }
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="app.py"
+    import atexit
+
+    atexit.register(seestack.flush)
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="main.go"
+    // Use defer in main() to ensure flush on exit
+    func main() {
+        seestack.Init(config)
+        defer seestack.Flush()
+
+        // ... application logic
+    }
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="info">
+  The SDK is fully non-blocking. All capture calls push events into the buffer and return immediately. A single background worker per feature handles flushing — no extra threads are spawned per event.
+</Callout>
+
+## Configuring Buffer Size
+
+You can adjust the buffer size at initialization:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.init({
+      apiKey: '...',
+      host: '...',
+      bufferSize: 1000, // 1,000 items per feature instead of default 500
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.init(
+        api_key="...",
+        host="...",
+        buffer_size=1000,
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.Init(seestack.Config{
+        APIKey:     "...",
+        Host:       "...",
+        BufferSize: 1000,
+    })
+    ```
+  </Tab>
+</Tabs>
+
+The total memory footprint scales with buffer size: ~500 items x 5 features = 2,500 items max at default settings, estimated at under **15 MB** of heap usage.

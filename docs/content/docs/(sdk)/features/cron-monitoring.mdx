@@ -1,0 +1,145 @@
+---
+title: Cron Monitoring
+description: Monitor scheduled jobs with heartbeat pings that report success or failure.
+---
+
+Cron monitoring tracks the health of your scheduled jobs. After each job execution, the SDK sends a heartbeat ping to SeeStack with the job's status, duration, and an optional message. If a job fails or misses its schedule, SeeStack triggers an alert.
+
+<Callout type="warn">
+  The cron monitor must be created first in the SeeStack console under **Cron Monitors**. The SDK only sends heartbeat pings — it does not create monitors.
+</Callout>
+
+## Basic Usage
+
+<Steps>
+<Step>
+
+### Create a Monitor in the Console
+
+In the SeeStack dashboard, go to **Cron Monitors** and create a new monitor with a slug (e.g. `daily-report-generator`). Set the expected schedule so SeeStack knows when to expect pings.
+
+</Step>
+<Step>
+
+### Instrument Your Job
+
+Wrap your job execution with `startJob` and `finishJob`:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="cron-job.js"
+    const handle = SeeStack.startJob('daily-report-generator');
+
+    try {
+      await generateReport();
+      SeeStack.finishJob(handle, 'success', 'Processed 1,842 records');
+    } catch (e) {
+      SeeStack.finishJob(handle, 'failed', e.message);
+      throw e; // Always rethrow — the SDK must not swallow job errors
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="cron_job.py"
+    handle = seestack.start_job("daily-report-generator")
+
+    try:
+        generate_report()
+        seestack.finish_job(handle, "success", "Processed 1,842 records")
+    except Exception as e:
+        seestack.finish_job(handle, "failed", str(e))
+        raise  # Always re-raise
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="cron_job.go"
+    handle := seestack.StartJob("daily-report-generator")
+
+    err := generateReport()
+    if err != nil {
+        seestack.FinishJob(handle, "failed", err.Error())
+        return err // Always return the error
+    }
+
+    seestack.FinishJob(handle, "success", "Processed 1,842 records")
+    ```
+  </Tab>
+</Tabs>
+
+</Step>
+</Steps>
+
+## Parameters
+
+### startJob
+
+<TypeTable
+  type={{
+    slug: {
+      type: 'string',
+      required: true,
+      description: 'The slug of the cron monitor as defined in the SeeStack console.',
+    },
+  }}
+/>
+
+Returns a `JobHandle` that tracks the start time internally.
+
+### finishJob
+
+<TypeTable
+  type={{
+    handle: {
+      type: 'JobHandle',
+      required: true,
+      description: 'The handle returned by startJob. Used to calculate duration.',
+    },
+    status: {
+      type: '"success" | "failed"',
+      required: true,
+      description: 'Whether the job completed successfully or encountered an error.',
+    },
+    message: {
+      type: 'string',
+      description: 'Human-readable result message (e.g. "Processed 1,842 records" or "Database connection refused").',
+    },
+  }}
+/>
+
+## Slug Format
+
+Monitor slugs must match the pattern `^[a-z0-9-]+$` — lowercase letters, numbers, and hyphens only.
+
+**Valid:** `daily-report-generator`, `payment-reconciliation`, `cleanup-job-v2`
+
+**Invalid:** `Daily_Report`, `my job`, `CLEANUP`
+
+## How It Works
+
+1. `startJob(slug)` records the current timestamp and returns a handle
+2. Your job executes normally
+3. `finishJob(handle, status, message?)` computes `durationMs` from the start time
+4. A heartbeat ping is sent **immediately** to the backend (no batching)
+
+<Callout type="info">
+  Heartbeats are sent immediately after `finishJob` is called — they are not buffered like logs or HTTP requests.
+</Callout>
+
+<Callout type="error">
+  Never swallow job errors. Always rethrow or return the error after calling `finishJob`. The SDK reports the failure to SeeStack, but your application's error handling must still work normally.
+</Callout>
+
+## Status Values
+
+| Status | Meaning | SeeStack Behavior |
+|--------|---------|------------------|
+| `success` | Job completed without errors | Recorded normally |
+| `failed` | Job encountered an error | Triggers alert evaluation immediately |
+
+## Next Steps
+
+<Cards>
+  <Card title="Buffering & Flushing" href="/docs/guides/buffering-and-flushing" />
+  <Card title="Retry Strategy" href="/docs/guides/retry-strategy" />
+  <Card title="API Reference" href="/docs/reference/sdk-api" />
+</Cards>

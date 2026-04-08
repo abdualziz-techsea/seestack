@@ -1,0 +1,65 @@
+---
+title: Overview
+description: Ingestion endpoints for the SeeStack observability platform.
+---
+
+The SeeStack ingestion API accepts telemetry data over HTTP. All endpoints require the `X-SeeStack-Key` header for authentication and return `202 Accepted` on success.
+
+## Endpoints
+
+<Cards>
+  <Card
+    title="Errors"
+    description="Ingest application errors and exceptions"
+    href="/docs/api/errors"
+  />
+  <Card
+    title="Logs"
+    description="Ingest structured application logs"
+    href="/docs/api/logs"
+  />
+  <Card
+    title="HTTP Requests"
+    description="Ingest HTTP request telemetry in batches"
+    href="/docs/api/http-requests"
+  />
+  <Card
+    title="Session Replay"
+    description="Ingest DOM and interaction events"
+    href="/docs/api/session-replay"
+  />
+  <Card
+    title="Heartbeat"
+    description="Send cron job heartbeat pings"
+    href="/docs/api/heartbeat"
+  />
+</Cards>
+
+## Authentication
+
+All endpoints require the `X-SeeStack-Key` header with your raw API key:
+
+```
+X-SeeStack-Key: seestack_live_abc123xyz...
+```
+
+The key is validated and the associated project is resolved automatically. You do not need to send a project ID (except for the HTTP requests endpoint).
+
+## Response Format
+
+Most endpoints return a standard envelope:
+
+```json
+{
+  "success": true,
+  "data": { ... },
+  "meta": {
+    "requestId": "uuid",
+    "timestamp": "2026-03-31T12:00:00.000Z"
+  }
+}
+```
+
+<Callout type="info">
+  The `/ingest/v1/http-requests` and `/ingest/v1/heartbeat` endpoints return raw JSON objects instead of the standard envelope.
+</Callout>

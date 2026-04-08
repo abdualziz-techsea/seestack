@@ -1,0 +1,17 @@
+{
+  "title": "SDK",
+  "description": "Integrate SeeStack observability into your applications",
+  "root": true,
+  "icon": "Box",
+  "pages": [
+    "---Introduction---",
+    "index",
+    "...introduction",
+    "---Features---",
+    "...features",
+    "---Guides---",
+    "...guides",
+    "---Reference---",
+    "...reference"
+  ]
+}

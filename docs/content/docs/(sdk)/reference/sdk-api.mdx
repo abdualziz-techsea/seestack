@@ -1,0 +1,505 @@
+---
+title: SDK API Reference
+description: Complete reference for all SeeStack SDK methods.
+---
+
+This page documents every public method in the SeeStack SDK.
+
+## init
+
+Initialize the SDK. Must be called once at application startup before any other SDK method.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.init({
+      apiKey: 'seestack_live_...',
+      host: 'https://your-seestack-instance.com',
+      environment: 'production',
+      release: 'v1.0.0',
+      debug: false,
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.init(
+        api_key="seestack_live_...",
+        host="https://your-seestack-instance.com",
+        environment="production",
+        release="v1.0.0",
+        debug=False,
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.Init(seestack.Config{
+        APIKey:      "seestack_live_...",
+        Host:        "https://your-seestack-instance.com",
+        Environment: "production",
+        Release:     "v1.0.0",
+        Debug:       false,
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    apiKey: { type: 'string', required: true, description: 'Project API key.' },
+    host: { type: 'string', required: true, description: 'SeeStack backend URL.' },
+    environment: { type: 'string', description: 'Deployment environment.', default: 'undefined' },
+    release: { type: 'string', description: 'Application version tag.', default: 'undefined' },
+    flushIntervalMs: { type: 'number', description: 'Flush interval in milliseconds.', default: '5000' },
+    bufferSize: { type: 'number', description: 'Max buffer items per feature.', default: '500' },
+    debug: { type: 'boolean', description: 'Enable debug logging.', default: 'false' },
+  }}
+/>
+
+Calling `init` more than once is idempotent — subsequent calls emit a warning and are ignored. If `init` has not been called, all other SDK methods are silent no-ops.
+
+---
+
+## captureError
+
+Capture an exception and send it to SeeStack immediately.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.captureError(error, {
+      level: 'error',
+      user: { id: 'usr_1234' },
+      metadata: { route: '/checkout' },
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.capture_error(error, context={
+        "level": "error",
+        "user": {"id": "usr_1234"},
+        "metadata": {"route": "/checkout"},
+    })
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.CaptureError(err, &seestack.ErrorContext{
+        Level: "error",
+        User:  &seestack.User{ID: "usr_1234"},
+        Metadata: map[string]any{"route": "/checkout"},
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    exception: { type: 'Error | Exception', required: true, description: 'The exception to capture.' },
+    "context.level": { type: '"debug" | "info" | "warn" | "error" | "fatal"', description: 'Severity level.', default: '"error"' },
+    "context.user": { type: '{ id?, email?, ip? }', description: 'User context override.' },
+    "context.metadata": { type: 'Record<string, any>', description: 'Arbitrary key-value context.' },
+    "context.sessionId": { type: 'string', description: 'Link to active session replay.' },
+  }}
+/>
+
+Errors are sent immediately (not buffered). See [Error Tracking](/docs/features/error-tracking).
+
+---
+
+## captureLog
+
+Capture a structured log entry. Logs are buffered and flushed periodically.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.captureLog('info', 'Order processed', { orderId: 'ORD-123' });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.capture_log("info", "Order processed", metadata={"order_id": "ORD-123"})
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.CaptureLog("info", "Order processed", map[string]any{"orderID": "ORD-123"})
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    level: { type: '"debug" | "info" | "warn" | "error" | "fatal"', required: true, description: 'Log severity level.' },
+    message: { type: 'string', required: true, description: 'Log message.' },
+    service: { type: 'string', description: 'Service or module name.' },
+    traceId: { type: 'string', description: 'Distributed trace correlation ID.' },
+    metadata: { type: 'Record<string, any>', description: 'Structured key-value data.' },
+  }}
+/>
+
+See [Log Ingestion](/docs/features/log-ingestion).
+
+---
+
+## flush
+
+Force-flush all buffered events to the backend. Returns a promise that resolves when all events have been sent (or the 5-second deadline expires).
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    await SeeStack.flush();
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.flush()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.Flush()
+    ```
+  </Tab>
+</Tabs>
+
+See [Buffering & Flushing](/docs/guides/buffering-and-flushing).
+
+---
+
+## setUser
+
+Set the default user context for all subsequent SDK events.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.setUser({ id: 'usr_1234', email: 'user@example.com' });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.set_user(id="usr_1234", email="user@example.com")
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.SetUser(seestack.User{ID: "usr_1234", Email: "user@example.com"})
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    id: { type: 'string', description: 'Internal user identifier.' },
+    email: { type: 'string', description: 'User email address.' },
+    ip: { type: 'string', description: 'User IP address.' },
+  }}
+/>
+
+See [User Context](/docs/guides/user-context).
+
+---
+
+## clearUser
+
+Clear the previously set user context.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.clearUser();
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.clear_user()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.ClearUser()
+    ```
+  </Tab>
+</Tabs>
+
+---
+
+## instrumentHttp
+
+Enable automatic HTTP request instrumentation. Patches the runtime's native HTTP client to capture all outbound requests.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.instrumentHttp();
+    // Patches: fetch, XMLHttpRequest, http.request, https.request
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.instrument_http()
+    # Patches: urllib3, httpx, aiohttp
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    // Go: use the transport wrapper instead
+    client := &http.Client{
+        Transport: seestack.NewHTTPTransport(http.DefaultTransport),
+    }
+    ```
+  </Tab>
+</Tabs>
+
+See [HTTP Monitoring](/docs/features/http-monitoring).
+
+---
+
+## captureHttpRequest
+
+Manually capture an HTTP request event. Use this for inbound requests (via middleware) or when auto-instrumentation is not suitable.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.captureHttpRequest({
+      traceId: 'trace-001',
+      direction: 'inbound',
+      method: 'POST',
+      host: 'api.myapp.com',
+      path: '/v1/orders',
+      statusCode: 201,
+      durationMs: 45,
+      requestSize: 512,
+      responseSize: 128,
+      timestamp: new Date().toISOString(),
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.capture_http_request(
+        trace_id="trace-001",
+        direction="inbound",
+        method="POST",
+        host="api.myapp.com",
+        path="/v1/orders",
+        status_code=201,
+        duration_ms=45,
+        request_size=512,
+        response_size=128,
+        timestamp=datetime.utcnow().isoformat() + "Z",
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.CaptureHTTPRequest(seestack.HTTPRequest{
+        TraceID:      "trace-001",
+        Direction:    "inbound",
+        Method:       "POST",
+        Host:         "api.myapp.com",
+        Path:         "/v1/orders",
+        StatusCode:   201,
+        DurationMs:   45,
+        RequestSize:  512,
+        ResponseSize: 128,
+        Timestamp:    time.Now().UTC().Format(time.RFC3339),
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    traceId: { type: 'string', required: true, description: 'Unique trace or request ID.' },
+    direction: { type: '"inbound" | "outbound"', required: true, description: 'Request direction.' },
+    method: { type: 'string', required: true, description: 'HTTP verb.' },
+    host: { type: 'string', required: true, description: 'Target hostname.' },
+    path: { type: 'string', required: true, description: 'URL path (no query params).' },
+    statusCode: { type: 'number', required: true, description: 'HTTP status code.' },
+    durationMs: { type: 'number', required: true, description: 'Round-trip ms.' },
+    requestSize: { type: 'number', required: true, description: 'Request body bytes.' },
+    responseSize: { type: 'number', required: true, description: 'Response body bytes.' },
+    timestamp: { type: 'string', required: true, description: 'ISO-8601 UTC datetime.' },
+    userId: { type: 'string', description: 'Authenticated user ID.' },
+  }}
+/>
+
+Captured requests are batched (up to 100) and flushed periodically. See [HTTP Monitoring](/docs/features/http-monitoring).
+
+---
+
+## startReplay
+
+Start recording session replay events. **Browser SDK only.**
+
+```js
+SeeStack.startReplay(sessionId);
+SeeStack.startReplay(sessionId, customFingerprint);
+```
+
+<TypeTable
+  type={{
+    sessionId: { type: 'string', required: true, description: 'Unique session identifier (e.g. UUID).' },
+    fingerprint: { type: 'string', description: 'Stable fingerprint for the session. Defaults to sessionId if omitted.' },
+  }}
+/>
+
+See [Session Replay](/docs/features/session-replay).
+
+---
+
+## stopReplay
+
+Stop recording session replay events. **Browser SDK only.**
+
+```js
+SeeStack.stopReplay();
+```
+
+---
+
+## startJob
+
+Begin monitoring a cron job execution. Returns a handle for use with `finishJob`.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    const handle = SeeStack.startJob('daily-report-generator');
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    handle = seestack.start_job("daily-report-generator")
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    handle := seestack.StartJob("daily-report-generator")
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    slug: { type: 'string', required: true, description: 'Cron monitor slug (lowercase alphanumeric + hyphens).' },
+  }}
+/>
+
+Returns a `JobHandle` that tracks the start timestamp.
+
+---
+
+## finishJob
+
+Complete a cron job and send a heartbeat ping to SeeStack. Sent immediately (not buffered).
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.finishJob(handle, 'success', 'Processed 1,842 records');
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.finish_job(handle, "success", "Processed 1,842 records")
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.FinishJob(handle, "success", "Processed 1,842 records")
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    handle: { type: 'JobHandle', required: true, description: 'Handle returned by startJob.' },
+    status: { type: '"success" | "failed"', required: true, description: 'Job outcome.' },
+    message: { type: 'string', description: 'Human-readable result message.' },
+  }}
+/>
+
+See [Cron Monitoring](/docs/features/cron-monitoring).
+
+---
+
+## getFlag
+
+Evaluate a single feature flag. **Server-side SDK only.**
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    const flag = await SeeStack.getFlag('new-checkout-flow', 'usr_1234', {
+      plan: 'pro',
+    });
+    // flag.enabled: boolean, flag.value: string
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    flag = seestack.get_flag("new-checkout-flow", user_id="usr_1234", attributes={"plan": "pro"})
+    # flag.enabled: bool, flag.value: str
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    flag, err := seestack.GetFlag("new-checkout-flow", "usr_1234", map[string]any{"plan": "pro"})
+    // flag.Enabled: bool, flag.Value: string
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    key: { type: 'string', required: true, description: 'Flag key.' },
+    userId: { type: 'string', description: 'User ID for rollout targeting.' },
+    attributes: { type: 'Record<string, any>', description: 'Targeting attributes.' },
+  }}
+/>
+
+Returns a `FlagResult` with `enabled` (boolean) and `value` (string). Results are cached for 60 seconds.
+
+See [Feature Flags](/docs/features/feature-flags).
+
+---
+
+## getAllFlags
+
+Evaluate all feature flags for a project in a single call. **Server-side SDK only.**
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    const flags = await SeeStack.getAllFlags('usr_1234', { plan: 'pro' });
+    // flags['new-checkout-flow'].enabled
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    flags = seestack.get_all_flags(user_id="usr_1234", attributes={"plan": "pro"})
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    flags, err := seestack.GetAllFlags("usr_1234", map[string]any{"plan": "pro"})
+    ```
+  </Tab>
+</Tabs>
+
+<TypeTable
+  type={{
+    userId: { type: 'string', description: 'User ID for rollout targeting.' },
+    attributes: { type: 'Record<string, any>', description: 'Targeting attributes.' },
+  }}
+/>
+
+Returns `Record<string, FlagResult>` mapping flag keys to evaluation results.

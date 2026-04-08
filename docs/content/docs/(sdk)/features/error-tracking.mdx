@@ -1,0 +1,168 @@
+---
+title: Error Tracking
+description: Capture exceptions with stack traces, user context, and metadata.
+---
+
+Error tracking captures runtime exceptions in your application and sends them to SeeStack with full stack traces, user context, and custom metadata. Errors are sent immediately (not buffered) because they represent urgent events.
+
+## Manual Capture
+
+Use `captureError` to report a caught exception:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    try {
+      await processOrder(orderId);
+    } catch (e) {
+      SeeStack.captureError(e, {
+        user: { id: 'usr_1234', email: 'user@example.com' },
+        metadata: { orderId, route: '/checkout' },
+      });
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    try:
+        process_order(order_id)
+    except Exception as e:
+        seestack.capture_error(e, context={
+            "user": {"id": "usr_1234", "email": "user@example.com"},
+            "metadata": {"order_id": order_id, "route": "/checkout"},
+        })
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    if err := processOrder(orderID); err != nil {
+        seestack.CaptureError(err, &seestack.ErrorContext{
+            User: &seestack.User{ID: "usr_1234", Email: "user@example.com"},
+            Metadata: map[string]any{"orderID": orderID, "route": "/checkout"},
+        })
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Automatic Capture
+
+You can opt into global error handler integration to catch unhandled exceptions automatically.
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    **Browser:**
+    ```js
+    // Captures unhandled exceptions and promise rejections
+    window.addEventListener('error', (event) => {
+      SeeStack.captureError(event.error);
+    });
+
+    window.addEventListener('unhandledrejection', (event) => {
+      SeeStack.captureError(event.reason);
+    });
+    ```
+
+    **Node.js:**
+    ```js
+    process.on('uncaughtException', (err) => {
+      SeeStack.captureError(err);
+    });
+
+    process.on('unhandledRejection', (reason) => {
+      SeeStack.captureError(reason);
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    import sys
+
+    original_hook = sys.excepthook
+
+    def seestack_excepthook(exc_type, exc_value, exc_tb):
+        seestack.capture_error(exc_value)
+        original_hook(exc_type, exc_value, exc_tb)
+
+    sys.excepthook = seestack_excepthook
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    // Go does not have global exception handlers.
+    // Use defer/recover in goroutines to capture panics:
+    func safeGo(fn func()) {
+        go func() {
+            defer func() {
+                if r := recover(); r != nil {
+                    seestack.CaptureError(fmt.Errorf("panic: %v", r), nil)
+                }
+            }()
+            fn()
+        }()
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Context Object
+
+The optional context parameter lets you attach additional information to an error.
+
+<TypeTable
+  type={{
+    level: {
+      type: '"debug" | "info" | "warn" | "error" | "fatal"',
+      description: 'Severity level of the error.',
+      default: '"error"',
+    },
+    "user.id": {
+      type: 'string',
+      description: 'Internal user identifier.',
+    },
+    "user.email": {
+      type: 'string',
+      description: 'User email address.',
+    },
+    "user.ip": {
+      type: 'string',
+      description: 'User IP address.',
+    },
+    metadata: {
+      type: 'Record<string, any>',
+      description: 'Arbitrary key-value pairs for additional context (e.g. route, component, order ID).',
+    },
+    sessionId: {
+      type: 'string',
+      description: 'Links this error to an active session replay recording.',
+    },
+  }}
+/>
+
+## Error Levels
+
+| Level | Use Case |
+|-------|----------|
+| `debug` | Low-priority issues for investigation |
+| `info` | Informational errors that are expected |
+| `warn` | Potential problems that may need attention |
+| `error` | Application errors that need to be fixed (default) |
+| `fatal` | Critical errors that crash the application |
+
+## How It Works
+
+When you call `captureError`, the SDK:
+
+1. Extracts the exception class name and message
+2. Captures the stack trace as an array of frame strings
+3. Attaches user context (if set globally via `setUser` or passed in the context)
+4. Attaches `environment` and `release` from the init config
+5. Sends the payload immediately to the backend
+
+<Callout type="info">
+  Errors are deduplicated server-side by exception class and stack trace. You do not need to implement any deduplication logic — send every occurrence and the backend handles grouping.
+</Callout>
+
+<Callout type="warn">
+  If the backend returns a `401 Unauthorized` response, the SDK disables itself for the remainder of the session. This indicates an invalid API key — check your configuration.
+</Callout>

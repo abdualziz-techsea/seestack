@@ -1,0 +1,154 @@
+---
+title: Configuration
+description: All available SDK initialization options.
+icon: Settings
+---
+
+The SDK is configured through a single `init` call at application startup. This page documents every available option.
+
+## Full Example
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="seestack.config.js"
+    import SeeStack from '@seestack/sdk';
+
+    SeeStack.init({
+      apiKey: 'seestack_live_your_key_here',
+      host: 'https://your-seestack-instance.com',
+      environment: 'production',
+      release: 'v2.3.1',
+      flushIntervalMs: 5000,
+      bufferSize: 500,
+      debug: false,
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="seestack_config.py"
+    import seestack
+
+    seestack.init(
+        api_key="seestack_live_your_key_here",
+        host="https://your-seestack-instance.com",
+        environment="production",
+        release="v2.3.1",
+        flush_interval_ms=5000,
+        buffer_size=500,
+        debug=False,
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="config.go"
+    seestack.Init(seestack.Config{
+        APIKey:          "seestack_live_your_key_here",
+        Host:            "https://your-seestack-instance.com",
+        Environment:     "production",
+        Release:         "v2.3.1",
+        FlushIntervalMs: 5000,
+        BufferSize:      500,
+        Debug:           false,
+    })
+    ```
+  </Tab>
+</Tabs>
+
+## Options Reference
+
+<TypeTable
+  type={{
+    apiKey: {
+      type: 'string',
+      required: true,
+      description: 'Your project API key from the SeeStack console. Sent as the X-SeeStack-Key header on every request.',
+    },
+    host: {
+      type: 'string',
+      required: true,
+      description: 'Base URL of your SeeStack backend instance (e.g. https://seestack.yourcompany.com).',
+    },
+    environment: {
+      type: 'string',
+      description: 'Deployment environment name. Attached to all events for filtering.',
+      default: 'undefined',
+    },
+    release: {
+      type: 'string',
+      description: 'Application version or release tag. Useful for tracking regressions across deploys.',
+      default: 'undefined',
+    },
+    flushIntervalMs: {
+      type: 'number',
+      description: 'How often (in milliseconds) the SDK flushes buffered events to the backend.',
+      default: '5000',
+    },
+    bufferSize: {
+      type: 'number',
+      description: 'Maximum number of events to hold in memory per feature before dropping the oldest.',
+      default: '500',
+    },
+    debug: {
+      type: 'boolean',
+      description: 'When true, logs all outgoing payloads and backend responses to the SDK internal logger.',
+      default: 'false',
+    },
+  }}
+/>
+
+<Callout type="warn">
+  `apiKey` and `host` are required. The SDK will not initialize without them and all methods will be no-ops.
+</Callout>
+
+## Environment-Specific Configuration
+
+A common pattern is to vary configuration by environment:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="init.js"
+    SeeStack.init({
+      apiKey: process.env.SEESTACK_API_KEY,
+      host: process.env.SEESTACK_HOST,
+      environment: process.env.NODE_ENV,
+      release: process.env.APP_VERSION,
+      debug: process.env.NODE_ENV !== 'production',
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="init.py"
+    import os
+    import seestack
+
+    seestack.init(
+        api_key=os.environ["SEESTACK_API_KEY"],
+        host=os.environ["SEESTACK_HOST"],
+        environment=os.environ.get("APP_ENV", "development"),
+        release=os.environ.get("APP_VERSION"),
+        debug=os.environ.get("APP_ENV") != "production",
+    )
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="init.go"
+    seestack.Init(seestack.Config{
+        APIKey:      os.Getenv("SEESTACK_API_KEY"),
+        Host:        os.Getenv("SEESTACK_HOST"),
+        Environment: os.Getenv("APP_ENV"),
+        Release:     os.Getenv("APP_VERSION"),
+        Debug:       os.Getenv("APP_ENV") != "production",
+    })
+    ```
+  </Tab>
+</Tabs>
+
+<Callout type="warn">
+  All SDK requests must use HTTPS. The SDK will refuse to send data over plain HTTP in production environments.
+</Callout>
+
+## Initialization Behavior
+
+- Calling `init()` more than once is idempotent — subsequent calls emit a warning and are ignored.
+- If `init()` has not been called, all SDK methods (`captureError`, `captureLog`, etc.) are silent no-ops.
+- The SDK validates that `apiKey` is non-empty at init time and fails fast if missing.

@@ -1,0 +1,182 @@
+---
+title: Feature Flags
+description: Evaluate remote feature flags with rollout percentages and targeting rules.
+---
+
+<Callout type="warn">
+  Feature flag evaluation requires a **server-side SDK**. The evaluation API uses management credentials that must not be exposed in browsers or mobile apps. To use flags client-side, call your own backend endpoint which evaluates flags securely on the server and returns the results.
+</Callout>
+
+Feature flags let you control feature rollouts, A/B tests, and kill switches remotely without deploying code. The SDK evaluates flags against the SeeStack backend and caches results locally for performance.
+
+## Evaluate a Single Flag
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    const flag = await SeeStack.getFlag('new-checkout-flow', 'usr_1234', {
+      plan: 'pro',
+      country: 'SA',
+    });
+
+    if (flag.enabled) {
+      renderNewCheckout(flag.value); // e.g. "variant-b"
+    } else {
+      renderLegacyCheckout();
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    flag = seestack.get_flag("new-checkout-flow", user_id="usr_1234", attributes={
+        "plan": "pro",
+        "country": "SA",
+    })
+
+    if flag.enabled:
+        render_new_checkout(flag.value)  # e.g. "variant-b"
+    else:
+        render_legacy_checkout()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    flag, err := seestack.GetFlag("new-checkout-flow", "usr_1234", map[string]any{
+        "plan":    "pro",
+        "country": "SA",
+    })
+
+    if flag.Enabled {
+        renderNewCheckout(flag.Value) // e.g. "variant-b"
+    } else {
+        renderLegacyCheckout()
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Evaluate All Flags
+
+Fetch all flag values for a project in a single call:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    const flags = await SeeStack.getAllFlags('usr_1234', { plan: 'pro' });
+
+    if (flags['dark-mode']?.enabled) {
+      enableDarkMode();
+    }
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    flags = seestack.get_all_flags(user_id="usr_1234", attributes={"plan": "pro"})
+
+    if flags.get("dark-mode", {}).get("enabled"):
+        enable_dark_mode()
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    flags, err := seestack.GetAllFlags("usr_1234", map[string]any{"plan": "pro"})
+
+    if flag, ok := flags["dark-mode"]; ok && flag.Enabled {
+        enableDarkMode()
+    }
+    ```
+  </Tab>
+</Tabs>
+
+## Flag Result
+
+<TypeTable
+  type={{
+    enabled: {
+      type: 'boolean',
+      required: true,
+      description: 'Whether the flag is active for the evaluated context.',
+    },
+    value: {
+      type: 'string',
+      required: true,
+      description: 'The flag value as a string. Cast to the appropriate type based on your flag configuration.',
+    },
+  }}
+/>
+
+## Flag Types
+
+All flag values are returned as strings. Cast them to the appropriate type in your code:
+
+| Type | Example `value` | How to Use |
+|------|-----------------|------------|
+| `boolean` | `"true"` or `"false"` | Parse as boolean |
+| `string` | `"variant-b"` | Use directly |
+| `number` | `"42"` | Parse as number |
+
+## Parameters
+
+### getFlag
+
+<TypeTable
+  type={{
+    key: {
+      type: 'string',
+      required: true,
+      description: 'The unique flag key (e.g. "new-checkout-flow").',
+    },
+    userId: {
+      type: 'string',
+      description: 'User identifier for rollout targeting and percentage-based rollouts.',
+    },
+    attributes: {
+      type: 'Record<string, any>',
+      description: 'Arbitrary key-value attributes for targeting rule matching (e.g. plan, country, role).',
+    },
+  }}
+/>
+
+### getAllFlags
+
+<TypeTable
+  type={{
+    userId: {
+      type: 'string',
+      description: 'User identifier for rollout targeting.',
+    },
+    attributes: {
+      type: 'Record<string, any>',
+      description: 'Attributes for targeting rule matching.',
+    },
+  }}
+/>
+
+Returns a `Record<string, FlagResult>` mapping flag keys to their evaluation results.
+
+## Next Steps
+
+<Cards>
+  <Card title="Configuration" href="/docs/introduction/configuration" />
+  <Card title="SDK API Reference" href="/docs/reference/sdk-api" />
+  <Card title="Data Models" href="/docs/reference/data-models" />
+</Cards>
+
+Returns a `Record<string, FlagResult>` mapping flag keys to their evaluation results.
+
+## Caching
+
+The SDK caches flag evaluation results to minimize network calls:
+
+| Scenario | Behavior |
+|----------|----------|
+| Cache hit (within 60s) | Returns cached value immediately |
+| Cache miss | Fetches from backend, caches result |
+| Network failure | Returns last cached value (stale-on-error) |
+| First call, no cache | Returns the default value from flag configuration |
+
+The cache TTL is **60 seconds** by default. After expiry, the next evaluation triggers a fresh fetch from the backend.
+
+<Callout type="info">
+  Rollout percentages are computed server-side based on `userId`. You do not need to implement any rollout logic in your code.
+</Callout>

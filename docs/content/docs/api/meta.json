@@ -1,0 +1,16 @@
+{
+  "title": "REST API",
+  "description": "Ingestion endpoint reference",
+  "root": true,
+  "icon": "Webhook",
+  "pages": [
+    "---Get Started---",
+    "index",
+    "---Reference---",
+    "errors",
+    "logs",
+    "http-requests",
+    "session-replay",
+    "heartbeat"
+  ]
+}

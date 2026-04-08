@@ -1,0 +1,91 @@
+---
+title: Privacy & Data Masking
+description: Understand how SeeStack protects sensitive data before it leaves the device.
+---
+
+<Callout type="error">
+  SeeStack masks all sensitive data **client-side** before transmission. This is mandatory and automatic — sensitive data never leaves your application.
+</Callout>
+
+## What Gets Masked Automatically
+
+### Session Replay
+
+| Rule | Behavior |
+|------|----------|
+| `<input type="password">` | Value replaced with `[MASKED]` — never captured |
+| `data-seestack-mask` attribute | Entire element content masked |
+| `seestack-mask` CSS class | Entire element content masked |
+| Clipboard events | Never captured (paste may contain sensitive data) |
+
+### HTTP Monitoring
+
+| Rule | Behavior |
+|------|----------|
+| `Authorization` header | Stripped before recording |
+| `Cookie` header | Stripped before recording |
+| `X-SeeStack-Key` header | Stripped before recording |
+| `X-API-Key` header | Stripped before recording |
+| `X-Auth-Token` header | Stripped before recording |
+| Query params: `token`, `key`, `secret`, `password`, `auth`, `api_key` | Replaced with `[FILTERED]` |
+
+### Error Tracking
+
+| Rule | Behavior |
+|------|----------|
+| Database connection strings | Never included in error metadata |
+| SQL with parameter values | Parameter values sanitized |
+
+### Log Ingestion
+
+| Rule | Behavior |
+|------|----------|
+| Metadata fields named `password`, `secret`, `token`, `key`, `authorization` | Values masked before sending |
+
+## Marking Elements for Masking
+
+Use the `data-seestack-mask` attribute or the `seestack-mask` CSS class on any HTML element to ensure its content is never captured by session replay:
+
+```html
+<!-- Attribute-based masking -->
+<input type="text" name="ssn" data-seestack-mask />
+<div data-seestack-mask>
+  Credit card: 4242 **** **** 1234
+</div>
+
+<!-- Class-based masking -->
+<div class="seestack-mask">
+  Sensitive information here
+</div>
+```
+
+## URL Query Parameter Stripping
+
+HTTP monitoring and session replay automatically strip query parameters that match sensitive patterns:
+
+```
+// Before masking
+https://api.example.com/auth?token=eyJhbGc...&redirect=/dashboard
+
+// After masking
+https://api.example.com/auth?token=[FILTERED]&redirect=/dashboard
+```
+
+Parameters matching these keywords are stripped: `token`, `key`, `secret`, `password`, `auth`, `api_key`.
+
+## HTTPS Enforcement
+
+<Callout type="warn">
+  All SDK communication must use HTTPS. The SDK will refuse to send data over plain HTTP in production environments. TLS certificates are validated on every request.
+</Callout>
+
+## API Key Protection
+
+The API key is never written to logs or console output unless `debug: true` is explicitly enabled. Even in debug mode, the key is only visible in HTTP request headers — it is never logged as a standalone value.
+
+## Best Practices
+
+1. **Use `data-seestack-mask` liberally** — when in doubt, mask it. There is no performance cost to masking.
+2. **Never put PII in arbitrary metadata** fields like error or log metadata unless necessary for debugging.
+3. **Review captured data** in the SeeStack dashboard periodically to ensure no sensitive information is leaking through.
+4. **Use environment variables** for your API key — never hardcode it in source files that may be committed to version control.

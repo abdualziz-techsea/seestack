@@ -1,0 +1,50 @@
+---
+title: Introduction
+description: Welcome to SeeStack — full-stack observability for your applications.
+icon: BookOpen
+---
+
+SeeStack is a full-stack observability platform that gives you visibility into errors, logs, HTTP traffic, user sessions, cron jobs, and feature flags — all from a single SDK. Initialize once at application startup and the SDK handles the rest: buffering, batching, retrying, and delivering telemetry to your SeeStack instance.
+
+<Callout type="info">
+  All SDK calls are async and fail-safe. The SDK will never crash your application or block your main thread.
+</Callout>
+
+## What You Can Do
+
+| Feature | Description |
+|---------|-------------|
+| [Error Tracking](/docs/features/error-tracking) | Capture exceptions with stack traces, user context, and metadata |
+| [Log Ingestion](/docs/features/log-ingestion) | Structured logs at five severity levels with arbitrary metadata |
+| [HTTP Monitoring](/docs/features/http-monitoring) | Track inbound and outbound HTTP requests with timing and status |
+| [Session Replay](/docs/features/session-replay) | Stream DOM and interaction events for later playback |
+| [Cron Monitoring](/docs/features/cron-monitoring) | Heartbeat pings for scheduled job success or failure |
+| [Feature Flags](/docs/features/feature-flags) | Evaluate remote flags with rollout percentages and targeting |
+
+## Get Started
+
+<Cards>
+  <Card title="Installation" href="/docs/introduction/installation" />
+  <Card title="Quick Start" href="/docs/introduction/quick-start" />
+  <Card title="Configuration" href="/docs/introduction/configuration" />
+  <Card title="SDK API Reference" href="/docs/reference/sdk-api" />
+</Cards>
+
+## AI-Friendly Docs
+
+Our documentation is available in machine-readable formats for AI coding assistants, harness agents, and automated pipelines.
+
+<Cards>
+  <Card
+    title="llms.txt"
+    description="Index of all documentation pages with summaries"
+    href="/llms.txt"
+    external
+  />
+  <Card
+    title="llms-full.txt"
+    description="Complete documentation content in a single file"
+    href="/llms-full.txt"
+    external
+  />
+</Cards>

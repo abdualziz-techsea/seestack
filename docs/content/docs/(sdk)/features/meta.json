@@ -1,0 +1,4 @@
+{
+  "title": "Features",
+  "pages": ["error-tracking", "log-ingestion", "http-monitoring", "session-replay", "cron-monitoring", "feature-flags"]
+}

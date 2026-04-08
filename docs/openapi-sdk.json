@@ -1,0 +1,1072 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "SeeStack SDK API",
+    "version": "1.0.0",
+    "description": "Ingestion API for the SeeStack observability platform.\n\nThe SeeStack SDK instruments applications to send telemetry data\n(errors, logs, HTTP requests, session replay events, and cron heartbeats)\nto the SeeStack backend over HTTP.\n\n## Authentication\n\nAll endpoints require the `X-SeeStack-Key` header with a raw API key.\nThe backend validates the key and resolves the associated `projectId`\nserver-side — the SDK does not need to know or send it (except for\nHTTP request ingestion where `projectId` is required in the body).\n\n```\nX-SeeStack-Key: seestack_live_abc123xyz...\n```\n\n## Response Envelope\n\nMost endpoints wrap responses in a standard envelope:\n\n```json\n{\n  \"success\": true,\n  \"data\": { ... },\n  \"meta\": {\n    \"requestId\": \"uuid\",\n    \"timestamp\": \"2026-03-31T12:00:00.000Z\"\n  }\n}\n```\n\nExceptions: `/ingest/v1/http-requests` and `/ingest/v1/heartbeat` return\nraw JSON objects (not wrapped in the envelope).\n\n## Error Handling\n\nOn failure, the SDK should:\n- **Never retry** on `400`, `401`, `403`, `422` (client errors)\n- **Retry with exponential backoff** on `5xx`, timeouts, and network errors\n- **Disable the SDK** on `401` (invalid API key — configuration error)\n\n## Rate Limiting & Buffering\n\n- Buffer events in-memory (max 500 per feature) and flush every 5 seconds\n  or at 80% capacity\n- HTTP request telemetry supports batching (up to 100 items per call)\n- Session replay supports batching (unbounded)\n- All other endpoints accept one event per request\n",
+    "contact": {
+      "name": "SeeStack Engineering"
+    },
+    "license": {
+      "name": "Proprietary"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080",
+      "description": "Local development"
+    },
+    {
+      "url": "https://{host}",
+      "description": "Production",
+      "variables": {
+        "host": {
+          "default": "api.seestack.io",
+          "description": "SeeStack backend hostname"
+        }
+      }
+    }
+  ],
+  "security": [
+    {
+      "ApiKeyAuth": []
+    }
+  ],
+  "tags": [
+    {
+      "name": "Errors",
+      "description": "Ingest application errors and exceptions. Each error is grouped\nserver-side by fingerprint for deduplication. Send one error per\nrequest — no batching.\n"
+    },
+    {
+      "name": "Logs",
+      "description": "Ingest structured application logs. Send one log per request.\nBuffer in-memory and flush on a timer interval.\n"
+    },
+    {
+      "name": "HTTP Requests",
+      "description": "Ingest HTTP request telemetry for both inbound and outbound calls.\nSupports batching — up to 100 items per request.\n"
+    },
+    {
+      "name": "Session Replay",
+      "description": "Ingest session replay events (DOM mutations, clicks, scrolls, etc.).\nSupports batching with no enforced limit. Events within a batch should\nbe sorted by `timestampMillis` ascending.\n"
+    },
+    {
+      "name": "Heartbeat",
+      "description": "Send cron job heartbeat pings. Call this at the end of every scheduled\ntask execution. The `slug` must match an existing cron monitor created\nin the SeeStack management console.\n"
+    }
+  ],
+  "paths": {
+    "/ingest/v1/errors": {
+      "post": {
+        "operationId": "ingestError",
+        "tags": [
+          "Errors"
+        ],
+        "summary": "Ingest a single error or exception",
+        "description": "Captures an application error for processing. Duplicate errors\nare grouped automatically. The `projectId` is resolved from the\nAPI key — do not include it in the body.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ErrorIngestRequest"
+              },
+              "examples": {
+                "unhandledException": {
+                  "summary": "Unhandled TypeError",
+                  "value": {
+                    "exceptionClass": "TypeError",
+                    "message": "Cannot read properties of undefined (reading 'userId')",
+                    "stackTrace": [
+                      "at getUserId (auth.js:42:18)",
+                      "at validateSession (session.js:17:5)",
+                      "at Object.<anonymous> (index.js:88:3)"
+                    ],
+                    "level": "error",
+                    "environment": "production",
+                    "release": "v2.1.0",
+                    "user": {
+                      "id": "usr_1234",
+                      "email": "user@example.com"
+                    },
+                    "metadata": {
+                      "route": "/dashboard",
+                      "browser": "Chrome 120"
+                    }
+                  }
+                },
+                "minimalError": {
+                  "summary": "Minimal required fields",
+                  "value": {
+                    "exceptionClass": "NullPointerException",
+                    "message": "Unexpected null value in payment processor"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Error accepted for processing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorIngestResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "550e8400-e29b-41d4-a716-446655440000"
+                  },
+                  "meta": {
+                    "requestId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                    "timestamp": "2026-03-31T12:00:00.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/ingest/v1/logs": {
+      "post": {
+        "operationId": "ingestLog",
+        "tags": [
+          "Logs"
+        ],
+        "summary": "Ingest a single log entry",
+        "description": "Submits a structured log entry for storage. The `projectId` is\nresolved from the API key. Logs do not support batching — send\none log per HTTP request. Buffer in-memory and flush every\n5 seconds or at 80% buffer capacity.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogIngestRequest"
+              },
+              "examples": {
+                "warningLog": {
+                  "summary": "Warning log with metadata",
+                  "value": {
+                    "level": "warn",
+                    "message": "Payment retry attempt 3 of 5",
+                    "service": "payment-service",
+                    "traceId": "trace-b9f2a1c3",
+                    "metadata": {
+                      "orderId": "ORD-5512",
+                      "amount": 99.9,
+                      "currency": "SAR"
+                    }
+                  }
+                },
+                "debugLog": {
+                  "summary": "Minimal debug log",
+                  "value": {
+                    "level": "debug",
+                    "message": "Cache miss for key user:1234"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Log accepted for processing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LogIngestResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "id": "660e8400-e29b-41d4-a716-446655440001"
+                  },
+                  "meta": {
+                    "requestId": "8d0e7780-8536-51ef-a55c-f18gd2g01bf8",
+                    "timestamp": "2026-03-31T12:00:01.000Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/ingest/v1/http-requests": {
+      "post": {
+        "operationId": "ingestHttpRequests",
+        "tags": [
+          "HTTP Requests"
+        ],
+        "summary": "Ingest a batch of HTTP request telemetry",
+        "description": "Submits a batch of HTTP request telemetry (both inbound requests\nreceived by the app and outbound requests made by the app).\n\n- Batch size: minimum 1, maximum 100 items\n- `projectId` is required in the body\n- `path` must not include query parameters (may contain secrets)\n- `timestamp` must be a valid ISO-8601 datetime string\n\n**Note:** This endpoint returns a raw JSON object, not the standard\n`ApiResponse` envelope.\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HttpRequestIngestRequest"
+              },
+              "examples": {
+                "batchOfTwo": {
+                  "summary": "Batch with outbound and inbound requests",
+                  "value": {
+                    "projectId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                    "requests": [
+                      {
+                        "traceId": "trace-001",
+                        "direction": "outbound",
+                        "method": "POST",
+                        "host": "payments.stripe.com",
+                        "path": "/v1/charges",
+                        "statusCode": 200,
+                        "durationMs": 320,
+                        "requestSize": 256,
+                        "responseSize": 1024,
+                        "userId": "usr_99",
+                        "timestamp": "2026-03-31T12:00:00.000Z"
+                      },
+                      {
+                        "traceId": "trace-002",
+                        "direction": "inbound",
+                        "method": "GET",
+                        "host": "api.myapp.com",
+                        "path": "/api/orders",
+                        "statusCode": 401,
+                        "durationMs": 8,
+                        "requestSize": 0,
+                        "responseSize": 64,
+                        "timestamp": "2026-03-31T12:00:01.000Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Batch accepted for processing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HttpRequestIngestResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "accepted": 2
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/ingest/v1/replay": {
+      "post": {
+        "operationId": "ingestReplay",
+        "tags": [
+          "Session Replay"
+        ],
+        "summary": "Ingest a batch of session replay events",
+        "description": "Submits session replay events (DOM mutations, clicks, scrolls,\nnetwork events, console messages, etc.) for a given session.\n\n- `fingerprint` is used to maintain event ordering within a session\n- Use the same `fingerprint` for all batches within a session\n- Events should be sorted by `timestampMillis` ascending\n- `eventData` must be a JSON-serialized **string**, not a nested object\n- No enforced batch size limit (recommended: under 200 events / ~500KB)\n\n**Privacy:** The SDK must mask sensitive data before sending:\n- Replace password field values with `\"[MASKED]\"`\n- Strip `Authorization`, `Cookie`, `X-SeeStack-Key` headers\n- Strip sensitive query parameters from URLs\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReplayIngestRequest"
+              },
+              "examples": {
+                "sessionEvents": {
+                  "summary": "Navigation, click, and masked input events",
+                  "value": {
+                    "fingerprint": "sess_8f3a2c1b",
+                    "sessionId": "sess_8f3a2c1b",
+                    "events": [
+                      {
+                        "eventType": "navigation",
+                        "eventData": "{\"from\":\"/home\",\"to\":\"/checkout\",\"method\":\"push\"}",
+                        "url": "https://myapp.com/checkout",
+                        "timestampMillis": 1711886400000
+                      },
+                      {
+                        "eventType": "mouse_click",
+                        "eventData": "{\"x\":512,\"y\":340,\"target\":\"button#place-order\"}",
+                        "url": "https://myapp.com/checkout",
+                        "timestampMillis": 1711886405123
+                      },
+                      {
+                        "eventType": "input",
+                        "eventData": "{\"field\":\"card-number\",\"value\":\"[MASKED]\"}",
+                        "url": "https://myapp.com/checkout",
+                        "timestampMillis": 1711886407800
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Replay events accepted for processing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayIngestResponse"
+                },
+                "example": {
+                  "success": true,
+                  "data": {
+                    "eventsReceived": 3
+                  },
+                  "meta": {
+                    "requestId": "9e1f8891-9647-62fg-b66d-g29he3h12cg9",
+                    "timestamp": "2026-03-31T12:00:05.123Z"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationError"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalError"
+          }
+        }
+      }
+    },
+    "/ingest/v1/heartbeat": {
+      "post": {
+        "operationId": "ingestHeartbeat",
+        "tags": [
+          "Heartbeat"
+        ],
+        "summary": "Send a cron job heartbeat ping",
+        "description": "Signals the completion of a cron job or scheduled task.\nCall this at the **end** of every job execution, regardless of\nsuccess or failure.\n\n- `slug` must match an existing cron monitor created in the\n  SeeStack management console\n- If `status` is `\"failed\"`, alerts are evaluated immediately\n- `durationMs` is used for trend analysis\n\n**Note:** This endpoint returns a raw JSON object, not the standard\n`ApiResponse` envelope.\n\n**SDK integration pattern:**\n```\nstart = now()\ntry {\n  runJob()\n  sendHeartbeat(slug, \"success\", now() - start, null)\n} catch (e) {\n  sendHeartbeat(slug, \"failed\", now() - start, e.message)\n  throw e  // rethrow — heartbeat must not swallow job errors\n}\n```\n",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HeartbeatRequest"
+              },
+              "examples": {
+                "successfulJob": {
+                  "summary": "Successful cron job",
+                  "value": {
+                    "slug": "daily-report-generator",
+                    "status": "success",
+                    "durationMs": 4320,
+                    "message": "Processed 1842 records, report emailed to 12 recipients"
+                  }
+                },
+                "failedJob": {
+                  "summary": "Failed cron job",
+                  "value": {
+                    "slug": "payment-reconciliation",
+                    "status": "failed",
+                    "durationMs": 180,
+                    "message": "Database connection refused after 3 retries"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Heartbeat accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatResponse"
+                },
+                "example": {
+                  "ok": true,
+                  "monitorId": "3f2a1b4c-5d6e-7f8a-9b0c-1d2e3f4a5b6c"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "No cron monitor found with the given slug",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatErrorResponse"
+                },
+                "example": {
+                  "ok": false,
+                  "code": "NOT_FOUND",
+                  "message": "No cron monitor found with slug: daily-report-generator"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid status value",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatErrorResponse"
+                },
+                "example": {
+                  "ok": false,
+                  "code": "VALIDATION_ERROR",
+                  "message": "Status must be 'success' or 'failed'"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeartbeatErrorResponse"
+                },
+                "example": {
+                  "ok": false,
+                  "message": "Failed to publish event"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-SeeStack-Key",
+        "description": "Raw API key for SDK ingestion endpoints. The backend validates\nthis key and resolves the associated project automatically.\n\nSend the raw key as-is.\n\nExample: `seestack_live_abc123xyz...`\n"
+      }
+    },
+    "schemas": {
+      "ErrorIngestRequest": {
+        "type": "object",
+        "required": [
+          "exceptionClass",
+          "message"
+        ],
+        "properties": {
+          "exceptionClass": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Class or type name of the exception (e.g. `TypeError`, `NullPointerException`)"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The exception message text"
+          },
+          "stackTrace": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of stack frame strings, one per line",
+            "examples": [
+              [
+                "at getUserId (auth.js:42:18)",
+                "at validateSession (session.js:17:5)"
+              ]
+            ]
+          },
+          "level": {
+            "type": "string",
+            "enum": [
+              "debug",
+              "info",
+              "warn",
+              "error",
+              "fatal",
+              "warning"
+            ],
+            "description": "Severity level. Defaults to `error` if omitted.\nNote: `warning` is accepted as an alias for `warn`.\n"
+          },
+          "environment": {
+            "type": "string",
+            "description": "Deployment environment (e.g. `production`, `staging`, `development`)"
+          },
+          "release": {
+            "type": "string",
+            "description": "Application version or release tag (e.g. `v1.4.2`)"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserContext"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Arbitrary key-value context (e.g. component, route, order ID)"
+          }
+        }
+      },
+      "UserContext": {
+        "type": "object",
+        "description": "Current user context at the time of the error",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Internal user identifier"
+          },
+          "email": {
+            "type": "string",
+            "description": "User email address"
+          },
+          "ip": {
+            "type": "string",
+            "description": "User IP address"
+          }
+        }
+      },
+      "LogIngestRequest": {
+        "type": "object",
+        "required": [
+          "level",
+          "message"
+        ],
+        "properties": {
+          "level": {
+            "type": "string",
+            "enum": [
+              "debug",
+              "info",
+              "warn",
+              "error",
+              "fatal"
+            ],
+            "description": "Log severity level. Case-sensitive.\nNote: unlike errors, `warning` is **not** valid for logs — use `warn`.\n"
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "description": "The log message text"
+          },
+          "service": {
+            "type": "string",
+            "description": "Service or module name that produced the log"
+          },
+          "traceId": {
+            "type": "string",
+            "description": "Distributed trace correlation ID"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Arbitrary key-value pairs for additional context"
+          }
+        }
+      },
+      "HttpRequestIngestRequest": {
+        "type": "object",
+        "required": [
+          "projectId",
+          "requests"
+        ],
+        "properties": {
+          "projectId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Project identifier. Required in the body for this endpoint."
+          },
+          "requests": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HttpRequestItem"
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "description": "Batch of HTTP request telemetry items (1–100)"
+          }
+        }
+      },
+      "HttpRequestItem": {
+        "type": "object",
+        "required": [
+          "traceId",
+          "direction",
+          "method",
+          "host",
+          "path",
+          "statusCode",
+          "durationMs",
+          "requestSize",
+          "responseSize",
+          "timestamp"
+        ],
+        "properties": {
+          "traceId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Unique trace or request identifier"
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "inbound",
+              "outbound"
+            ],
+            "description": "- `inbound`: a request the application **received** (server-side)\n- `outbound`: a request the application **made** to an external service\n"
+          },
+          "method": {
+            "type": "string",
+            "minLength": 1,
+            "description": "HTTP verb (`GET`, `POST`, `PUT`, `DELETE`, etc.)"
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Target hostname without protocol (e.g. `api.example.com`)"
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "description": "URL path only — **no query string**. Strip query parameters\nbefore sending as they may contain secrets.\n"
+          },
+          "statusCode": {
+            "type": "integer",
+            "description": "HTTP response status code"
+          },
+          "durationMs": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Total round-trip duration in milliseconds"
+          },
+          "requestSize": {
+            "type": "integer",
+            "description": "Request body size in bytes"
+          },
+          "responseSize": {
+            "type": "integer",
+            "description": "Response body size in bytes"
+          },
+          "userId": {
+            "type": "string",
+            "description": "Authenticated user identifier (if available)"
+          },
+          "errorFingerprint": {
+            "type": "string",
+            "description": "Error group fingerprint if the request resulted in a captured error"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "ISO-8601 UTC datetime when the request occurred"
+          }
+        }
+      },
+      "ReplayIngestRequest": {
+        "type": "object",
+        "required": [
+          "fingerprint",
+          "sessionId",
+          "events"
+        ],
+        "properties": {
+          "fingerprint": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Unique session fingerprint used to maintain event ordering.\nUse the same fingerprint for all batches within a session.\nRecommended: set `fingerprint = sessionId`.\n"
+          },
+          "sessionId": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Human-readable session identifier (e.g. UUID generated at session start)"
+          },
+          "events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReplayEventItem"
+            },
+            "minItems": 1,
+            "description": "Array of replay events. Sort by `timestampMillis` ascending\nbefore sending. No enforced maximum, but keep batches under\n200 events (~500KB) for best performance.\n"
+          }
+        }
+      },
+      "ReplayEventItem": {
+        "type": "object",
+        "required": [
+          "eventType",
+          "eventData"
+        ],
+        "properties": {
+          "eventType": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Type of captured event. The backend does not enforce specific\nvalues — use a consistent naming convention. Recommended values:\n`dom_mutation`, `mouse_click`, `mouse_move`, `scroll`, `input`,\n`navigation`, `network_request`, `console`, `error`,\n`visibility_change`, `resize`.\n"
+          },
+          "eventData": {
+            "type": "string",
+            "minLength": 1,
+            "description": "**JSON-serialized string** of the event payload — not a nested\nobject. Serialize your event data to a string before including it.\n\nExample: `\"{\\\"x\\\":142,\\\"y\\\":320,\\\"target\\\":\\\"button#checkout\\\"}\"`\n\n**Privacy:** Replace sensitive values with `\"[MASKED]\"` before\nsending (passwords, card numbers, tokens).\n"
+          },
+          "url": {
+            "type": "string",
+            "description": "Page URL when the event occurred"
+          },
+          "timestampMillis": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Unix epoch timestamp in milliseconds"
+          }
+        }
+      },
+      "HeartbeatRequest": {
+        "type": "object",
+        "required": [
+          "slug",
+          "status",
+          "durationMs"
+        ],
+        "properties": {
+          "slug": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^[a-z0-9\\-]+$",
+            "description": "Must match an existing cron monitor slug created in the SeeStack\nmanagement console. Lowercase alphanumeric and hyphens only.\n",
+            "examples": [
+              "daily-report-generator",
+              "payment-reconciliation"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "success",
+              "failed"
+            ],
+            "description": "Job outcome. Must be `success` or `failed`. If `failed`,\nalerts are evaluated immediately.\n"
+          },
+          "durationMs": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Job execution duration in milliseconds"
+          },
+          "message": {
+            "type": "string",
+            "description": "Optional human-readable result message"
+          }
+        }
+      },
+      "ApiResponseMeta": {
+        "type": "object",
+        "required": [
+          "requestId",
+          "timestamp"
+        ],
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Unique request identifier for debugging and support"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Server timestamp when the response was generated (ISO-8601)"
+          }
+        }
+      },
+      "ErrorBody": {
+        "type": "object",
+        "required": [
+          "code",
+          "message"
+        ],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code for programmatic handling"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message"
+          },
+          "details": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Additional error details. For validation errors, this is a map\nof field names to error messages.\n"
+          }
+        }
+      },
+      "ErrorIngestResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "meta"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Unique event identifier assigned by the backend"
+              }
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ApiResponseMeta"
+          }
+        }
+      },
+      "LogIngestResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "meta"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "id"
+            ],
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Unique event identifier assigned by the backend"
+              }
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ApiResponseMeta"
+          }
+        }
+      },
+      "HttpRequestIngestResponse": {
+        "type": "object",
+        "description": "Raw response — not wrapped in the standard `ApiResponse` envelope.\n",
+        "required": [
+          "ok",
+          "accepted"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "accepted": {
+            "type": "integer",
+            "description": "Number of HTTP request items accepted for processing"
+          }
+        }
+      },
+      "ReplayIngestResponse": {
+        "type": "object",
+        "required": [
+          "success",
+          "meta"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": true
+          },
+          "data": {
+            "type": "object",
+            "required": [
+              "eventsReceived"
+            ],
+            "properties": {
+              "eventsReceived": {
+                "type": "integer",
+                "description": "Number of replay events accepted for processing"
+              }
+            }
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ApiResponseMeta"
+          }
+        }
+      },
+      "HeartbeatResponse": {
+        "type": "object",
+        "description": "Raw response — not wrapped in the standard `ApiResponse` envelope.\n",
+        "required": [
+          "ok",
+          "monitorId"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": true
+          },
+          "monitorId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID of the matched cron monitor"
+          }
+        }
+      },
+      "HeartbeatErrorResponse": {
+        "type": "object",
+        "description": "Error response for heartbeat endpoint. Raw format — not wrapped\nin the standard `ApiResponse` envelope.\n",
+        "required": [
+          "ok"
+        ],
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "const": false
+          },
+          "code": {
+            "type": "string",
+            "description": "Machine-readable error code"
+          },
+          "message": {
+            "type": "string",
+            "description": "Human-readable error message"
+          }
+        }
+      },
+      "ApiErrorResponse": {
+        "type": "object",
+        "description": "Standard error response envelope used by most endpoints",
+        "required": [
+          "success",
+          "meta"
+        ],
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "const": false
+          },
+          "error": {
+            "$ref": "#/components/schemas/ErrorBody"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/ApiResponseMeta"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Unauthorized": {
+        "description": "Invalid or missing API key",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": "INVALID_API_KEY",
+                "message": "Invalid or missing API key"
+              },
+              "meta": {
+                "requestId": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+                "timestamp": "2026-03-31T12:00:00.000Z"
+              }
+            }
+          }
+        }
+      },
+      "ValidationError": {
+        "description": "Request validation failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": "VALIDATION_ERROR",
+                "message": "Validation failed",
+                "details": {
+                  "exceptionClass": "must not be blank",
+                  "level": "must match \"debug|info|warn|error|fatal|warning\""
+                }
+              },
+              "meta": {
+                "requestId": "8d0e7780-8536-51ef-a55c-f18gd2g01bf8",
+                "timestamp": "2026-03-31T12:00:00.000Z"
+              }
+            }
+          }
+        }
+      },
+      "InternalError": {
+        "description": "Unexpected server error (retryable)",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ApiErrorResponse"
+            },
+            "example": {
+              "success": false,
+              "error": {
+                "code": "INTERNAL_ERROR",
+                "message": "An unexpected error occurred"
+              },
+              "meta": {
+                "requestId": "9e1f8891-9647-62fg-b66d-g29he3h12cg9",
+                "timestamp": "2026-03-31T12:00:00.000Z"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

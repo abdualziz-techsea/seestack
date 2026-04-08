@@ -1,0 +1,129 @@
+---
+title: Installation
+description: Install the SeeStack SDK in your project.
+icon: Download
+---
+
+## Prerequisites
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    - Node.js 18 or later (for server-side usage)
+    - Any modern browser (for client-side usage)
+  </Tab>
+  <Tab value="Python">
+    - Python 3.8 or later
+    - pip or poetry package manager
+  </Tab>
+  <Tab value="Go">
+    - Go 1.21 or later
+    - Go modules enabled
+  </Tab>
+</Tabs>
+
+## Install the SDK
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    <Tabs groupId="pkg" items={["npm", "yarn", "pnpm", "bun"]} defaultIndex={3} persist>
+      <Tab value="npm">
+        ```bash
+        npm install @seestack/sdk
+        ```
+      </Tab>
+      <Tab value="yarn">
+        ```bash
+        yarn add @seestack/sdk
+        ```
+      </Tab>
+      <Tab value="pnpm">
+        ```bash
+        pnpm add @seestack/sdk
+        ```
+      </Tab>
+      <Tab value="bun">
+        ```bash
+        bun add @seestack/sdk
+        ```
+      </Tab>
+    </Tabs>
+  </Tab>
+  <Tab value="Python">
+    ```bash
+    pip install seestack-sdk
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```bash
+    go get github.com/seestack/seestack-go
+    ```
+  </Tab>
+</Tabs>
+
+## CDN (Browser Only)
+
+For browser-only usage without a build step, you can load the SDK via a script tag:
+
+```html
+<script src="https://cdn.seestack.io/sdk/latest/seestack.min.js"></script>
+```
+
+This exposes a global `SeeStack` object you can use directly.
+
+## Verify Installation
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js title="verify.js"
+    import SeeStack from '@seestack/sdk';
+
+    SeeStack.init({
+      apiKey: 'seestack_live_your_key_here',
+      host: 'https://your-seestack-instance.com',
+      debug: true,
+    });
+
+    SeeStack.captureLog('info', 'SeeStack SDK installed successfully');
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python title="verify.py"
+    import seestack
+
+    seestack.init(
+        api_key="seestack_live_your_key_here",
+        host="https://your-seestack-instance.com",
+        debug=True,
+    )
+
+    seestack.capture_log("info", "SeeStack SDK installed successfully")
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go title="verify.go"
+    package main
+
+    import "github.com/seestack/seestack-go"
+
+    func main() {
+        seestack.Init(seestack.Config{
+            APIKey: "seestack_live_your_key_here",
+            Host:   "https://your-seestack-instance.com",
+            Debug:  true,
+        })
+        defer seestack.Flush()
+
+        seestack.CaptureLog("info", "SeeStack SDK installed successfully", nil)
+    }
+    ```
+  </Tab>
+</Tabs>
+
+If `debug: true` is set, you should see outgoing payloads logged to your console or stderr.
+
+## Next Steps
+
+<Cards>
+  <Card title="Quick Start" href="/docs/introduction/quick-start" />
+  <Card title="Configuration" href="/docs/introduction/configuration" />
+</Cards>

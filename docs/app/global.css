@@ -1,0 +1,68 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/solar.css';
+@import 'fumadocs-ui/css/preset.css';
+@import 'fumadocs-openapi/css/preset.css';
+
+/* === SeeStack Design System — Fumadocs theme override === */
+
+/* Light mode overrides */
+@theme {
+  --color-fd-background: #fafafa;
+  --color-fd-foreground: rgba(0,0,0,0.90);
+  --color-fd-muted: #f5f5f5;
+  --color-fd-muted-foreground: rgba(0,0,0,0.50);
+  --color-fd-popover: #ffffff;
+  --color-fd-popover-foreground: rgba(0,0,0,0.90);
+  --color-fd-card: #ffffff;
+  --color-fd-card-foreground: rgba(0,0,0,0.90);
+  --color-fd-border: rgba(0,0,0,0.06);
+  --color-fd-primary: #1a9b6c;
+  --color-fd-primary-foreground: #ffffff;
+  --color-fd-secondary: #f5f5f5;
+  --color-fd-secondary-foreground: rgba(0,0,0,0.90);
+  --color-fd-accent: #eeeeee;
+  --color-fd-accent-foreground: rgba(0,0,0,0.90);
+  --color-fd-ring: #1a9b6c;
+  --color-fd-overlay: rgba(0,0,0,0.2);
+  --color-fd-article: #fafafa;
+}
+
+/* Dark mode overrides */
+.dark {
+  --color-fd-background: #050505;
+  --color-fd-foreground: rgba(255,255,255,0.93);
+  --color-fd-muted: #131313;
+  --color-fd-muted-foreground: rgba(255,255,255,0.53);
+  --color-fd-popover: #1a1a1a;
+  --color-fd-popover-foreground: rgba(255,255,255,0.93);
+  --color-fd-card: #0c0c0c;
+  --color-fd-card-foreground: rgba(255,255,255,0.93);
+  --color-fd-border: rgba(255,255,255,0.05);
+  --color-fd-primary: #3ecf8e;
+  --color-fd-primary-foreground: #050505;
+  --color-fd-secondary: #131313;
+  --color-fd-secondary-foreground: rgba(255,255,255,0.93);
+  --color-fd-accent: #212121;
+  --color-fd-accent-foreground: rgba(255,255,255,0.93);
+  --color-fd-ring: #3ecf8e;
+  --color-fd-overlay: rgba(0,0,0,0.5);
+  --color-fd-article: #050505;
+}
+
+/* Semantic color overrides */
+@theme static {
+  --color-fd-info: #6c9eff;
+  --color-fd-warning: #f0b95b;
+  --color-fd-error: #f75f5f;
+  --color-fd-success: #3ecf8e;
+  --color-fd-idea: #f0b95b;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}

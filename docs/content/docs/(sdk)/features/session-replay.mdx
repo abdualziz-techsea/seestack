@@ -1,0 +1,147 @@
+---
+title: Session Replay
+description: Stream DOM and interaction events for later playback in the SeeStack dashboard.
+---
+
+<Callout type="warn">
+  Session replay is a **browser SDK only** feature. It is not available in Node.js, Python, or Go server-side SDKs.
+</Callout>
+
+Session replay records DOM mutations, user interactions, and navigation events in the browser. These events are streamed to SeeStack and can be replayed in the dashboard to see exactly what users experienced.
+
+## Getting Started
+
+<Steps>
+<Step>
+
+### Generate a Session ID
+
+Create a unique session identifier when a user session begins (e.g. on page load or after login):
+
+```js
+const sessionId = crypto.randomUUID();
+```
+
+</Step>
+<Step>
+
+### Start Recording
+
+Begin capturing events. The SDK will buffer events and flush them every 5 seconds or at 50 events.
+
+```js
+SeeStack.startReplay(sessionId);
+```
+
+You can optionally pass a custom fingerprint as the second argument. If omitted, `sessionId` is used as the fingerprint.
+
+```js
+SeeStack.startReplay(sessionId, customFingerprint);
+```
+
+</Step>
+<Step>
+
+### Stop Recording
+
+Stop capturing when the session ends (e.g. on logout or page unload):
+
+```js
+SeeStack.stopReplay();
+```
+
+</Step>
+</Steps>
+
+## Full Example
+
+```js title="session-replay.js"
+import SeeStack from '@seestack/sdk';
+
+SeeStack.init({
+  apiKey: 'seestack_live_your_key_here',
+  host: 'https://your-seestack-instance.com',
+});
+
+// Start recording when the app loads
+const sessionId = crypto.randomUUID();
+SeeStack.startReplay(sessionId);
+
+// Stop recording when the user leaves
+window.addEventListener('beforeunload', () => {
+  SeeStack.stopReplay();
+  SeeStack.flush();
+});
+```
+
+## Captured Event Types
+
+| Event Type | Description |
+|------------|-------------|
+| `dom_mutation` | DOM tree changes (added/removed/modified elements) |
+| `mouse_click` | User clicks with coordinates and target element |
+| `mouse_move` | Cursor movement tracking |
+| `scroll` | Page or element scroll events |
+| `input` | Form field interactions (**values are masked** — see below) |
+| `navigation` | URL or route changes |
+| `network_request` | XHR/fetch calls (sensitive headers stripped) |
+| `console` | Console log, warn, and error output |
+| `error` | JavaScript error events |
+| `visibility_change` | Tab focus and blur events |
+| `resize` | Viewport resize events |
+
+## Privacy Masking
+
+<Callout type="error">
+  Privacy masking is **mandatory**. All sensitive data is masked client-side before it leaves the browser. This is not optional.
+</Callout>
+
+The SDK automatically applies these masking rules:
+
+### Input Fields
+- `<input type="password">` values are **never captured** — replaced with `[MASKED]`
+- Elements with the `data-seestack-mask` attribute are fully masked
+- Elements with the CSS class `seestack-mask` are fully masked
+
+```html
+<!-- This field's value will never be captured -->
+<input type="password" name="password" />
+
+<!-- Mark any element for masking -->
+<input type="text" name="ssn" data-seestack-mask />
+<div class="seestack-mask">Sensitive content here</div>
+```
+
+### Network Events
+These headers are stripped from captured request metadata:
+- `Authorization`
+- `Cookie`
+- `X-SeeStack-Key`
+- `X-API-Key`
+- `X-Auth-Token`
+
+### URLs
+Query parameters matching these patterns are stripped: `token`, `key`, `secret`, `password`, `auth`, `api_key`.
+
+### Clipboard
+Clipboard events (paste operations) are never captured, as they may contain sensitive data.
+
+## Linking Errors to Sessions
+
+When session replay is active and an error is captured via `captureError`, the current `sessionId` is automatically attached to the error. This lets you replay the user's session directly from the error detail view in the dashboard.
+
+## Buffering
+
+Replay events are flushed:
+- Every **5 seconds**
+- When the buffer reaches **50 events**
+
+Events within each batch are automatically sorted by timestamp before sending.
+
+## Next Steps
+
+<Cards>
+  <Card title="User Context" href="/docs/guides/user-context" />
+  <Card title="Privacy & Data Masking" href="/docs/guides/privacy-masking" />
+  <Card title="Error Tracking" href="/docs/features/error-tracking" />
+</Cards>

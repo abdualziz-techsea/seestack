@@ -1,0 +1,115 @@
+---
+title: Configuration Options
+description: Detailed reference for all SDK initialization configuration options.
+---
+
+This page provides a complete reference for every option accepted by `SeeStack.init()`.
+
+## All Options
+
+<TypeTable
+  type={{
+    apiKey: {
+      type: 'string',
+      required: true,
+      description: 'Your project API key from the SeeStack console. Sent as the X-SeeStack-Key header on every ingestion request. Must be non-empty.',
+    },
+    host: {
+      type: 'string',
+      required: true,
+      description: 'Base URL of your SeeStack backend (e.g. https://seestack.yourcompany.com). Must include the protocol. HTTPS is required in production.',
+    },
+    environment: {
+      type: 'string',
+      description: 'Deployment environment name (e.g. "production", "staging", "development"). Attached to all error and log events for filtering in the dashboard.',
+      default: 'undefined',
+    },
+    release: {
+      type: 'string',
+      description: 'Application version or release tag (e.g. "v2.3.1", "abc123f"). Used to track error regressions and correlate deployments with issues.',
+      default: 'undefined',
+    },
+    flushIntervalMs: {
+      type: 'number',
+      description: 'How often (in milliseconds) the SDK flushes buffered events to the backend. Lower values send data faster but create more HTTP requests.',
+      default: '5000',
+    },
+    bufferSize: {
+      type: 'number',
+      description: 'Maximum number of events to hold in memory per feature (errors, logs, HTTP requests, replay events). When the buffer is full, the oldest item is dropped.',
+      default: '500',
+    },
+    debug: {
+      type: 'boolean',
+      description: 'When true, all outgoing payloads and backend responses are logged to the SDK internal logger (not your application logger). Useful for verifying SDK behavior during development.',
+      default: 'false',
+    },
+  }}
+/>
+
+## Required vs Optional
+
+<Callout type="warn">
+  `apiKey` and `host` are the only required options. Without them, the SDK will not initialize and all methods will be no-ops. The SDK validates that `apiKey` is non-empty at init time.
+</Callout>
+
+## Default Values Summary
+
+| Option | Default |
+|--------|---------|
+| `environment` | Not set |
+| `release` | Not set |
+| `flushIntervalMs` | `5000` (5 seconds) |
+| `bufferSize` | `500` items per feature |
+| `debug` | `false` |
+
+## Memory Impact
+
+The buffer size directly affects SDK memory usage:
+
+| Buffer Size | Items (5 features) | Estimated Heap |
+|-------------|---------------------|----------------|
+| 100 | 500 total | ~3 MB |
+| 500 (default) | 2,500 total | ~15 MB |
+| 1000 | 5,000 total | ~30 MB |
+
+Each item is estimated at 1–5 KB depending on the event type and metadata size.
+
+## Initialization Behavior
+
+| Scenario | Behavior |
+|----------|----------|
+| First `init()` call | SDK initializes normally |
+| Second `init()` call | Warning emitted, call ignored (idempotent) |
+| SDK method called before `init()` | Silent no-op — no error thrown |
+| Empty `apiKey` passed | SDK fails fast with an error at init time |
+| HTTP `host` in production | SDK refuses to send data (HTTPS required) |
+
+## Environment-Specific Recommendations
+
+### Development
+```json
+{
+  "debug": true,
+  "environment": "development"
+}
+```
+
+### Staging
+```json
+{
+  "debug": false,
+  "environment": "staging",
+  "flushIntervalMs": 3000
+}
+```
+
+### Production
+```json
+{
+  "debug": false,
+  "environment": "production",
+  "flushIntervalMs": 5000,
+  "bufferSize": 500
+}
+```

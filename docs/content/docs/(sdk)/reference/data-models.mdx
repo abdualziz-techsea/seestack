@@ -1,0 +1,147 @@
+---
+title: Data Models
+description: Reference for all data types and structures used by the SeeStack SDK.
+---
+
+This page documents all data types and structures you interact with when using the SeeStack SDK.
+
+<Accordions>
+<Accordion title="InitConfig">
+
+The configuration object passed to `init()`.
+
+<TypeTable
+  type={{
+    apiKey: { type: 'string', required: true, description: 'Project API key.' },
+    host: { type: 'string', required: true, description: 'SeeStack backend URL.' },
+    environment: { type: 'string', description: 'Deployment environment name.', default: 'undefined' },
+    release: { type: 'string', description: 'Application version tag.', default: 'undefined' },
+    flushIntervalMs: { type: 'number', description: 'Buffer flush interval in milliseconds.', default: '5000' },
+    bufferSize: { type: 'number', description: 'Max items per feature buffer.', default: '500' },
+    debug: { type: 'boolean', description: 'Enable debug logging.', default: 'false' },
+  }}
+/>
+
+See [Configuration Options](/docs/reference/configuration-options) for detailed descriptions.
+
+</Accordion>
+<Accordion title="UserContext">
+
+User identity attached to events. All fields are optional.
+
+<TypeTable
+  type={{
+    id: { type: 'string', description: 'Internal user identifier (e.g. database ID, UUID).' },
+    email: { type: 'string', description: 'User email address.' },
+    ip: { type: 'string', description: 'User IP address.' },
+  }}
+/>
+
+Set globally with `setUser()` or per-event via the context parameter.
+
+</Accordion>
+<Accordion title="ErrorContext">
+
+Optional context passed as the second argument to `captureError`.
+
+<TypeTable
+  type={{
+    level: { type: '"debug" | "info" | "warn" | "error" | "fatal"', description: 'Severity level.', default: '"error"' },
+    user: { type: 'UserContext', description: 'User context override for this error.' },
+    metadata: { type: 'Record<string, any>', description: 'Arbitrary key-value pairs for debugging context.' },
+    sessionId: { type: 'string', description: 'Links the error to an active session replay recording.' },
+  }}
+/>
+
+</Accordion>
+<Accordion title="HttpRequestData">
+
+Data captured for each HTTP request by `instrumentHttp()` or manual instrumentation.
+
+<TypeTable
+  type={{
+    traceId: { type: 'string', required: true, description: 'Unique trace or request ID.' },
+    direction: { type: '"inbound" | "outbound"', required: true, description: 'Whether the request was received or made.' },
+    method: { type: 'string', required: true, description: 'HTTP verb (GET, POST, etc.).' },
+    host: { type: 'string', required: true, description: 'Target hostname, no protocol.' },
+    path: { type: 'string', required: true, description: 'URL path without query parameters.' },
+    statusCode: { type: 'number', required: true, description: 'HTTP response status code.' },
+    durationMs: { type: 'number', required: true, description: 'Round-trip time in milliseconds.' },
+    requestSize: { type: 'number', required: true, description: 'Request body size in bytes.' },
+    responseSize: { type: 'number', required: true, description: 'Response body size in bytes.' },
+    timestamp: { type: 'string', required: true, description: 'ISO-8601 UTC datetime.' },
+    userId: { type: 'string', description: 'Authenticated user who made or received the request.' },
+  }}
+/>
+
+</Accordion>
+<Accordion title="ReplayEvent">
+
+A single event captured during session replay.
+
+<TypeTable
+  type={{
+    eventType: { type: 'string', required: true, description: 'Event category (e.g. "dom_mutation", "mouse_click", "input").' },
+    eventData: { type: 'string', required: true, description: 'JSON-serialized event payload (a string, not an object).' },
+    url: { type: 'string', description: 'Page URL when the event occurred.' },
+    timestampMillis: { type: 'number', description: 'Unix epoch milliseconds when the event fired.' },
+  }}
+/>
+
+</Accordion>
+<Accordion title="JobHandle">
+
+Opaque handle returned by `startJob()` and passed to `finishJob()`.
+
+The handle internally tracks:
+- The monitor `slug`
+- The job start timestamp (used to compute `durationMs`)
+
+You do not need to inspect or modify the handle — just pass it through.
+
+</Accordion>
+<Accordion title="HeartbeatData">
+
+Data sent to SeeStack when `finishJob()` is called.
+
+<TypeTable
+  type={{
+    slug: { type: 'string', required: true, description: 'Cron monitor slug (lowercase alphanumeric + hyphens).' },
+    status: { type: '"success" | "failed"', required: true, description: 'Job outcome.' },
+    durationMs: { type: 'number', required: true, description: 'Job execution time in milliseconds (computed from JobHandle).' },
+    message: { type: 'string', description: 'Human-readable result message.' },
+  }}
+/>
+
+</Accordion>
+<Accordion title="FlagResult">
+
+Result of evaluating a single feature flag via `getFlag()`.
+
+<TypeTable
+  type={{
+    enabled: { type: 'boolean', required: true, description: 'Whether the flag is active for the evaluated context.' },
+    value: { type: 'string', required: true, description: 'Flag value as a string. Cast to the appropriate type (boolean, number, string) in your code.' },
+  }}
+/>
+
+</Accordion>
+<Accordion title="FlagsMap">
+
+Result of evaluating all flags via `getAllFlags()`.
+
+```ts
+type FlagsMap = Record<string, FlagResult>
+```
+
+A mapping of flag keys to their evaluation results. Example:
+
+```json
+{
+  "new-checkout-flow": { "enabled": true, "value": "variant-b" },
+  "dark-mode": { "enabled": false, "value": "false" }
+}
+```
+
+</Accordion>
+</Accordions>

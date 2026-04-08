@@ -1,0 +1,148 @@
+---
+title: Log Ingestion
+description: Send structured logs at five severity levels with arbitrary metadata.
+---
+
+Log ingestion sends structured log entries from your application to SeeStack. Logs are buffered in memory and flushed periodically — they are not sent synchronously on every call.
+
+## Basic Usage
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.captureLog('info', 'User signed in', {
+      userId: 'usr_1234',
+      method: 'oauth',
+    });
+
+    SeeStack.captureLog('error', 'Payment failed after 3 retries', {
+      orderId: 'ORD-5512',
+      amount: 99.90,
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.capture_log("info", "User signed in", metadata={
+        "user_id": "usr_1234",
+        "method": "oauth",
+    })
+
+    seestack.capture_log("error", "Payment failed after 3 retries", metadata={
+        "order_id": "ORD-5512",
+        "amount": 99.90,
+    })
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.CaptureLog("info", "User signed in", map[string]any{
+        "userID": "usr_1234",
+        "method": "oauth",
+    })
+
+    seestack.CaptureLog("error", "Payment failed after 3 retries", map[string]any{
+        "orderID": "ORD-5512",
+        "amount": 99.90,
+    })
+    ```
+  </Tab>
+</Tabs>
+
+## Severity Levels
+
+| Level | Use Case |
+|-------|----------|
+| `debug` | Verbose output for development and debugging |
+| `info` | Normal operational events (user actions, successful operations) |
+| `warn` | Something unexpected that is not yet an error |
+| `error` | A failure that needs investigation |
+| `fatal` | A critical failure that may crash the application |
+
+<Callout type="warn">
+  Use `warn` (not `warning`) for log severity. The `warning` alias is only accepted in error tracking, not in logs.
+</Callout>
+
+## Parameters
+
+<TypeTable
+  type={{
+    level: {
+      type: '"debug" | "info" | "warn" | "error" | "fatal"',
+      required: true,
+      description: 'Severity level of the log entry.',
+    },
+    message: {
+      type: 'string',
+      required: true,
+      description: 'Human-readable log message.',
+    },
+    service: {
+      type: 'string',
+      description: 'Service or module name that produced the log (e.g. "payment-service").',
+    },
+    traceId: {
+      type: 'string',
+      description: 'Distributed trace correlation ID for linking logs across services.',
+    },
+    metadata: {
+      type: 'Record<string, any>',
+      description: 'Arbitrary key-value pairs for structured data (e.g. user ID, order ID, amounts).',
+    },
+  }}
+/>
+
+## Service and Trace Context
+
+You can attach a service name and distributed trace ID to logs for correlation:
+
+<Tabs groupId="lang" items={["JavaScript", "Python", "Go"]}>
+  <Tab value="JavaScript">
+    ```js
+    SeeStack.captureLog('warn', 'Payment retry attempt 3 of 5', {
+      service: 'payment-service',
+      traceId: 'trace-b9f2a1c3',
+      orderId: 'ORD-5512',
+      amount: 99.90,
+      currency: 'SAR',
+    });
+    ```
+  </Tab>
+  <Tab value="Python">
+    ```python
+    seestack.capture_log("warn", "Payment retry attempt 3 of 5", metadata={
+        "service": "payment-service",
+        "trace_id": "trace-b9f2a1c3",
+        "order_id": "ORD-5512",
+        "amount": 99.90,
+        "currency": "SAR",
+    })
+    ```
+  </Tab>
+  <Tab value="Go">
+    ```go
+    seestack.CaptureLog("warn", "Payment retry attempt 3 of 5", map[string]any{
+        "service": "payment-service",
+        "traceID": "trace-b9f2a1c3",
+        "orderID": "ORD-5512",
+        "amount": 99.90,
+        "currency": "SAR",
+    })
+    ```
+  </Tab>
+</Tabs>
+
+## Buffering Behavior
+
+Logs are not sent immediately. They are held in an in-memory buffer (default: 500 items) and flushed:
+
+- Every `flushIntervalMs` (default: 5 seconds)
+- When the buffer reaches 80% capacity
+- On explicit `flush()` call
+- On application shutdown (best-effort)
+
+Each log is sent as an individual request — there is no batch endpoint for logs.
+
+<Callout type="info">
+  Need to guarantee delivery before a process exits? Call `SeeStack.flush()` (or `seestack.flush()` / `seestack.Flush()`) and await its completion. See [Buffering & Flushing](/docs/guides/buffering-and-flushing) for details.
+</Callout>

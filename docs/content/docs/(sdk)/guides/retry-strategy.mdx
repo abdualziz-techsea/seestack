@@ -1,0 +1,99 @@
+---
+title: Retry Strategy
+description: How the SDK handles network failures and retries.
+---
+
+The SeeStack SDK uses exponential backoff with jitter to retry failed requests. This ensures reliable delivery without overwhelming the backend during outages.
+
+## Backoff Schedule
+
+When a request fails with a retryable error, the SDK retries with increasing delays:
+
+| Attempt | Delay |
+|---------|-------|
+| 1 | Immediate |
+| 2 | 1 second + random 0–500ms |
+| 3 | 2 seconds + random 0–500ms |
+| 4 | 4 seconds + random 0–500ms |
+| 5 | 8 seconds + random 0–500ms |
+| After 5 | Discard the event |
+
+Jitter (the random 0–500ms addition) prevents thundering herd problems when many SDK instances restart simultaneously.
+
+## What Gets Retried
+
+| Response | Retried? | Reason |
+|----------|----------|--------|
+| `5xx` Server Error | Yes | Backend is temporarily unavailable |
+| Connection timeout | Yes | Network or server issue |
+| Network unreachable | Yes | Transient connectivity problem |
+| `429` Too Many Requests | Yes | Rate limited — respects `Retry-After` header |
+| `400` Bad Request | No | Malformed payload — retrying won't help |
+| `401` Unauthorized | No | Invalid API key — see below |
+| `403` Forbidden | No | Access denied — configuration error |
+| `422` Unprocessable Entity | No | Validation failure — fix the payload |
+
+## Network Timeouts
+
+The SDK enforces strict timeouts to prevent blocking:
+
+| Parameter | Value |
+|-----------|-------|
+| Connection timeout | 3 seconds |
+| Read/write timeout | 3 seconds |
+| Total request timeout | 5 seconds |
+
+If the backend does not respond within these limits, the request fails and enters the retry cycle.
+
+## 401 Handling
+
+<Callout type="error">
+  A `401 Unauthorized` response **disables the SDK for the entire session**. This is not a transient error — it means your API key is invalid or missing. The SDK will:
+
+  1. Log a warning: "SeeStack SDK: invalid API key — disabling SDK"
+  2. Stop all SDK operations (capture, flush, etc.)
+  3. Never retry the request
+
+  If you see this, check your `apiKey` in the init configuration.
+</Callout>
+
+## 400 Handling
+
+A `400 Bad Request` means the payload was malformed. The SDK:
+
+1. Logs a debug message: "SeeStack SDK: malformed payload — dropping event"
+2. Discards the event
+3. Does not retry
+
+This typically indicates a bug in payload construction, not a transient issue.
+
+## Your Application Is Never Affected
+
+<Callout type="info">
+  The SDK fails silently in all cases. If the backend is unreachable, data is buffered locally and retried in the background. If retries are exhausted, events are discarded. Your application's performance and stability are never impacted.
+</Callout>
+
+All retry logic runs on a background worker. Capture calls (`captureError`, `captureLog`, etc.) always return immediately, regardless of network status.
+
+## Decision Tree
+
+```
+Send attempt fails
+├── 401 Unauthorized
+│     → Disable SDK for session, do NOT retry
+│
+├── 400 Bad Request / 422 Unprocessable
+│     → Discard event, do NOT retry
+│
+├── 429 Too Many Requests
+│     → Respect Retry-After header
+│     → Retry up to 3 more attempts with backoff
+│
+├── 5xx Server Error
+│     → Retry with exponential backoff (up to 5 attempts)
+│     → Discard after 5 failures
+│
+└── Network timeout / connection refused
+      → Retry with exponential backoff (up to 5 attempts)
+      → Discard after 5 failures
+```
