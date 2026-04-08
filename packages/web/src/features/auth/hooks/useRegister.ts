@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { apiClient } from '@allstak/shared'
+import { apiClient } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 const KEYCLOAK_BASE = import.meta.env.PROD
   ? (import.meta.env.VITE_KEYCLOAK_URL ?? 'http://localhost:8180')
   : '/auth'
-const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM ?? 'allstak'
-const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'allstak-web'
+const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM ?? 'seestack'
+const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'seestack-web'
 
 interface RegisterData {
   name: string
@@ -86,7 +86,7 @@ export function useRegister() {
       const accessToken = tokenData.access_token
 
       // Store token for API calls
-      localStorage.setItem('allstak_token', accessToken)
+      localStorage.setItem('seestack_token', accessToken)
 
       // Step 4: Create organization via backend API
       const orgRes = await apiClient.post('/api/v1/organizations', {

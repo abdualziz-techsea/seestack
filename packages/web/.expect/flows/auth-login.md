@@ -8,4 +8,4 @@
 5. Click Sign in — verify error banner appears with correct message
 6. Clear password, enter correct password "Test1234!"
 7. Click Sign in — verify redirect to /overview
-8. Verify topbar shows "AllStak" logo and project selector
+8. Verify topbar shows "SeeStack" logo and project selector

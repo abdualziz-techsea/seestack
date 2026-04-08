@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { apiClient } from '@allstak/shared'
+import { apiClient } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export interface MonitorCheck {

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { MonitorCard } from './MonitorCard'
-import type { Monitor } from '@allstak/shared'
+import type { Monitor } from '@seestack/shared'
 
 interface MonitorGridProps {
   monitors: Monitor[]

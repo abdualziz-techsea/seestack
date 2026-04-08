@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Monitor } from '@allstak/shared'
+import type { Monitor } from '@seestack/shared'
 
 interface MonitorModalProps {
   monitor?: Monitor | null

@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import type { Monitor } from '@allstak/shared'
+import type { Monitor } from '@seestack/shared'
 
 const statusColors: Record<string, string> = {
   up: 'var(--success)',

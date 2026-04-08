@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AllStak — Design System v5</title>
+  <title>SeeStack — Design System v5</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     /* ==========================================================================
-       AllStak Design System v5
+       SeeStack Design System v5
        Inspired by: Supabase v0 · Railway · Resend · Framer · Linear · Raycast
        ========================================================================== */
 
@@ -669,7 +669,7 @@
     .hd-demo-nav a.on{color:var(--text-primary);background:var(--bg-active)}
 
     /* ==========================================================================
-       ALLSTAK COMPONENT DEMOS
+       SEESTACK COMPONENT DEMOS
        ========================================================================== */
     .err-card{
       background:var(--bg-raised);border:1px solid var(--border);
@@ -807,7 +807,7 @@
 <body>
 <!-- ==================== SIDEBAR ==================== -->
 <aside class="sb">
-  <div class="sb-logo"><span class="sb-mark">A</span>AllStak</div>
+  <div class="sb-logo"><span class="sb-mark">A</span>SeeStack</div>
   <nav>
     <div class="sb-sec">Foundation</div>
     <a href="#colors" class="on"><span class="ic">&#9632;</span>Colors</a>
@@ -855,7 +855,7 @@
 <!-- ==================== MAIN ==================== -->
 <main class="mn">
   <header class="hd">
-    <span class="hd-t"><strong>AllStak</strong> &nbsp;Design System v5</span>
+    <span class="hd-t"><strong>SeeStack</strong> &nbsp;Design System v5</span>
     <div class="tt">
       <button class="on" onclick="setTheme('dark')">Dark</button>
       <button onclick="setTheme('light')">Light</button>
@@ -1061,7 +1061,7 @@
         </div>
       </div>
       <div class="sub"><div class="lbl">Header bar</div>
-        <div class="hd-demo"><div class="hd-demo-logo"><span style="width:20px;height:20px;background:var(--gradient-brand);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">A</span>AllStak</div><div class="hd-demo-nav"><a href="#" class="on">Errors</a><a href="#">Logs</a><a href="#">Monitors</a></div><span class="av av-s">JD</span></div>
+        <div class="hd-demo"><div class="hd-demo-logo"><span style="width:20px;height:20px;background:var(--gradient-brand);border-radius:5px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-weight:700">A</span>SeeStack</div><div class="hd-demo-nav"><a href="#" class="on">Errors</a><a href="#">Logs</a><a href="#">Monitors</a></div><span class="av av-s">JD</span></div>
       </div>
       <div class="sub"><div class="lbl">Breadcrumb</div><div class="bc"><a href="#">Errors</a><span class="sep">/</span><a href="#">Production</a><span class="sep">/</span><span class="cur">NullPointerException</span></div></div>
       <div class="sub"><div class="lbl">Tabs</div><div class="tab-bar"><button class="tab-i on">Overview</button><button class="tab-i">Stack Trace</button><button class="tab-i">Events</button><button class="tab-i">User Context</button></div></div>
@@ -1141,8 +1141,8 @@
       <div class="sub">
         <div class="cblk">
           <div class="cblk-head"><span>bash</span><button class="cblk-copy">Copy</button></div>
-          <pre>npm install @allstak/sdk --save
-allstak init --project my-app</pre>
+          <pre>npm install @seestack/sdk --save
+seestack init --project my-app</pre>
         </div>
       </div>
     </section>
@@ -1294,21 +1294,21 @@ allstak init --project my-app</pre>
             <!-- Frame 1 — crash point -->
             <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 20px;border-left:3px solid var(--primary);background:var(--primary-ghost)">
               <div style="flex:1;min-width:0">
-                <div style="font-family:var(--font-mono);font-size:var(--text-sm);font-weight:500;color:var(--text-primary)">at com.allstak.payment.<strong>PaymentService.getEmail</strong>(PaymentService.java:42)</div>
+                <div style="font-family:var(--font-mono);font-size:var(--text-sm);font-weight:500;color:var(--text-primary)">at com.seestack.payment.<strong>PaymentService.getEmail</strong>(PaymentService.java:42)</div>
               </div>
               <span class="bdg bdg-success" style="height:18px;padding:0 6px;font-size:9px;flex-shrink:0">Application</span>
             </div>
             <!-- Frame 2 -->
             <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 20px;border-left:3px solid transparent">
               <div style="flex:1;min-width:0">
-                <div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--text-secondary)">at com.allstak.payment.<strong>PaymentProcessor.processCharge</strong>(PaymentProcessor.java:118)</div>
+                <div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--text-secondary)">at com.seestack.payment.<strong>PaymentProcessor.processCharge</strong>(PaymentProcessor.java:118)</div>
               </div>
               <span class="bdg bdg-success" style="height:18px;padding:0 6px;font-size:9px;flex-shrink:0">Application</span>
             </div>
             <!-- Frame 3 -->
             <div style="display:flex;align-items:flex-start;gap:10px;padding:8px 20px;border-left:3px solid transparent">
               <div style="flex:1;min-width:0">
-                <div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--text-secondary)">at com.allstak.api.<strong>PaymentController.handlePayment</strong>(PaymentController.java:67)</div>
+                <div style="font-family:var(--font-mono);font-size:var(--text-sm);color:var(--text-secondary)">at com.seestack.api.<strong>PaymentController.handlePayment</strong>(PaymentController.java:67)</div>
               </div>
               <span class="bdg bdg-success" style="height:18px;padding:0 6px;font-size:9px;flex-shrink:0">Application</span>
             </div>
@@ -1766,7 +1766,7 @@ allstak init --project my-app</pre>
               <span style="font-size:var(--text-lg);font-weight:700;letter-spacing:-0.015em">Production App</span>
               <span class="bdg bdg-success" style="margin-left:auto"><span class="bdg-dot"></span>Healthy</span>
             </div>
-            <div style="font-size:var(--text-sm);color:var(--text-tertiary);margin-left:20px">allstak/production-app &middot; Last deploy 2h ago</div>
+            <div style="font-size:var(--text-sm);color:var(--text-tertiary);margin-left:20px">seestack/production-app &middot; Last deploy 2h ago</div>
           </div>
           <!-- Mini metrics -->
           <div style="display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)">
@@ -2238,15 +2238,15 @@ allstak init --project my-app</pre>
       <div class="lp-wrap">
         <!-- HERO -->
         <div class="lp-hero lp-reveal">
-          <span class="lp-badge">AllStak Features</span>
+          <span class="lp-badge">SeeStack Features</span>
           <h3 class="lp-headline">From error to resolution,<br>as one team</h3>
-          <p class="lp-subtitle">AllStak captures every production error, gives your team the full investigation context, and keeps collaboration attached to the issue &mdash; so nothing gets lost between tools</p>
+          <p class="lp-subtitle">SeeStack captures every production error, gives your team the full investigation context, and keeps collaboration attached to the issue &mdash; so nothing gets lost between tools</p>
         </div>
 
         <!-- CONNECTED ISSUE THREAD — visual continuity marker -->
         <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;padding:0 4px;flex-wrap:wrap" class="lp-reveal">
           <span class="mu-dot" style="background:var(--danger);box-shadow:0 0 5px rgba(247,95,95,0.3)"></span>
-          <span style="font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-tertiary)">Following one issue through AllStak:</span>
+          <span style="font-family:var(--font-mono);font-size:var(--text-xs);color:var(--text-tertiary)">Following one issue through SeeStack:</span>
           <span style="font-family:var(--font-mono);font-size:var(--text-xs);font-weight:600;color:var(--danger)">ISS-1042</span>
           <span class="mu-chip" style="background:var(--danger-ghost);color:var(--danger)">NullPointerException</span>
           <span class="mu-chip" style="background:var(--bg-active);color:var(--text-tertiary)">production</span>
@@ -2471,7 +2471,7 @@ allstak init --project my-app</pre>
             </div>
             <div class="lp-card-body">
               <div class="lp-card-title">Resolution Workflow</div>
-              <div class="lp-card-desc">Move from detection to fix without leaving AllStak. Track time to resolve, link PRs, and confirm the issue stays closed.</div>
+              <div class="lp-card-desc">Move from detection to fix without leaving SeeStack. Track time to resolve, link PRs, and confirm the issue stays closed.</div>
             </div>
           </div>
 
@@ -2606,7 +2606,7 @@ allstak init --project my-app</pre>
 
         <!-- ==================== METRICS / VALUE ==================== -->
         <div style="text-align:center;margin-bottom:28px" class="lp-reveal">
-          <span class="lp-badge">Why AllStak</span>
+          <span class="lp-badge">Why SeeStack</span>
           <h3 class="lp-headline" style="font-size:30px">Ship with confidence</h3>
           <p class="lp-subtitle">Measurable improvements to your engineering workflow from day one</p>
         </div>
@@ -2637,7 +2637,7 @@ allstak init --project my-app</pre>
         <div style="text-align:center;margin-bottom:36px" class="lp-reveal">
           <span class="lp-badge">How It Works</span>
           <h3 class="lp-headline" style="font-size:30px">From signal to resolution</h3>
-          <p class="lp-subtitle">AllStak closes the loop between detection and fix</p>
+          <p class="lp-subtitle">SeeStack closes the loop between detection and fix</p>
         </div>
         <div class="lp-steps">
           <div class="lp-step lp-reveal">
@@ -2666,7 +2666,7 @@ allstak init --project my-app</pre>
         <div style="text-align:center;margin-bottom:28px" class="lp-reveal">
           <span class="lp-badge">Integrations</span>
           <h3 class="lp-headline" style="font-size:30px">Works with your stack</h3>
-          <p class="lp-subtitle">Connect AllStak to the tools your team already uses</p>
+          <p class="lp-subtitle">Connect SeeStack to the tools your team already uses</p>
         </div>
         <div class="lp-int-grid">
           <div class="lp-int-card lp-reveal">

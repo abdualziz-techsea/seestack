@@ -1,13 +1,13 @@
 import { useEffect } from 'react'
 import { useAuthStore } from '@/store/auth.store'
-import { apiClient } from '@allstak/shared'
+import { apiClient } from '@seestack/shared'
 
 export function useAuth() {
   const { user, org, currentProject, projects, accessToken, setAuth, setCurrentProject, logout } =
     useAuthStore()
 
   useEffect(() => {
-    const token = localStorage.getItem('allstak_token')
+    const token = localStorage.getItem('seestack_token')
     if (token && !user) {
       // Decode JWT to get basic user info
       try {
@@ -52,11 +52,11 @@ export function useAuth() {
           })
           .catch(() => {
             // Token expired or invalid — clear and redirect
-            localStorage.removeItem('allstak_token')
+            localStorage.removeItem('seestack_token')
           })
       } catch {
         // Invalid token format
-        localStorage.removeItem('allstak_token')
+        localStorage.removeItem('seestack_token')
       }
     }
   }, [])
@@ -66,7 +66,7 @@ export function useAuth() {
     org,
     projects,
     currentProject,
-    isAuthenticated: !!accessToken || !!localStorage.getItem('allstak_token'),
+    isAuthenticated: !!accessToken || !!localStorage.getItem('seestack_token'),
     setAuth,
     setCurrentProject,
     logout,

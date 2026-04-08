@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { billingApi } from '@allstak/shared'
+import { billingApi } from '@seestack/shared'
 
 /**
  * Fetches the authoritative plan price from the backend.

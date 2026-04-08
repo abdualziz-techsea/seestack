@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import type { LogEntry } from '@allstak/shared'
+import type { LogEntry } from '@seestack/shared'
 import { LogMetadataExpand } from './LogMetadataExpand'
 
 const levelStyles: Record<string, { bg: string; color: string; fontWeight?: number }> = {

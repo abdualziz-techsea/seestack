@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 import { Search } from 'lucide-react'
 
 interface ErrorFilterBarProps {

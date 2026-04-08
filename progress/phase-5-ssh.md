@@ -10,7 +10,7 @@ Completed: 2026-03-27
 - [x] SSH server config CRUD (POST/GET/PUT/DELETE /api/v1/ssh/servers)
 - [x] AES-256-GCM encryption for private keys at rest (SshEncryptionService)
 - [x] WebSocket terminal session (/api/v1/ssh/terminal via Apache SSHD)
-- [x] Audit log writer to ClickHouse via Kafka (allstak.ssh-audit topic)
+- [x] Audit log writer to ClickHouse via Kafka (seestack.ssh-audit topic)
 - [x] Audit log query endpoint (GET /api/v1/ssh/servers/{id}/audit)
 - [x] Unit tests for encryption service (8 tests)
 

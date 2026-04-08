@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { alertsApi, type CreateAlertRuleRequest } from '@allstak/shared'
+import { alertsApi, type CreateAlertRuleRequest } from '@seestack/shared'
 
 export function useCreateAlertRule() {
   const queryClient = useQueryClient()

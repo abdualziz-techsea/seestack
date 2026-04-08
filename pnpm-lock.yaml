@@ -33,7 +33,7 @@ importers:
 
   packages/web:
     dependencies:
-      '@allstak/shared':
+      '@seestack/shared':
         specifier: workspace:*
         version: link:../shared
       '@tanstack/react-query':

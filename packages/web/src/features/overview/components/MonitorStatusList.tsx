@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { useMonitors } from '../../monitors/hooks/useMonitors'
-import type { Monitor } from '@allstak/shared'
+import type { Monitor } from '@seestack/shared'
 
 const statusColors: Record<string, string> = { up: 'var(--success)', down: 'var(--danger)', degraded: 'var(--warning)' }
 const msColor = (ms: number) => ms > 500 ? 'var(--danger)' : ms > 300 ? 'var(--warning)' : 'var(--success)'

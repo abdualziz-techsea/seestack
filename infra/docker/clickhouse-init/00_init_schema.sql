@@ -1,8 +1,8 @@
 -- ClickHouse initialization — runs on first container startup
 
-CREATE DATABASE IF NOT EXISTS allstak;
+CREATE DATABASE IF NOT EXISTS seestack;
 
-CREATE TABLE IF NOT EXISTS allstak.errors
+CREATE TABLE IF NOT EXISTS seestack.errors
 (
     id              UUID            DEFAULT generateUUIDv4(),
     project_id      UUID            NOT NULL,
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS allstak.errors
 ORDER BY (project_id, timestamp)
 TTL toDateTime(timestamp) + INTERVAL 30 DAY;
 
-CREATE TABLE IF NOT EXISTS allstak.logs
+CREATE TABLE IF NOT EXISTS seestack.logs
 (
     id         UUID          DEFAULT generateUUIDv4(),
     project_id UUID          NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS allstak.logs
 ORDER BY (project_id, timestamp)
 TTL toDateTime(timestamp) + INTERVAL 14 DAY;
 
-CREATE TABLE IF NOT EXISTS allstak.monitor_checks
+CREATE TABLE IF NOT EXISTS seestack.monitor_checks
 (
     monitor_id       UUID          NOT NULL,
     project_id       UUID          NOT NULL,
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS allstak.monitor_checks
 ORDER BY (monitor_id, timestamp)
 TTL toDateTime(timestamp) + INTERVAL 90 DAY;
 
-CREATE TABLE IF NOT EXISTS allstak.ssh_audit_logs
+CREATE TABLE IF NOT EXISTS seestack.ssh_audit_logs
 (
     id         UUID          DEFAULT generateUUIDv4(),
     server_id  UUID          NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS allstak.ssh_audit_logs
 ORDER BY (project_id, timestamp)
 TTL toDateTime(timestamp) + INTERVAL 90 DAY;
 
-CREATE TABLE IF NOT EXISTS allstak.replay_events
+CREATE TABLE IF NOT EXISTS seestack.replay_events
 (
     id           UUID          DEFAULT generateUUIDv4(),
     project_id   UUID          NOT NULL,

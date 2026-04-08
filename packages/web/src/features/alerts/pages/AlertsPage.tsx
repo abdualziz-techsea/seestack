@@ -6,9 +6,9 @@ import { TimeAgo } from '@/components/shared/TimeAgo'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { useAlertRules } from '../hooks/useAlertRules'
 import { useCreateAlertRule } from '../hooks/useCreateAlertRule'
-import { alertsApi } from '@allstak/shared'
+import { alertsApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
-import type { AlertRule } from '@allstak/shared'
+import type { AlertRule } from '@seestack/shared'
 
 const TRIGGER_TYPES = [
   'error_spike',

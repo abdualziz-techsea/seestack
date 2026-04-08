@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { sshApi } from '@allstak/shared'
+import { sshApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useSshServers() {

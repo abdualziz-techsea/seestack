@@ -1,4 +1,4 @@
-# AllStak SDK Guidelines
+# SeeStack SDK Guidelines
 
 > **Version:** 1.0.0
 > **Last Updated:** 2026-03-31
@@ -33,7 +33,7 @@
 
 ## 1. Overview
 
-AllStak is a full-stack observability and DevOps platform. The SDK is the client-side library that instruments applications to send telemetry data to the AllStak backend over HTTP.
+SeeStack is a full-stack observability and DevOps platform. The SDK is the client-side library that instruments applications to send telemetry data to the SeeStack backend over HTTP.
 
 ### What the SDK solves
 
@@ -73,7 +73,7 @@ The following are backend-only (management plane) and are **not** SDK concerns:
 All SDK ingestion requests **must** include the following header:
 
 ```
-X-AllStak-Key: <raw-api-key>
+X-SeeStack-Key: <raw-api-key>
 ```
 
 The backend validates this key by:
@@ -89,16 +89,16 @@ The SDK does **not** need to hash the key. Send the raw key as-is.
 
 ```http
 POST /ingest/v1/errors HTTP/1.1
-Host: <your-allstak-host>
+Host: <your-seestack-host>
 Content-Type: application/json
-X-AllStak-Key: allstak_live_abc123xyz...
+X-SeeStack-Key: seestack_live_abc123xyz...
 ```
 
 ### Authentication Scope
 
 | Route Pattern | Auth Method |
 |---|---|
-| `/ingest/v1/**` | `X-AllStak-Key` header |
+| `/ingest/v1/**` | `X-SeeStack-Key` header |
 | `/api/v1/**` | OAuth2 Bearer JWT (management — not SDK) |
 | `/actuator/health` | None |
 
@@ -184,7 +184,7 @@ The SDK must **never** cause the host application to crash or throw an unhandled
 try {
   sdk.capture(event)
 } catch (anything) {
-  sdkLogger.debug("AllStak SDK: failed to capture event", error)
+  sdkLogger.debug("SeeStack SDK: failed to capture event", error)
   // do NOT rethrow
 }
 ```
@@ -195,8 +195,8 @@ The SDK must be initialized **once** at application startup with at minimum:
 
 ```json
 {
-  "apiKey": "allstak_live_...",
-  "host": "https://your-allstak-instance.com"
+  "apiKey": "seestack_live_...",
+  "host": "https://your-seestack-instance.com"
 }
 ```
 
@@ -231,7 +231,7 @@ POST /ingest/v1/errors
 #### When to Send
 
 - An unhandled exception is thrown and caught by a global error handler
-- The developer explicitly calls `AllStak.captureError(exception)`
+- The developer explicitly calls `SeeStack.captureError(exception)`
 - A caught exception is explicitly reported
 
 #### Payload Structure
@@ -282,7 +282,7 @@ The backend groups errors by **fingerprint**, computed from `exceptionClass` + n
 
 ```json
 POST /ingest/v1/errors
-X-AllStak-Key: allstak_live_abc123
+X-SeeStack-Key: seestack_live_abc123
 
 {
   "exceptionClass": "TypeError",
@@ -319,7 +319,7 @@ POST /ingest/v1/logs
 
 #### When to Send
 
-- The developer calls `AllStak.log(level, message, metadata)`
+- The developer calls `SeeStack.log(level, message, metadata)`
 - The SDK intercepts calls to the platform's native logger (optional integration)
 - Automatic breadcrumb capture before an error (recommended pattern)
 
@@ -364,7 +364,7 @@ Logs do not have a batch endpoint. Send one log per HTTP request. Buffer in-memo
 
 ```json
 POST /ingest/v1/logs
-X-AllStak-Key: allstak_live_abc123
+X-SeeStack-Key: seestack_live_abc123
 
 {
   "level": "warn",
@@ -463,7 +463,7 @@ send({
 
 ```json
 POST /ingest/v1/http-requests
-X-AllStak-Key: allstak_live_abc123
+X-SeeStack-Key: seestack_live_abc123
 
 {
   "requests": [
@@ -569,9 +569,9 @@ The backend does not validate specific eventType strings — use a consistent na
 
 The backend has an `InputMaskingService` that masks sensitive data server-side, but the SDK **must also mask client-side** before transmission:
 
-- **Input fields**: Never capture the value of `<input type="password">`, credit card fields, or any element with `data-allstak-mask` attribute
+- **Input fields**: Never capture the value of `<input type="password">`, credit card fields, or any element with `data-seestack-mask` attribute
 - **Replace** sensitive values with `"[MASKED]"` in `eventData` before sending
-- **Network events**: Strip `Authorization`, `Cookie`, `X-AllStak-Key` headers from captured request metadata
+- **Network events**: Strip `Authorization`, `Cookie`, `X-SeeStack-Key` headers from captured request metadata
 - **URLs**: Strip query parameters from captured URLs if they contain tokens or sensitive data (e.g., `?token=`, `?key=`)
 
 #### Response
@@ -591,7 +591,7 @@ HTTP/1.1 202 Accepted
 
 ```json
 POST /ingest/v1/replay
-X-AllStak-Key: allstak_live_abc123
+X-SeeStack-Key: seestack_live_abc123
 
 {
   "fingerprint": "sess_8f3a2c1b",
@@ -679,7 +679,7 @@ HTTP/1.1 202 Accepted
 
 ```json
 POST /ingest/v1/heartbeat
-X-AllStak-Key: allstak_live_abc123
+X-SeeStack-Key: seestack_live_abc123
 
 {
   "slug": "daily-report-generator",
@@ -693,7 +693,7 @@ X-AllStak-Key: allstak_live_abc123
 
 ```json
 POST /ingest/v1/heartbeat
-X-AllStak-Key: allstak_live_abc123
+X-SeeStack-Key: seestack_live_abc123
 
 {
   "slug": "payment-reconciliation",
@@ -815,7 +815,7 @@ The backend computes rollout percent server-side using `userId` as the input to 
 
 All ingestion endpoints are at `/ingest/v1/`. All management endpoints are at `/api/v1/`.
 
-### Ingestion Endpoints (SDK scope — require `X-AllStak-Key`)
+### Ingestion Endpoints (SDK scope — require `X-SeeStack-Key`)
 
 | Method | Path | Description | Max Payload |
 |---|---|---|---|
@@ -1116,12 +1116,12 @@ The SDK must ensure that replay events within a single flush batch are **sorted 
 ```
 Send attempt fails
   ├─ 401 Unauthorized
-  │     → Log warning: "AllStak SDK: invalid API key — disabling SDK"
+  │     → Log warning: "SeeStack SDK: invalid API key — disabling SDK"
   │     → Disable all SDK operations for session
   │     → Do NOT retry
   │
   ├─ 400 Bad Request
-  │     → Log debug: "AllStak SDK: malformed payload — dropping event"
+  │     → Log debug: "SeeStack SDK: malformed payload — dropping event"
   │     → Discard event
   │     → Do NOT retry
   │
@@ -1196,12 +1196,12 @@ The SDK must actively prevent the following from reaching the backend:
 
 **Session Replay:**
 - Mask any `<input type="password">` → capture element reference, replace value with `"[MASKED]"`
-- Mask any element with `data-allstak-mask` attribute
-- Mask any element with CSS class `allstak-mask`
+- Mask any element with `data-seestack-mask` attribute
+- Mask any element with CSS class `seestack-mask`
 - Do not capture clipboard events (paste operations may contain sensitive data)
 
 **HTTP Request Monitoring:**
-- Strip the following request headers before logging: `Authorization`, `Cookie`, `X-AllStak-Key`, `X-API-Key`, `X-Auth-Token`
+- Strip the following request headers before logging: `Authorization`, `Cookie`, `X-SeeStack-Key`, `X-API-Key`, `X-Auth-Token`
 - Strip query parameters matching patterns: `token`, `key`, `secret`, `password`, `auth`, `api_key`
 - Replace stripped values with `"[FILTERED]"`
 
@@ -1243,27 +1243,27 @@ These rules are non-negotiable for all SDK implementations across all languages 
 
 ```
 // Minimum required API
-AllStak.init(config)
-AllStak.captureError(exception, context?)
-AllStak.captureLog(level, message, metadata?)
-AllStak.flush() → Promise<void>
-AllStak.setUser(user)        // sets default user context for subsequent events
-AllStak.clearUser()          // clears user context
+SeeStack.init(config)
+SeeStack.captureError(exception, context?)
+SeeStack.captureLog(level, message, metadata?)
+SeeStack.flush() → Promise<void>
+SeeStack.setUser(user)        // sets default user context for subsequent events
+SeeStack.clearUser()          // clears user context
 
 // HTTP monitoring (automatic instrumentation)
-AllStak.instrumentHttp()     // patches fetch/XMLHttpRequest/http.request
+SeeStack.instrumentHttp()     // patches fetch/XMLHttpRequest/http.request
 
 // Session replay (browser SDK only)
-AllStak.startReplay(sessionId, fingerprint?)
-AllStak.stopReplay()
+SeeStack.startReplay(sessionId, fingerprint?)
+SeeStack.stopReplay()
 
 // Cron monitoring
-AllStak.startJob(slug) → JobHandle
-AllStak.finishJob(handle, status, message?)
+SeeStack.startJob(slug) → JobHandle
+SeeStack.finishJob(handle, status, message?)
 
 // Feature flags (server-side SDK only)
-AllStak.getFlag(key, userId?, attributes?) → FlagResult
-AllStak.getAllFlags(userId?, attributes?) → FlagsMap
+SeeStack.getFlag(key, userId?, attributes?) → FlagResult
+SeeStack.getAllFlags(userId?, attributes?) → FlagsMap
 ```
 
 ---
@@ -1275,7 +1275,7 @@ AllStak.getAllFlags(userId?, attributes?) → FlagsMap
 ```
 Application Code
      │
-     │  AllStak.captureError(err)
+     │  SeeStack.captureError(err)
      ▼
 SDK (in-process)
      │  1. Wrap in try/catch
@@ -1288,28 +1288,28 @@ SDK (in-process)
      │  5. Dequeue item from buffer
      │  6. Build HTTP request:
      │       POST /ingest/v1/errors
-     │       X-AllStak-Key: allstak_live_abc123
+     │       X-SeeStack-Key: seestack_live_abc123
      │       Content-Type: application/json
      │       Timeout: 3s
      ▼
-AllStak Backend (Spring Boot)
+SeeStack Backend (Spring Boot)
      │
      │  7. ApiKeyAuthFilter:
      │       SHA-256(raw key) → lookup in DB
      │       Extract projectId from key record
-     │       Set request attribute: allstak.projectId
+     │       Set request attribute: seestack.projectId
      │
      │  8. ErrorIngestController:
      │       Validate request body (Jakarta validation)
      │       Compute error fingerprint (exceptionClass + stack)
      │       Build ErrorKafkaEvent
-     │       Publish to Kafka topic: allstak.errors
+     │       Publish to Kafka topic: seestack.errors
      │       Partition key: fingerprint
      │       Return 202 Accepted
      │
      ▼
 Apache Kafka
-     │  Topic: allstak.errors (3 partitions)
+     │  Topic: seestack.errors (3 partitions)
      │  Retained for configured retention period
      ▼
 Kafka Consumer (ErrorKafkaConsumer)
@@ -1333,7 +1333,7 @@ try {
   const user = await getUser(userId)
   processOrder(user)
 } catch (e) {
-  AllStak.captureError(e, {
+  SeeStack.captureError(e, {
     environment: 'production',
     release: 'v2.3.1',
     user: { id: currentUser.id, email: currentUser.email }
@@ -1345,8 +1345,8 @@ try {
 
 ```http
 POST /ingest/v1/errors HTTP/1.1
-Host: allstak.mycompany.com
-X-AllStak-Key: allstak_live_kG9qR2mNpX7vL4wT
+Host: seestack.mycompany.com
+X-SeeStack-Key: seestack_live_kG9qR2mNpX7vL4wT
 Content-Type: application/json
 Connection: keep-alive
 
@@ -1388,7 +1388,7 @@ Content-Type: application/json
 
 **Step 4: Event flows through Kafka → ClickHouse + PostgreSQL**
 
-The error is now queryable at `GET /api/v1/errors?projectId=...` and visible in the AllStak dashboard. If an alert rule exists for this project matching the error severity, a notification is dispatched via configured channels (email, Slack, Discord, webhook).
+The error is now queryable at `GET /api/v1/errors?projectId=...` and visible in the SeeStack dashboard. If an alert rule exists for this project matching the error severity, a notification is dispatched via configured channels (email, Slack, Discord, webhook).
 
 ---
 
@@ -1406,7 +1406,7 @@ Use this checklist when building a new SDK. Every item is derived from actual ba
 
 ### Authentication
 
-- [ ] All ingestion requests include `X-AllStak-Key: <raw key>` header
+- [ ] All ingestion requests include `X-SeeStack-Key: <raw key>` header
 - [ ] `Content-Type: application/json` is set on all POST requests
 - [ ] On `401` response: disable SDK, emit warning, do NOT retry
 - [ ] API key is never logged to console in non-debug mode
@@ -1440,7 +1440,7 @@ Use this checklist when building a new SDK. Every item is derived from actual ba
 - [ ] `durationMs` is measured accurately (start time before request, end time after response)
 - [ ] `requestSize` and `responseSize` are measured in bytes
 - [ ] `path` has query parameters stripped
-- [ ] `Authorization`, `Cookie`, `X-AllStak-Key` headers are NOT forwarded in metadata
+- [ ] `Authorization`, `Cookie`, `X-SeeStack-Key` headers are NOT forwarded in metadata
 - [ ] Requests are batched up to 100 and sent to `POST /ingest/v1/http-requests`
 - [ ] `timestamp` is ISO-8601 UTC format (not local time)
 
@@ -1451,7 +1451,7 @@ Use this checklist when building a new SDK. Every item is derived from actual ba
 - [ ] `eventData` is serialized as a **JSON string** (not an object)
 - [ ] Events are sorted by `timestampMillis` ascending within each batch
 - [ ] `<input type="password">` values are replaced with `"[MASKED]"` before sending
-- [ ] Elements with `data-allstak-mask` attribute are masked
+- [ ] Elements with `data-seestack-mask` attribute are masked
 - [ ] Replay events are sent to `POST /ingest/v1/replay`
 - [ ] Batch flushed every 5 seconds or at 50 events
 
@@ -1512,4 +1512,4 @@ Use this checklist when building a new SDK. Every item is derived from actual ba
 
 ---
 
-*This document was generated from direct analysis of the AllStak backend source code. All endpoint paths, field names, enum values, and validation rules are derived from actual implementation, not inferred from convention.*
+*This document was generated from direct analysis of the SeeStack backend source code. All endpoint paths, field names, enum values, and validation rules are derived from actual implementation, not inferred from convention.*

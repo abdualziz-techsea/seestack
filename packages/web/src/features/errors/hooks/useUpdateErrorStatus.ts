@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { errorsApi, type ErrorStatus } from '@allstak/shared'
+import { errorsApi, type ErrorStatus } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useUpdateErrorStatus() {

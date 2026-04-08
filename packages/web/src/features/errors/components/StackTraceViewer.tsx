@@ -1,4 +1,4 @@
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 
 interface StackFrame {
   file: string

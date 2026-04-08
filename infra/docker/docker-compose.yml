@@ -3,10 +3,10 @@ services:
   # ── PostgreSQL 16 ────────────────────────────────────────────
   postgres:
     image: postgres:16-alpine
-    container_name: allstak-postgres
+    container_name: seestack-postgres
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-allstak}
-      POSTGRES_USER: ${POSTGRES_USER:-allstak}
+      POSTGRES_DB: ${POSTGRES_DB:-seestack}
+      POSTGRES_USER: ${POSTGRES_USER:-seestack}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
     ports:
       - "5432:5432"
@@ -14,21 +14,21 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./postgres-init:/docker-entrypoint-initdb.d
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-allstak} -d ${POSTGRES_DB:-allstak}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-seestack} -d ${POSTGRES_DB:-seestack}"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 10s
     restart: unless-stopped
     networks:
-      - allstak-net
+      - seestack-net
 
   # ── ClickHouse 24 ────────────────────────────────────────────
   clickhouse:
     image: clickhouse/clickhouse-server:24-alpine
-    container_name: allstak-clickhouse
+    container_name: seestack-clickhouse
     environment:
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-allstak}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-seestack}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
     ports:
@@ -45,12 +45,12 @@ services:
       start_period: 15s
     restart: unless-stopped
     networks:
-      - allstak-net
+      - seestack-net
 
   # ── Kafka (KRaft mode — no ZooKeeper) ───────────────────────
   kafka:
     image: apache/kafka:3.8.0
-    container_name: allstak-kafka
+    container_name: seestack-kafka
     environment:
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
@@ -65,7 +65,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
       KAFKA_LOG_RETENTION_HOURS: 168
-      CLUSTER_ID: allstak-kafka-cluster-1
+      CLUSTER_ID: seestack-kafka-cluster-1
     ports:
       - "9092:9092"
     volumes:
@@ -78,12 +78,12 @@ services:
       start_period: 30s
     restart: unless-stopped
     networks:
-      - allstak-net
+      - seestack-net
 
   # ── Redis 7 ──────────────────────────────────────────────────
   redis:
     image: redis:7-alpine
-    container_name: allstak-redis
+    container_name: seestack-redis
     command: redis-server --requirepass ${REDIS_PASSWORD:-}
     ports:
       - "6379:6379"
@@ -97,17 +97,17 @@ services:
       start_period: 5s
     restart: unless-stopped
     networks:
-      - allstak-net
+      - seestack-net
 
   # ── Keycloak 25 ──────────────────────────────────────────────
   keycloak:
     image: quay.io/keycloak/keycloak:25.0
-    container_name: allstak-keycloak
+    container_name: seestack-keycloak
     command: start-dev --import-realm
     environment:
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-allstak}
-      KC_DB_USERNAME: ${POSTGRES_USER:-allstak}
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-seestack}
+      KC_DB_USERNAME: ${POSTGRES_USER:-seestack}
       KC_DB_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       KC_DB_SCHEMA: keycloak
       KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN:-admin}
@@ -129,19 +129,19 @@ services:
       start_period: 60s
     restart: unless-stopped
     networks:
-      - allstak-net
+      - seestack-net
 
-  # ── AllStak Backend ──────────────────────────────────────────
+  # ── SeeStack Backend ──────────────────────────────────────────
   backend:
     build:
       context: ../../backend
       dockerfile: Dockerfile
-    container_name: allstak-backend
+    container_name: seestack-backend
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
-      POSTGRES_DB: ${POSTGRES_DB:-allstak}
-      POSTGRES_USER: ${POSTGRES_USER:-allstak}
+      POSTGRES_DB: ${POSTGRES_DB:-seestack}
+      POSTGRES_USER: ${POSTGRES_USER:-seestack}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -149,16 +149,16 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:19092
       CLICKHOUSE_HOST: clickhouse
       CLICKHOUSE_PORT: 8123
-      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-allstak}
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-seestack}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
       CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-}
-      KEYCLOAK_ISSUER_URI: http://keycloak:8180/realms/allstak
-      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/allstak/protocol/openid-connect/certs
+      KEYCLOAK_ISSUER_URI: http://keycloak:8180/realms/seestack
+      KEYCLOAK_JWK_URI: http://keycloak:8180/realms/seestack/protocol/openid-connect/certs
       SSH_ENCRYPTION_KEY: ${SSH_ENCRYPTION_KEY:?SSH_ENCRYPTION_KEY is required}
       MOYASER_SECRET_KEY: ${MOYASER_SECRET_KEY:-}
       MOYASER_PUBLIC_KEY: ${MOYASER_PUBLIC_KEY:-}
-      ALLSTAK_BASE_URL: ${ALLSTAK_BASE_URL:-http://localhost:3000}
-      ALLSTAK_BACKEND_URL: ${ALLSTAK_BACKEND_URL:-http://localhost:8080}
+      SEESTACK_BASE_URL: ${SEESTACK_BASE_URL:-http://localhost:3000}
+      SEESTACK_BACKEND_URL: ${SEESTACK_BACKEND_URL:-http://localhost:8080}
     ports:
       - "8080:8080"
     depends_on:
@@ -180,7 +180,7 @@ services:
       start_period: 30s
     restart: unless-stopped
     networks:
-      - allstak-net
+      - seestack-net
 
 volumes:
   postgres_data:
@@ -189,5 +189,5 @@ volumes:
   redis_data:
 
 networks:
-  allstak-net:
+  seestack-net:
     driver: bridge

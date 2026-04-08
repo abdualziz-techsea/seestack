@@ -5,8 +5,8 @@ import ar from './ar.json'
 
 i18n.use(initReactI18next).init({
   resources: { en: { translation: en }, ar: { translation: ar } },
-  lng: localStorage.getItem('allstak-ui')
-    ? JSON.parse(localStorage.getItem('allstak-ui')!).state?.lang ?? 'en'
+  lng: localStorage.getItem('seestack-ui')
+    ? JSON.parse(localStorage.getItem('seestack-ui')!).state?.lang ?? 'en'
     : 'en',
   fallbackLng: 'en',
   interpolation: { escapeValue: false },

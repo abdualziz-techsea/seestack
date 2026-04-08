@@ -1,9 +1,9 @@
-**# Integration Test Report — AllStak Frontend ↔ Backend
+**# Integration Test Report — SeeStack Frontend ↔ Backend
 
 **Date:** 2026-03-29
 **Tester:** Claude Code (automated via Chrome MCP)
 **Branch:** develop
-**Backend:** Docker container `allstak-backend` (Spring Boot 3.x)
+**Backend:** Docker container `seestack-backend` (Spring Boot 3.x)
 **Frontend:** Vite dev server `http://localhost:3001`
 
 ---

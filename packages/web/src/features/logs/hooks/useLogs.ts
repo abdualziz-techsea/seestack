@@ -1,5 +1,5 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import { logsApi, type ListLogsParams } from '@allstak/shared'
+import { logsApi, type ListLogsParams } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 interface UseLogsParams {

@@ -7,16 +7,16 @@ Completed: 2026-03-27
 
 ## Tasks
 
-- [x] Kafka topic: allstak.errors (created in Phase 1 KafkaTopicsConfig)
+- [x] Kafka topic: seestack.errors (created in Phase 1 KafkaTopicsConfig)
 - [x] V11 Flyway migration: error_groups table (fingerprint, status, counts, first/last seen)
-- [x] ApiKeyAuthFilter — validates X-AllStak-Key header on /ingest/** endpoints
+- [x] ApiKeyAuthFilter — validates X-SeeStack-Key header on /ingest/** endpoints
 - [x] ApiKeyService — SHA-256 hashing, DB lookup via ApiKeyRepository (JdbcClient)
 - [x] POST /ingest/v1/errors endpoint (ErrorIngestController)
 - [x] Input validation (@Valid on ErrorIngestRequest)
 - [x] ErrorFingerprintService — SHA-256 of exception class + top 5 app frames
 - [x] ErrorKafkaEvent — typed Kafka message payload record
-- [x] ErrorKafkaConsumer — consumes allstak.errors, manual ack, concurrency=3
-- [x] ErrorClickHouseWriter — writes to allstak.errors ClickHouse table
+- [x] ErrorKafkaConsumer — consumes seestack.errors, manual ack, concurrency=3
+- [x] ErrorClickHouseWriter — writes to seestack.errors ClickHouse table
 - [x] ErrorGroupService — upsert logic (increment or insert), status update
 - [x] GET /api/v1/errors — list with filters (status, level, environment, pagination)
 - [x] GET /api/v1/errors/{fingerprint} — error group detail

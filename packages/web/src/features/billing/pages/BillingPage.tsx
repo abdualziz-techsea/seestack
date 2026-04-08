@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router-dom'
-import { PLAN_PRICES } from '@allstak/shared'
-import type { BillingInvoice, InvoiceStatus } from '@allstak/shared'
+import { PLAN_PRICES } from '@seestack/shared'
+import type { BillingInvoice, InvoiceStatus } from '@seestack/shared'
 import {
   Check, RefreshCw, AlertCircle, CheckCircle2,
   Clock, XCircle, X, CreditCard

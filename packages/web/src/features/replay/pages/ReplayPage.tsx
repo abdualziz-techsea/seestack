@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 import { Play, Pause, SkipBack, SkipForward, Rewind, FastForward, AlertCircle, Globe, Terminal } from 'lucide-react'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { useReplayData } from '../hooks/useReplayData'

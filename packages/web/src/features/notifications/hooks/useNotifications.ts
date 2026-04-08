@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { notificationsApi } from '@allstak/shared'
-import type { NotificationItem } from '@allstak/shared'
+import { notificationsApi } from '@seestack/shared'
+import type { NotificationItem } from '@seestack/shared'
 
 const POLL_INTERVAL_MS = 30_000
 

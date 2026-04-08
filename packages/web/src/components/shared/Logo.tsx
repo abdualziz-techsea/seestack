@@ -17,7 +17,7 @@ export function Logo({ size = 24, showWordmark = false }: LogoProps) {
           className="text-[15px] font-semibold"
           style={{ color: 'var(--text-primary)', letterSpacing: '-0.012em' }}
         >
-          AllStak
+          SeeStack
         </span>
       )}
     </div>

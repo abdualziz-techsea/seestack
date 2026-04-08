@@ -10,12 +10,12 @@ Completed: 2026-03-28
 ### Schema & Config
 - [x] Flyway migration V21: cron_monitors table (PostgreSQL)
 - [x] ClickHouse table: cron_pings (via init SQL + ApplicationRunner)
-- [x] Kafka topic: allstak.cron_pings (3 partitions)
+- [x] Kafka topic: seestack.cron_pings (3 partitions)
 
 ### Ingestion
 - [x] POST /ingest/v1/heartbeat endpoint (API key auth)
 - [x] Input validation (slug required, status must be success|failed)
-- [x] CronPingKafkaProducer — publishes to allstak.cron_pings
+- [x] CronPingKafkaProducer — publishes to seestack.cron_pings
 - [x] CronPingKafkaConsumer → CronPingClickHouseWriter
 
 ### CRUD API

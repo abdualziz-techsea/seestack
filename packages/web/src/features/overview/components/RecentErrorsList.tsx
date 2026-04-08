@@ -4,7 +4,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { TimeAgo } from '@/components/shared/TimeAgo'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { useErrors } from '../../errors/hooks/useErrors'
-import type { ErrorGroup } from '@allstak/shared'
+import type { ErrorGroup } from '@seestack/shared'
 
 export function RecentErrorsList() {
   const { t } = useTranslation()

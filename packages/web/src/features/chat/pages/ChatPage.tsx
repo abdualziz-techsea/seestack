@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
-import { cn, chatApi } from '@allstak/shared'
+import { cn, chatApi } from '@seestack/shared'
 import { Hash, Send, X, Users, MessageSquare, Search, Pin, Plus, Trash2, Edit2, Smile } from 'lucide-react'
 import { TimeAgo } from '@/components/shared/TimeAgo'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
@@ -14,7 +14,7 @@ import { useChatSocket } from '../hooks/useChatSocket'
 import { useMessageActions } from '../hooks/useMessageActions'
 import { usePinnedMessages } from '../hooks/usePinnedMessages'
 import { useChatSearch } from '../hooks/useChatSearch'
-import type { ChatChannel, ChatMessage, MessageReaction } from '@allstak/shared'
+import type { ChatChannel, ChatMessage, MessageReaction } from '@seestack/shared'
 
 const QUICK_EMOJIS = ['👍', '❤️', '😂', '🔥', '🎉', '👀', '✅', '🚀']
 

@@ -100,7 +100,7 @@ export function PaymentModal({ plan, planLabel, amountHalalas, orgId, onClose }:
       element: containerRef.current,
       amount: amountHalalas,
       currency: 'SAR',
-      description: `AllStak ${planLabel} Plan`,
+      description: `SeeStack ${planLabel} Plan`,
       publishable_api_key: publicKey,
       callback_url: callbackUrl,
       methods: ['creditcard'],

@@ -34,6 +34,6 @@ export const useUIStore = create<UIStore>()(
 
       toggleSidebar: () => set((s) => ({ sidebarCollapsed: !s.sidebarCollapsed })),
     }),
-    { name: 'allstak-ui' }
+    { name: 'seestack-ui' }
   )
 )

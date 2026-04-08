@@ -1,6 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from 'react'
 import { useAuthStore } from '@/store/auth.store'
-import type { LogEntry } from '@allstak/shared'
+import type { LogEntry } from '@seestack/shared'
 
 const MAX_LIVE_LOGS = 200
 

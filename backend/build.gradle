@@ -4,7 +4,7 @@ plugins {
     id 'java'
 }
 
-group = 'com.allstak'
+group = 'com.seestack'
 version = '0.0.1-SNAPSHOT'
 
 // NOTE: Targeting Java 17 for local development.

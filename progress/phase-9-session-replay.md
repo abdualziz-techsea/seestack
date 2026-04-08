@@ -8,7 +8,7 @@ Completed: 2026-03-27
 ## Tasks
 
 - [x] ClickHouse table: replay_events (with 30-day TTL)
-- [x] Kafka topic: allstak.replay (3 partitions)
+- [x] Kafka topic: seestack.replay (3 partitions)
 - [x] POST /ingest/v1/replay endpoint (API key auth)
 - [x] Input validation (fingerprint, sessionId, events required)
 - [x] InputMaskingService — password, credit card, sensitive field redaction

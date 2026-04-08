@@ -7,7 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, './src'),
-      '@allstak/shared': resolve(__dirname, '../shared/src'),
+      '@seestack/shared': resolve(__dirname, '../shared/src'),
     },
   },
   server: {

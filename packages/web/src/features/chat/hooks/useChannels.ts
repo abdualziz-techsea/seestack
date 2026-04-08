@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { chatApi } from '@allstak/shared'
+import { chatApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useChannels() {

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { monitorsApi } from '@allstak/shared'
+import { monitorsApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useMonitors() {

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { errorsApi } from '@allstak/shared'
+import { errorsApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 interface UseErrorsParams {

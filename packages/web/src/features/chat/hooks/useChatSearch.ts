@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { chatApi } from '@allstak/shared'
-import type { ChatMessage } from '@allstak/shared'
+import { chatApi } from '@seestack/shared'
+import type { ChatMessage } from '@seestack/shared'
 
 export function useChatSearch(orgId: string | undefined) {
   const [query, setQuery] = useState('')

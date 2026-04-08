@@ -7,7 +7,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { TimeAgo } from '@/components/shared/TimeAgo'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { X } from 'lucide-react'
-import type { ErrorGroup, ErrorStatus } from '@allstak/shared'
+import type { ErrorGroup, ErrorStatus } from '@seestack/shared'
 
 function FilterGroup({ options, value, onChange }: { options: { value: string; label: string }[]; value: string; onChange: (v: string) => void }) {
   return (

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 import { Check, Copy, CheckCircle } from 'lucide-react'
 
 const platforms = [
@@ -61,7 +61,7 @@ export function OnboardingPage() {
           <div>
             <label className="mb-1 block text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>URL slug</label>
             <div className="flex items-center rounded-lg border text-[13px]" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
-              <span className="px-3" style={{ color: 'var(--text-tertiary)' }}>allstak.io/</span>
+              <span className="px-3" style={{ color: 'var(--text-tertiary)' }}>seestack.io/</span>
               <input value={workspace.slug} onChange={(e) => setWorkspace({ ...workspace, slug: e.target.value })} className="flex-1 bg-transparent px-1 py-2 outline-none" style={{ color: 'var(--text-primary)' }} />
             </div>
           </div>
@@ -141,11 +141,11 @@ export function OnboardingPage() {
           </div>
           <div className="rounded-lg border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
             <div className="mb-2 text-[11px] font-medium uppercase" style={{ color: 'var(--text-tertiary)' }}>Install</div>
-            <code className="block text-[13px] font-mono" style={{ color: 'var(--text-primary)' }}>npm install @allstak/sdk</code>
+            <code className="block text-[13px] font-mono" style={{ color: 'var(--text-primary)' }}>npm install @seestack/sdk</code>
           </div>
           <div className="rounded-lg border p-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-elevated)' }}>
             <div className="mb-2 text-[11px] font-medium uppercase" style={{ color: 'var(--text-tertiary)' }}>Initialize</div>
-            <pre className="text-[12px] font-mono" style={{ color: 'var(--text-primary)' }}>{`import AllStak from '@allstak/sdk'\n\nAllStak.init({\n  apiKey: 'ask_live_xxx',\n  environment: 'production'\n})`}</pre>
+            <pre className="text-[12px] font-mono" style={{ color: 'var(--text-primary)' }}>{`import SeeStack from '@seestack/sdk'\n\nSeeStack.init({\n  apiKey: 'ask_live_xxx',\n  environment: 'production'\n})`}</pre>
           </div>
           {eventReceived ? (
             <div className="flex items-center gap-2 rounded-lg p-3" style={{ background: 'var(--success-ghost)', color: 'var(--success)' }}>

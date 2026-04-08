@@ -9,10 +9,10 @@ Completed: 2026-03-27
 
 ### Setup
 - [x] pnpm monorepo initialized
-- [x] @allstak/shared package — all types
-- [x] @allstak/shared package — all API clients
-- [x] @allstak/shared package — utils and constants
-- [x] @allstak/web package — Vite + React 19 + TypeScript
+- [x] @seestack/shared package — all types
+- [x] @seestack/shared package — all API clients
+- [x] @seestack/shared package — utils and constants
+- [x] @seestack/web package — Vite + React 19 + TypeScript
 - [x] Tailwind CSS v4 configured with design tokens
 - [x] TanStack Query client configured
 - [x] Zustand stores (auth, ui, terminal)

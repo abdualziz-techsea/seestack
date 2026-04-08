@@ -1,5 +1,5 @@
 {
-  "name": "@allstak/web",
+  "name": "@seestack/web",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -18,7 +18,7 @@
     "test:chat": "expect-cli -m 'test sending a message with @mention and opening thread panel' -y"
   },
   "dependencies": {
-    "@allstak/shared": "workspace:*",
+    "@seestack/shared": "workspace:*",
     "@tanstack/react-query": "^5.0.0",
     "@tanstack/react-table": "^8.0.0",
     "axios": "^1.7.0",

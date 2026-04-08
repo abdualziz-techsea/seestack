@@ -8,7 +8,7 @@ import '@/i18n'
 import '@/styles/tokens.css'
 
 // Apply stored theme and lang on startup
-const stored = JSON.parse(localStorage.getItem('allstak-ui') ?? '{}')
+const stored = JSON.parse(localStorage.getItem('seestack-ui') ?? '{}')
 const theme = stored?.state?.theme ?? 'dark'
 const lang = stored?.state?.lang ?? 'en'
 document.documentElement.setAttribute('data-theme', theme)

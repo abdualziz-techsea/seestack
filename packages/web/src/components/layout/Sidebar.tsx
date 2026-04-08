@@ -1,6 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 import { useUIStore } from '@/store/ui.store'
 import { Logo } from '@/components/shared/Logo'

@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { chatApi } from '@allstak/shared'
+import { chatApi } from '@seestack/shared'
 
 export function useMessageActions(channelId: string | undefined) {
   const queryClient = useQueryClient()

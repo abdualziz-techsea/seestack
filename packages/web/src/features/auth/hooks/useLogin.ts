@@ -1,15 +1,15 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '@/store/auth.store'
-import { apiClient } from '@allstak/shared'
+import { apiClient } from '@seestack/shared'
 
 // In dev, use the Vite proxy (/auth -> localhost:8180) to avoid CORS.
 // In production, use the configured Keycloak URL.
 const KEYCLOAK_URL = import.meta.env.PROD
   ? (import.meta.env.VITE_KEYCLOAK_URL ?? 'http://localhost:8180')
   : '/auth'
-const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM ?? 'allstak'
-const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'allstak-web'
+const KEYCLOAK_REALM = import.meta.env.VITE_KEYCLOAK_REALM ?? 'seestack'
+const KEYCLOAK_CLIENT_ID = import.meta.env.VITE_KEYCLOAK_CLIENT_ID ?? 'seestack-web'
 
 export function useLogin() {
   const [isLoading, setIsLoading] = useState(false)
@@ -47,7 +47,7 @@ export function useLogin() {
       const accessToken = tokenData.access_token
 
       // Store token so apiClient interceptor can use it
-      localStorage.setItem('allstak_token', accessToken)
+      localStorage.setItem('seestack_token', accessToken)
 
       // 2. Decode JWT for user info
       const payload = JSON.parse(atob(accessToken.split('.')[1]))

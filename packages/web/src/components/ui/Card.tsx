@@ -1,5 +1,5 @@
 import type { HTMLAttributes, ReactNode } from 'react'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 
 interface CardProps extends HTMLAttributes<HTMLDivElement> {
   hover?: boolean

@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { requestsApi } from '@allstak/shared'
+import { requestsApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useHttpRequestStats() {

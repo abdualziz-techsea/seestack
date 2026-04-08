@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { chatApi } from '@allstak/shared'
-import type { ChatMessage } from '@allstak/shared'
+import { chatApi } from '@seestack/shared'
+import type { ChatMessage } from '@seestack/shared'
 
 export function usePinnedMessages(channelId: string | undefined) {
   const query = useQuery({

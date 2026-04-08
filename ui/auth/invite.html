@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AllStak — Team invitation</title>
+<title>SeeStack — Team invitation</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -57,7 +57,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 </head>
 <body>
 <header class="topbar">
-  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">SeeStack</span></a>
   <div class="topbar-right"><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
 </header>
 <main class="main">
@@ -65,7 +65,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
     <div class="inviter-av">MR</div>
     <h1 class="heading"><span data-en="Mohammed invited you to join" data-ar="محمد دعاك للانضمام إلى">Mohammed invited you to join</span></h1>
     <div class="ws-name">Fatura Inc.</div>
-    <p class="subheading"><span data-en="Join your team on AllStak" data-ar="انضم لفريقك على AllStak">Join your team on AllStak</span></p>
+    <p class="subheading"><span data-en="Join your team on SeeStack" data-ar="انضم لفريقك على SeeStack">Join your team on SeeStack</span></p>
     <div class="ws-info">&#128101; <span data-en="12 members &middot; Pro plan" data-ar="12 عضواً &middot; خطة Pro">12 members &middot; Pro plan</span></div>
     <div class="divider"></div>
     <form onsubmit="return handleAccept(event)">
@@ -82,7 +82,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 <footer class="page-footer"><a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a><a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a></footer>
 <script>
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
-function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('seestack-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
 function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
 function togglePw(btn){const i=btn.previousElementSibling;const lang=document.documentElement.lang;if(i.type==='password'){i.type='text';btn.textContent=lang==='ar'?'إخفاء':'Hide'}else{i.type='password';btn.textContent=lang==='ar'?'إظهار':'Show'}}
 function updateStr(ipt){const pw=ipt.value;let s=0;if(pw.length>=8)s++;if(/[A-Z]/.test(pw))s++;if(/[0-9]/.test(pw))s++;if(/[^a-zA-Z0-9]/.test(pw))s++;
@@ -91,7 +91,7 @@ function handleAccept(e){e.preventDefault();let v=true;document.querySelectorAll
 if(!v)return false;const btn=document.getElementById('accept-btn');btn.disabled=true;btn.innerHTML='<span class="spinner"></span>Joining...';
 setTimeout(()=>window.location.href='onboarding.html',1200);return false}
 document.querySelectorAll('.fg input').forEach(i=>i.addEventListener('input',()=>i.closest('.fg').classList.remove('invalid')));
-(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+(function(){const saved=localStorage.getItem('seestack-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
 </script>
 </body>
 </html>

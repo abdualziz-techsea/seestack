@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { sshApi, type CreateSshServerRequest } from '@allstak/shared'
+import { sshApi, type CreateSshServerRequest } from '@seestack/shared'
 
 export function useCreateServer() {
   const queryClient = useQueryClient()

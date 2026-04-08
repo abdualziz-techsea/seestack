@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AllStak — Set up your workspace</title>
+<title>SeeStack — Set up your workspace</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -110,7 +110,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 </head>
 <body>
 <header class="topbar">
-  <a href="#" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <a href="#" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">SeeStack</span></a>
   <div class="topbar-right"><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
 </header>
 
@@ -134,7 +134,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
       <h1 class="heading"><span data-en="Set up your workspace" data-ar="إعداد مساحة العمل">Set up your workspace</span></h1>
       <p class="subheading"><span data-en="You can always change this later" data-ar="يمكنك تغيير هذا لاحقاً">You can always change this later</span></p>
       <div class="fg"><label><span data-en="Workspace name" data-ar="اسم مساحة العمل">Workspace name</span></label><input type="text" value="Fatura Inc." id="ws-name"></div>
-      <div class="fg"><label><span data-en="Workspace URL" data-ar="رابط مساحة العمل">Workspace URL</span></label><div class="input-group"><span class="prefix">allstak.io /</span><input type="text" value="fatura" id="ws-slug"></div><div class="helper"><span data-en="This is your team's unique URL" data-ar="هذا هو الرابط الفريد لفريقك">This is your team's unique URL</span></div></div>
+      <div class="fg"><label><span data-en="Workspace URL" data-ar="رابط مساحة العمل">Workspace URL</span></label><div class="input-group"><span class="prefix">seestack.io /</span><input type="text" value="fatura" id="ws-slug"></div><div class="helper"><span data-en="This is your team's unique URL" data-ar="هذا هو الرابط الفريد لفريقك">This is your team's unique URL</span></div></div>
       <div class="fg"><label><span data-en="Your role" data-ar="دورك">Your role</span></label><select><option>CTO / Tech Lead</option><option>Senior Developer</option><option>Developer</option><option>DevOps Engineer</option><option>Other</option></select></div>
       <div class="fg"><label><span data-en="Team size" data-ar="حجم الفريق">Team size</span></label></div>
       <div class="pills"><button class="pill active" onclick="selectPill(this)">1-5</button><button class="pill" onclick="selectPill(this)">6-15</button><button class="pill" onclick="selectPill(this)">16-50</button><button class="pill" onclick="selectPill(this)">50+</button></div>
@@ -144,7 +144,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
     <!-- STEP 2: Project -->
     <div class="step" id="step-2">
       <h1 class="heading"><span data-en="Create your first project" data-ar="إنشاء مشروعك الأول">Create your first project</span></h1>
-      <p class="subheading"><span data-en="A project connects your app to AllStak" data-ar="المشروع يربط تطبيقك بـ AllStak">A project connects your app to AllStak</span></p>
+      <p class="subheading"><span data-en="A project connects your app to SeeStack" data-ar="المشروع يربط تطبيقك بـ SeeStack">A project connects your app to SeeStack</span></p>
       <div class="fg"><label><span data-en="Project name" data-ar="اسم المشروع">Project name</span></label><input type="text" placeholder="My App" id="proj-name"></div>
       <div class="fg"><label><span data-en="Platform / Framework" data-ar="المنصة / الإطار">Platform / Framework</span></label></div>
       <div class="platform-grid">
@@ -157,14 +157,14 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
       </div>
       <div class="fg"><label><span data-en="Environment" data-ar="البيئة">Environment</span></label></div>
       <div class="tab-row"><button class="tab-btn active" onclick="selectTab(this)">Production</button><button class="tab-btn" onclick="selectTab(this)">Staging</button><button class="tab-btn" onclick="selectTab(this)">Development</button></div>
-      <div class="code-block"><div class="code-head"><span><span data-en="Install SDK" data-ar="تثبيت SDK">Install SDK</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>npm install @allstak/js</pre></div>
+      <div class="code-block"><div class="code-head"><span><span data-en="Install SDK" data-ar="تثبيت SDK">Install SDK</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>npm install @seestack/js</pre></div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(1)"><span data-en="&#8592; Back" data-ar="العودة &#8594;">&#8592; Back</span></button><button class="btn btn-pri" onclick="goStep(3)"><span data-en="Create project &#8594;" data-ar="إنشاء المشروع &#8592;">Create project &#8594;</span></button></div>
     </div>
 
     <!-- STEP 3: Invite -->
     <div class="step" id="step-3">
       <h1 class="heading"><span data-en="Invite your team" data-ar="دعوة فريقك">Invite your team</span></h1>
-      <p class="subheading"><span data-en="AllStak works best when your whole team is here" data-ar="AllStak يعمل بشكل أفضل عندما يكون فريقك بالكامل هنا">AllStak works best when your whole team is here</span></p>
+      <p class="subheading"><span data-en="SeeStack works best when your whole team is here" data-ar="SeeStack يعمل بشكل أفضل عندما يكون فريقك بالكامل هنا">SeeStack works best when your whole team is here</span></p>
       <div class="fg"><label><span data-en="Email addresses" data-ar="عناوين البريد الإلكتروني">Email addresses</span></label>
         <div class="email-input-wrap" id="email-wrap">
           <div class="email-tag">mohammed@fatura.io <button class="remove" onclick="this.parentElement.remove()">&#10005;</button></div>
@@ -173,7 +173,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
       </div>
       <div class="fg"><label><span data-en="Role" data-ar="الدور">Role</span></label><select><option>Developer</option><option>Admin</option><option>Viewer</option></select></div>
       <div style="margin-bottom:14px"><div style="font-size:13px;font-weight:500;margin-bottom:6px"><span data-en="Or share invite link" data-ar="أو شارك رابط الدعوة">Or share invite link</span></div>
-        <div class="share-row"><input value="https://allstak.io/invite/fatura-abc123" readonly id="share-link"><button class="share-copy" onclick="copyLink()"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div>
+        <div class="share-row"><input value="https://seestack.io/invite/fatura-abc123" readonly id="share-link"><button class="share-copy" onclick="copyLink()"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div>
       </div>
       <div class="btn-row"><button class="btn btn-ghost" onclick="goStep(2)"><span data-en="&#8592; Back" data-ar="العودة &#8594;">&#8592; Back</span></button><button class="btn btn-ghost btn-sm" onclick="goStep(4)"><span data-en="Skip for now" data-ar="تخطي الآن">Skip for now</span></button><button class="btn btn-pri" onclick="goStep(4)"><span data-en="Send invitations &#8594;" data-ar="إرسال الدعوات &#8592;">Send invitations &#8594;</span></button></div>
     </div>
@@ -183,11 +183,11 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
       <h1 class="heading"><span data-en="Install the SDK" data-ar="تثبيت SDK">Install the SDK</span></h1>
       <p class="subheading"><span data-en="Start capturing errors in 2 minutes" data-ar="ابدأ بالتقاط الأخطاء في دقيقتين">Start capturing errors in 2 minutes</span></p>
       <div class="tab-row"><button class="tab-btn active" onclick="selectTab(this)">npm</button><button class="tab-btn" onclick="selectTab(this)">yarn</button><button class="tab-btn" onclick="selectTab(this)">pnpm</button></div>
-      <div class="code-block"><div class="code-head"><span><span data-en="Install" data-ar="تثبيت">Install</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>npm install @allstak/js</pre></div>
+      <div class="code-block"><div class="code-head"><span><span data-en="Install" data-ar="تثبيت">Install</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>npm install @seestack/js</pre></div>
       <div class="tab-row"><button class="tab-btn active" onclick="selectTab(this)">JavaScript</button><button class="tab-btn" onclick="selectTab(this)">TypeScript</button></div>
-      <div class="code-block"><div class="code-head"><span><span data-en="Initialize" data-ar="تهيئة">Initialize</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>import AllStak from '@allstak/js'
+      <div class="code-block"><div class="code-head"><span><span data-en="Initialize" data-ar="تهيئة">Initialize</span></span><button class="code-copy" onclick="copyCode(this)"><span data-en="Copy" data-ar="نسخ">Copy</span></button></div><pre>import SeeStack from '@seestack/js'
 
-AllStak.init({
+SeeStack.init({
   apiKey: 'ask_live_••••••••••••••••',
   environment: 'production'
 })</pre></div>
@@ -206,7 +206,7 @@ AllStak.init({
 <script>
 let currentStep=1;
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
-function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('seestack-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
 function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
 
 function goStep(n){
@@ -252,12 +252,12 @@ function simulateEvent(){
   const dot=document.getElementById('sdk-dot');
   const text=document.getElementById('sdk-text');
   dot.className='status-dot received';
-  text.innerHTML='&#10003; Event received! AllStak is working.';
+  text.innerHTML='&#10003; Event received! SeeStack is working.';
   text.style.color='var(--success)';
 }
 
 function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('tw').appendChild(t);setTimeout(()=>t.remove(),2500)}
-(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+(function(){const saved=localStorage.getItem('seestack-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
 </script>
 </body>
 </html>

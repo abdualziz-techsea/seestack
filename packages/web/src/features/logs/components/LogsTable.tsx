@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { LogEntry } from '@allstak/shared'
+import type { LogEntry } from '@seestack/shared'
 import { LogRow } from './LogRow'
 
 interface LogsTableProps {

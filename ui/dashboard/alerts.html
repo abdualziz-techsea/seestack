@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AllStak — Alert Rules</title>
+<title>SeeStack — Alert Rules</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -112,7 +112,7 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>SeeStack</a>
   <span class="top-sep">/</span><span class="top-project">Production App &#9660;</span>
   <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
   <div class="top-right">
@@ -435,7 +435,7 @@ function setLang(lang){
   document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
   document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===lang.toUpperCase()));
   swapText(lang);
-  localStorage.setItem('allstak-lang',lang);
+  localStorage.setItem('seestack-lang',lang);
 }
 
 function swapText(lang){
@@ -450,7 +450,7 @@ function swapText(lang){
   });
 }
 
-(function(){var l=localStorage.getItem('allstak-lang');if(l)setLang(l);var t=localStorage.getItem('allstak-theme');if(t)setTheme(t)})()
+(function(){var l=localStorage.getItem('seestack-lang');if(l)setLang(l);var t=localStorage.getItem('seestack-theme');if(t)setTheme(t)})()
 
 // Create modal
 function openCreateModal(){document.getElementById('createModal').classList.add('open')}

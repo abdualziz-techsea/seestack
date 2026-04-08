@@ -5,7 +5,7 @@ import { LevelBadge } from '@/components/shared/LevelBadge'
 import { TimeAgo } from '@/components/shared/TimeAgo'
 import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { useErrors } from '../hooks/useErrors'
-import type { ErrorGroup } from '@allstak/shared'
+import type { ErrorGroup } from '@seestack/shared'
 
 interface ErrorsTableProps {
   statusFilter: string

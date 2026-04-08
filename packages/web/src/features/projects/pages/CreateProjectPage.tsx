@@ -24,7 +24,7 @@ const environments = [
 ]
 
 const installTabs = ['npm', 'yarn', 'pnpm']
-const installCommands = ['npm install @allstak/sdk', 'yarn add @allstak/sdk', 'pnpm add @allstak/sdk']
+const installCommands = ['npm install @seestack/sdk', 'yarn add @seestack/sdk', 'pnpm add @seestack/sdk']
 
 const apiKey = 'ask_live_' + Math.random().toString(36).slice(2, 26)
 

@@ -12,7 +12,7 @@ export const apiClient = axios.create({
 
 // Request interceptor — attach JWT
 apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('allstak_token')
+  const token = localStorage.getItem('seestack_token')
   if (token) config.headers.Authorization = `Bearer ${token}`
   return config
 })
@@ -27,7 +27,7 @@ apiClient.interceptors.response.use(
   },
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('allstak_token')
+      localStorage.removeItem('seestack_token')
       window.location.href = '/login'
     }
     return Promise.reject(error.response?.data ?? error)

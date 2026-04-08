@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AllStak — Verify email</title>
+<title>SeeStack — Verify email</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -65,7 +65,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 </head>
 <body>
 <header class="topbar">
-  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">SeeStack</span></a>
   <div class="topbar-right"><a href="onboarding.html" class="skip-link"><span data-en="Skip for demo &#8594;" data-ar="تخطي للعرض &#8592;">Skip for demo &#8594;</span></a><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
 </header>
 <main class="main">
@@ -75,7 +75,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
     <p class="subheading"><span data-en="We sent a verification link to" data-ar="أرسلنا رابط التحقق إلى">We sent a verification link to</span><br><span class="email-hl">ahmed@fatura.io</span></p>
     <div class="steps-card">
       <ol>
-        <li><span data-en="Open the email from AllStak" data-ar="افتح البريد الإلكتروني من AllStak">Open the email from AllStak</span></li>
+        <li><span data-en="Open the email from SeeStack" data-ar="افتح البريد الإلكتروني من SeeStack">Open the email from SeeStack</span></li>
         <li><span data-en='Click "Verify my email"' data-ar='انقر على "تحقق من بريدي"'>Click "Verify my email"</span></li>
         <li><span data-en="You'll be redirected back here automatically" data-ar="ستتم إعادة توجيهك هنا تلقائياً">You'll be redirected back here automatically</span></li>
       </ol>
@@ -99,7 +99,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 <footer class="page-footer"><a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a><a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a></footer>
 <script>
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
-function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('seestack-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
 function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
 function handleResend(){
   const btn=document.getElementById('resend-btn'),cd=document.getElementById('resend-cd');
@@ -113,7 +113,7 @@ setTimeout(()=>{
   document.getElementById('verify-anim').style.display='block';
   setTimeout(()=>window.location.href='onboarding.html',2000);
 },5000);
-(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+(function(){const saved=localStorage.getItem('seestack-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
 </script>
 </body>
 </html>

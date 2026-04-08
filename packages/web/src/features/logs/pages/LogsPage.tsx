@@ -5,7 +5,7 @@ import { useLiveLogs } from '../hooks/useLiveLogs'
 import { LogFilterBar, type LogFilters } from '../components/LogFilterBar'
 import { LogsTable } from '../components/LogsTable'
 import { LiveTailBar } from '../components/LiveTailBar'
-import type { LogEntry } from '@allstak/shared'
+import type { LogEntry } from '@seestack/shared'
 
 /** Parse metadata from backend JSON string to object */
 function parseMetadata(log: LogEntry): LogEntry {

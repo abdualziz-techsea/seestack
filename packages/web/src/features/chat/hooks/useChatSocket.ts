@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
-import type { ChatMessage } from '@allstak/shared'
+import type { ChatMessage } from '@seestack/shared'
 
 export function useChatSocket(channelId: string | undefined) {
   const [isConnected, setIsConnected] = useState(false)

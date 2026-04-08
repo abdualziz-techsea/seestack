@@ -31,7 +31,7 @@ export function AuthLayout() {
             className="text-[15px] font-semibold"
             style={{ color: 'var(--text-primary)', letterSpacing: '-0.012em' }}
           >
-            AllStak
+            SeeStack
           </span>
         </a>
         <div className="flex items-center gap-3">

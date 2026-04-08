@@ -1,11 +1,11 @@
-# AllStak
+# SeeStack
 
 > A unified observability and team collaboration platform for startups and small teams.
 > Replaces Sentry + Datadog + UptimeRobot + Slack with a single product.
 
-## What is AllStak?
+## What is SeeStack?
 
-AllStak is the **single home base** for engineering teams:
+SeeStack is the **single home base** for engineering teams:
 - **Error Monitoring** — Full stack traces, grouping, status management
 - **Logs** — Multi-level log ingestion with live tail
 - **Website Monitor** — HTTP/HTTPS uptime monitoring with alerting
@@ -28,7 +28,7 @@ AllStak is the **single home base** for engineering teams:
 ## Project Structure
 
 ```
-allstak/
+seestack/
 ├── backend/          ← Spring Boot 4 monolith
 ├── packages/
 │   ├── shared/       ← Shared API client + types
@@ -71,4 +71,4 @@ Copy `.env.example` to `.env` and fill in values before running.
 ## Development
 
 See `progress/README.md` for current development status.
-See `ALLSTAK_SPEC.md` for full project specification.
+See `SEESTACK_SPEC.md` for full project specification.

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { timeAgo, formatTimestamp } from '@allstak/shared'
+import { timeAgo, formatTimestamp } from '@seestack/shared'
 import { useUIStore } from '@/store/ui.store'
 
 interface TimeAgoProps {

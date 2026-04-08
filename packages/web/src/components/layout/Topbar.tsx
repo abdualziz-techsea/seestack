@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 import { ThemeToggle } from '@/components/shared/ThemeToggle'
 import { LangToggle } from '@/components/shared/LangToggle'
 import { Logo } from '@/components/shared/Logo'
@@ -69,7 +69,7 @@ export function Topbar() {
       {/* Left: Logo + separator + project */}
       <a href="/overview" className="flex items-center gap-1.5 text-sm font-semibold no-underline" style={{ color: 'var(--text-primary)', letterSpacing: '-0.012em' }}>
         <Logo size={20} />
-        AllStak
+        SeeStack
       </a>
       <span className="text-base font-light" style={{ color: 'var(--text-disabled)' }}>/</span>
       <div className="relative" ref={projectRef}>

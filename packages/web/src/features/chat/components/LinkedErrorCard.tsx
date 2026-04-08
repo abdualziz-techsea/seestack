@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import type { LinkedError } from '@allstak/shared'
+import type { LinkedError } from '@seestack/shared'
 
 interface LinkedErrorCardProps {
   error: LinkedError

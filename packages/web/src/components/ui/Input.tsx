@@ -1,5 +1,5 @@
 import { forwardRef, useState, type InputHTMLAttributes } from 'react'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string

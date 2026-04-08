@@ -10,8 +10,8 @@ import {
   Loader2,
   BellOff,
 } from 'lucide-react'
-import type { NotificationItem } from '@allstak/shared'
-import { cn } from '@allstak/shared'
+import type { NotificationItem } from '@seestack/shared'
+import { cn } from '@seestack/shared'
 
 function timeAgo(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime()

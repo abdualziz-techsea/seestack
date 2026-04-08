@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 import { Copy, CheckCircle } from 'lucide-react'
 
 interface CopyButtonProps {

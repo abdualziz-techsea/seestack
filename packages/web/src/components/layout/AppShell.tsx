@@ -24,13 +24,13 @@ export function AppShell() {
 
   // Auth guard — redirect to login if not authenticated
   useEffect(() => {
-    if (!user && !accessToken && !localStorage.getItem('allstak_token')) {
+    if (!user && !accessToken && !localStorage.getItem('seestack_token')) {
       navigate('/login', { replace: true })
     }
   }, [user, accessToken, navigate])
 
   // Show nothing while redirecting
-  if (!user && !accessToken && !localStorage.getItem('allstak_token')) {
+  if (!user && !accessToken && !localStorage.getItem('seestack_token')) {
     return null
   }
 

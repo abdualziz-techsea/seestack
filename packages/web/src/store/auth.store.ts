@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { AuthState, Project } from '@allstak/shared'
+import type { AuthState, Project } from '@seestack/shared'
 
 interface AuthStore extends AuthState {
   setAuth: (state: Partial<AuthState>) => void
@@ -22,11 +22,11 @@ export const useAuthStore = create<AuthStore>()(
       setCurrentProject: (project) => set({ currentProject: project }),
 
       logout: () => {
-        localStorage.removeItem('allstak_token')
+        localStorage.removeItem('seestack_token')
         set({ user: null, org: null, projects: [], currentProject: null, accessToken: null })
         window.location.href = '/login'
       },
     }),
-    { name: 'allstak-auth', partialize: (s) => ({ currentProject: s.currentProject }) }
+    { name: 'seestack-auth', partialize: (s) => ({ currentProject: s.currentProject }) }
   )
 )

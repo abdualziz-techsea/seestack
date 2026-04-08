@@ -62,7 +62,7 @@ export function GeneralSettingsPage() {
             <div>
               <label className="mb-1 block text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>{t('settings.workspaceUrl')}</label>
               <div className="flex items-center rounded-lg border text-[13px]" style={{ background: 'var(--bg-elevated)', borderColor: 'var(--border)' }}>
-                <span className="px-3" style={{ color: 'var(--text-tertiary)' }}>allstak.io/</span>
+                <span className="px-3" style={{ color: 'var(--text-tertiary)' }}>seestack.io/</span>
                 <Field name="slug" className="flex-1 bg-transparent px-1 py-2 outline-none" style={{ color: 'var(--text-primary)' }} />
               </div>
             </div>

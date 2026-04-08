@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { authApi } from '@allstak/shared'
+import { authApi } from '@seestack/shared'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useCurrentUser() {

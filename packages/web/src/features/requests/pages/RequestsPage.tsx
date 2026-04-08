@@ -5,7 +5,7 @@ import { SkeletonRow } from '@/components/shared/SkeletonRow'
 import { TimeAgo } from '@/components/shared/TimeAgo'
 import { useHttpRequests } from '../hooks/useHttpRequests'
 import { useHttpRequestStats } from '../hooks/useHttpRequestStats'
-import type { HttpRequestEntry } from '@allstak/shared'
+import type { HttpRequestEntry } from '@seestack/shared'
 
 const methods = ['ALL', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'] as const
 const directions = ['ALL', 'inbound', 'outbound'] as const

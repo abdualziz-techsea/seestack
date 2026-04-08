@@ -9,7 +9,7 @@ Completed: 2026-03-27
 
 - [x] Monitor config CRUD (POST/GET/PUT/DELETE /api/v1/monitors)
 - [x] Scheduler (check every 1/5/10 minutes via @Scheduled + Java HttpClient)
-- [x] Store results in ClickHouse via Kafka (allstak.monitor-checks topic)
+- [x] Store results in ClickHouse via Kafka (seestack.monitor-checks topic)
 - [x] Check history endpoint (GET /api/v1/monitors/{id}/checks with uptime %)
 - [x] Unit tests for up/down determination logic (10 tests)
 

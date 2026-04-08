@@ -1,9 +1,9 @@
 {
-  "name": "allstak",
+  "name": "seestack",
   "private": true,
   "scripts": {
-    "dev": "pnpm --filter @allstak/web dev",
-    "build": "pnpm --filter @allstak/shared build && pnpm --filter @allstak/web build",
+    "dev": "pnpm --filter @seestack/web dev",
+    "build": "pnpm --filter @seestack/shared build && pnpm --filter @seestack/web build",
     "lint": "pnpm -r lint",
     "type-check": "pnpm -r type-check"
   },

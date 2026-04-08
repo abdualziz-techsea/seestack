@@ -1,11 +1,11 @@
--- ClickHouse schema initialization for AllStak
+-- ClickHouse schema initialization for SeeStack
 -- Run once on startup via ClickHouseSchemaInitializer bean
 -- All tables use MergeTree engine with ORDER BY (project_id, timestamp)
 
-CREATE DATABASE IF NOT EXISTS allstak;
+CREATE DATABASE IF NOT EXISTS seestack;
 
 -- ── Errors ────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.errors
+CREATE TABLE IF NOT EXISTS seestack.errors
 (
     id              UUID            DEFAULT generateUUIDv4(),
     project_id      UUID            NOT NULL,
@@ -27,7 +27,7 @@ TTL toDateTime(timestamp) + INTERVAL 30 DAY
 SETTINGS index_granularity = 8192;
 
 -- ── Logs ──────────────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.logs
+CREATE TABLE IF NOT EXISTS seestack.logs
 (
     id         UUID          DEFAULT generateUUIDv4(),
     project_id UUID          NOT NULL,
@@ -43,7 +43,7 @@ TTL toDateTime(timestamp) + INTERVAL 14 DAY
 SETTINGS index_granularity = 8192;
 
 -- ── Monitor Checks ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.monitor_checks
+CREATE TABLE IF NOT EXISTS seestack.monitor_checks
 (
     monitor_id       UUID          NOT NULL,
     project_id       UUID          NOT NULL,
@@ -57,7 +57,7 @@ TTL toDateTime(timestamp) + INTERVAL 90 DAY
 SETTINGS index_granularity = 8192;
 
 -- ── SSH Audit Logs ────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.ssh_audit_logs
+CREATE TABLE IF NOT EXISTS seestack.ssh_audit_logs
 (
     id         UUID          DEFAULT generateUUIDv4(),
     server_id  UUID          NOT NULL,
@@ -72,7 +72,7 @@ TTL toDateTime(timestamp) + INTERVAL 90 DAY
 SETTINGS index_granularity = 8192;
 
 -- ── Cron Pings ──────────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.cron_pings
+CREATE TABLE IF NOT EXISTS seestack.cron_pings
 (
     id           UUID DEFAULT generateUUIDv4(),
     monitor_id   UUID,
@@ -87,7 +87,7 @@ TTL toDateTime(timestamp) + INTERVAL 90 DAY
 SETTINGS index_granularity = 8192;
 
 -- ── HTTP Requests ───────────────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.http_requests
+CREATE TABLE IF NOT EXISTS seestack.http_requests
 (
     id                UUID DEFAULT generateUUIDv4(),
     project_id        UUID,
@@ -110,7 +110,7 @@ TTL toDateTime(timestamp) + INTERVAL 30 DAY
 SETTINGS index_granularity = 8192;
 
 -- ── Session Replay Events ───────────────────────────────────
-CREATE TABLE IF NOT EXISTS allstak.replay_events
+CREATE TABLE IF NOT EXISTS seestack.replay_events
 (
     id           UUID          DEFAULT generateUUIDv4(),
     project_id   UUID          NOT NULL,

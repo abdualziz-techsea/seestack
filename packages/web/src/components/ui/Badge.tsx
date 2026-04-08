@@ -1,4 +1,4 @@
-import { cn } from '@allstak/shared'
+import { cn } from '@seestack/shared'
 
 type BadgeVariant = 'default' | 'primary' | 'success' | 'warning' | 'danger' | 'info'
 type BadgeSize = 'sm' | 'md' | 'lg'

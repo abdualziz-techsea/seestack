@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { apiClient } from '@allstak/shared'
+import { apiClient } from '@seestack/shared'
 
 export function useReplayData(sessionId: string | undefined) {
   const query = useQuery({

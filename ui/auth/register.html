@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AllStak — Create account</title>
+<title>SeeStack — Create account</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -56,7 +56,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 </head>
 <body>
 <header class="topbar">
-  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">AllStak</span></a>
+  <a href="login.html" class="logo"><svg width="24" height="24" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg><span class="logo-text">SeeStack</span></a>
   <div class="topbar-right"><div class="lang-btn"><button class="on" onclick="toggleLang()">EN</button><button onclick="toggleLang()">AR</button></div><div class="theme-btn"><button class="on" onclick="setTheme('dark')">&#9789;</button><button onclick="setTheme('light')">&#9788;</button></div></div>
 </header>
 <main class="main">
@@ -80,7 +80,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
         <div class="pw-label"></div>
         <div class="err"><span data-en="Password is required" data-ar="كلمة المرور مطلوبة">Password is required</span></div>
       </div>
-      <div class="fg"><label><span data-en="Organization name *" data-ar="اسم المنظمة *">Organization name *</span></label><input type="text" placeholder="Fatura Inc." required><div class="err"><span data-en="Organization name is required" data-ar="اسم المنظمة مطلوب">Organization name is required</span></div><div class="helper"><span data-en="This will be your workspace name on AllStak" data-ar="سيكون هذا اسم مساحة عملك على AllStak">This will be your workspace name on AllStak</span></div></div>
+      <div class="fg"><label><span data-en="Organization name *" data-ar="اسم المنظمة *">Organization name *</span></label><input type="text" placeholder="Fatura Inc." required><div class="err"><span data-en="Organization name is required" data-ar="اسم المنظمة مطلوب">Organization name is required</span></div><div class="helper"><span data-en="This will be your workspace name on SeeStack" data-ar="سيكون هذا اسم مساحة عملك على SeeStack">This will be your workspace name on SeeStack</span></div></div>
       <button type="submit" class="btn btn-pri" id="reg-btn" style="margin-top:4px"><span data-en="Create account &#8594;" data-ar="إنشاء حساب &#8592;">Create account &#8594;</span></button>
     </form>
     <p class="terms"><span data-en="By creating an account you agree to our" data-ar="بإنشاء حساب فإنك توافق على">By creating an account you agree to our</span> <a href="#"><span data-en="Terms of Service" data-ar="شروط الخدمة">Terms of Service</span></a> <span data-en="and" data-ar="و">and</span> <a href="#"><span data-en="Privacy Policy" data-ar="سياسة الخصوصية">Privacy Policy</span></a></p>
@@ -92,7 +92,7 @@ body{display:flex;flex-direction:column;min-height:100vh;height:auto;overflow:au
 <script>
 function setTheme(t){document.documentElement.setAttribute('data-theme',t);document.querySelectorAll('.theme-btn button').forEach(b=>b.classList.toggle('on',b.textContent==='\u263D'?t==='dark':t==='light'))}
 function togglePw(btn){const i=btn.previousElementSibling;const lang=document.documentElement.lang;if(i.type==='password'){i.type='text';btn.textContent=lang==='ar'?'إخفاء':'Hide'}else{i.type='password';btn.textContent=lang==='ar'?'إظهار':'Show'}}
-function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('allstak-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
+function toggleLang(){const h=document.documentElement;const isEn=h.lang==='en';const newLang=isEn?'ar':'en';h.lang=newLang;h.dir=newLang==='ar'?'rtl':'ltr';localStorage.setItem('seestack-lang',newLang);document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===newLang.toUpperCase()));applyLang(newLang)}
 function applyLang(lang){document.querySelectorAll('[data-en][data-ar]').forEach(el=>{el.textContent=el.getAttribute('data-'+lang)})}
 function updateStr(ipt){
   const pw=ipt.value;let s=0;const lang=document.documentElement.lang;
@@ -116,7 +116,7 @@ function handleReg(e){
 }
 document.querySelectorAll('.fg input').forEach(i=>i.addEventListener('input',()=>i.closest('.fg').classList.remove('invalid')));
 function showToast(msg){const t=document.createElement('div');t.className='toast';t.textContent=msg;document.getElementById('tw').appendChild(t);setTimeout(()=>t.remove(),2500)}
-(function(){const saved=localStorage.getItem('allstak-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
+(function(){const saved=localStorage.getItem('seestack-lang');if(saved&&saved!=='en'){document.documentElement.lang=saved;document.documentElement.dir=saved==='ar'?'rtl':'ltr';document.querySelectorAll('.lang-btn button').forEach(b=>b.classList.toggle('on',b.textContent===saved.toUpperCase()));applyLang(saved)}})();
 </script>
 </body>
 </html>

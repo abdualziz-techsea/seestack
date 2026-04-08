@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AllStak — Create Project</title>
+<title>SeeStack — Create Project</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Rubik:wght@400;500;600&display=swap" rel="stylesheet">
@@ -95,7 +95,7 @@
 </head>
 <body>
 <header class="topbar">
-  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>AllStak</a>
+  <a href="index.html" class="top-logo"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" fill="var(--primary)"/><rect x="13" y="3" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="3" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".6"/><rect x="13" y="13" width="8" height="8" rx="2" fill="var(--primary)" opacity=".3"/></svg>SeeStack</a>
   <span class="top-sep">/</span><span class="top-project" data-en="New Project" data-ar="مشروع جديد">New Project</span>
   <div class="top-search"><span class="top-search-ico">&#8981;</span><input placeholder="Search errors, logs..."></div>
   <div class="top-right">
@@ -195,9 +195,9 @@
             <button class="sdk-tab" onclick="switchTab('install-tabs','install-code',2)">pnpm</button>
           </div>
           <div id="install-code">
-            <div class="code-block active">npm install @allstak/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-            <div class="code-block" style="display:none">yarn add @allstak/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-            <div class="code-block" style="display:none">pnpm add @allstak/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <div class="code-block active">npm install @seestack/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <div class="code-block" style="display:none">yarn add @seestack/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+            <div class="code-block" style="display:none">pnpm add @seestack/sdk<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
           </div>
 
           <div class="section-label" data-en="Initialize" data-ar="التهيئة">Initialize</div>
@@ -206,15 +206,15 @@
             <button class="sdk-tab" onclick="switchTab('init-tabs','init-code',1)">TypeScript</button>
           </div>
           <div id="init-code">
-            <div class="code-block active">import { AllStak } from '@allstak/sdk';
+            <div class="code-block active">import { SeeStack } from '@seestack/sdk';
 
-AllStak.init({
+SeeStack.init({
   apiKey: 'ask_live_7f3a9b2c4d5e6f1a8b9c0d1e2f3a4b5c',
   environment: 'production',
 });<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
-            <div class="code-block" style="display:none">import { AllStak } from '@allstak/sdk';
+            <div class="code-block" style="display:none">import { SeeStack } from '@seestack/sdk';
 
-AllStak.init({
+SeeStack.init({
   apiKey: 'ask_live_7f3a9b2c4d5e6f1a8b9c0d1e2f3a4b5c' as string,
   environment: 'production' as const,
 });<button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
