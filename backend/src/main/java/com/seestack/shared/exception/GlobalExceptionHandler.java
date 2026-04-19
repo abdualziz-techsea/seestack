@@ -11,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,6 +55,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
                 .body(ApiResponse.error("FORBIDDEN", ex.getMessage(), null));
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<ApiResponse<Void>> handleStatus(ResponseStatusException ex) {
+        String code = ex.getStatusCode().value() == 401 ? "UNAUTHORIZED"
+                    : ex.getStatusCode().value() == 403 ? "FORBIDDEN"
+                    : ex.getStatusCode().value() == 404 ? "NOT_FOUND"
+                    : ex.getStatusCode().value() == 409 ? "CONFLICT"
+                    : "REQUEST_ERROR";
+        String msg = ex.getReason() != null ? ex.getReason() : ex.getStatusCode().toString();
+        return ResponseEntity.status(ex.getStatusCode())
+                .body(ApiResponse.error(code, msg, null));
     }
 
     @ExceptionHandler(RuntimeException.class)
