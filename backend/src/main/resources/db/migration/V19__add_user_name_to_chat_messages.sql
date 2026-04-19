@@ -1,1 +1,0 @@
-ALTER TABLE chat_messages ADD COLUMN user_name VARCHAR(255) NOT NULL DEFAULT '';

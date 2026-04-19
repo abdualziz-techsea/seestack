@@ -1,1 +1,0 @@
-ALTER TABLE organizations ADD COLUMN timezone VARCHAR(50) NOT NULL DEFAULT 'UTC';

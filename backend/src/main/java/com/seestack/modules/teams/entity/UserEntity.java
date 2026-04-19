@@ -16,38 +16,33 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "keycloak_id", nullable = false, unique = true)
-    private String keycloakId;
-
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Nullable
-    @Column(name = "org_id")
-    private UUID orgId;
+    @Column(name = "password_hash", nullable = false)
+    private String passwordHash;
 
-    @Column(name = "org_role", nullable = false, length = 50)
-    private String orgRole = "member";
+    @Nullable
+    @Column
+    private String name;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
     protected UserEntity() {}
 
-    public UserEntity(String keycloakId, String email, @Nullable UUID orgId, String orgRole) {
-        this.keycloakId = keycloakId;
+    public UserEntity(String email, String passwordHash, @Nullable String name) {
         this.email = email;
-        this.orgId = orgId;
-        this.orgRole = orgRole;
+        this.passwordHash = passwordHash;
+        this.name = name;
     }
 
     public UUID getId() { return id; }
-    public String getKeycloakId() { return keycloakId; }
     public String getEmail() { return email; }
-    public @Nullable UUID getOrgId() { return orgId; }
-    public String getOrgRole() { return orgRole; }
+    public String getPasswordHash() { return passwordHash; }
+    public @Nullable String getName() { return name; }
     public Instant getCreatedAt() { return createdAt; }
 
-    public void setOrgId(@Nullable UUID orgId) { this.orgId = orgId; }
-    public void setOrgRole(String orgRole) { this.orgRole = orgRole; }
+    public void setPasswordHash(String passwordHash) { this.passwordHash = passwordHash; }
+    public void setName(@Nullable String name) { this.name = name; }
 }

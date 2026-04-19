@@ -1,0 +1,22 @@
+Project Title    seeStack — Error Monitoring and Website Monitoring Platform
+
+Team Members
+- Abdualziz Alosaimi
+- Salem Omran
+- Mohammed Taleb
+- Mohammed bin Eid
+- Omar Alallaf
+- Faisal Alghanim
+
+Project Summary
+seeStack is a focused developer tool with two responsibilities:
+capturing runtime errors from applications and monitoring the
+availability of websites. Applications ship errors to seeStack via a
+zero-dependency SDK and a project-scoped ingest key; the backend
+groups repeated events by a stable fingerprint and surfaces them in a
+web dashboard. Separately, users register URLs and a scheduler
+performs periodic HTTP checks, classifying each result as up or down
+and recording uptime history. Authentication is internal email +
+password (BCrypt + HS256 JWT) — no external identity provider. The
+system runs on PostgreSQL, ClickHouse, Apache Kafka, and Redis behind
+a Spring Boot 3 backend and a React + Vite frontend.

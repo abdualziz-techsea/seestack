@@ -6,15 +6,25 @@ import { CommandPalette } from '@/components/shared/CommandPalette'
 import { useAuthStore } from '@/store/auth.store'
 import { useUIStore } from '@/store/ui.store'
 import { useAuth } from '@/hooks/useAuth'
+import { useProjects } from '@/features/projects/hooks/useProjects'
 
 export function AppShell() {
   const navigate = useNavigate()
   useAuth()
   const user = useAuthStore((s) => s.user)
   const accessToken = useAuthStore((s) => s.accessToken)
+  const currentProject = useAuthStore((s) => s.currentProject)
+  const setCurrentProject = useAuthStore((s) => s.setCurrentProject)
   const theme = useUIStore((s) => s.theme)
   const lang = useUIStore((s) => s.lang)
   const sidebarCollapsed = useUIStore((s) => s.sidebarCollapsed)
+  const { projects } = useProjects()
+
+  useEffect(() => {
+    if (!currentProject && projects.length > 0) {
+      setCurrentProject(projects[0])
+    }
+  }, [currentProject, projects, setCurrentProject])
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)

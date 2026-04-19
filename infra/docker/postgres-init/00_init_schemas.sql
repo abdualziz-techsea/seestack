@@ -1,2 +1,1 @@
--- Create the keycloak schema so Keycloak can start before Flyway runs
-CREATE SCHEMA IF NOT EXISTS keycloak;
+-- seeStack uses a single default schema; Flyway handles all table creation.

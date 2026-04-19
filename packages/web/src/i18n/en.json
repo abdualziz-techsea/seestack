@@ -19,6 +19,7 @@
     "sectionConfigure": "CONFIGURE",
     "sectionSettings": "SETTINGS",
     "projects": "Projects",
+    "sdkSetup": "SDK Setup",
     "profile": "Profile"
   },
   "common": {
@@ -277,7 +278,7 @@
     "totalErrors": "Total errors",
     "newErrors": "New errors",
     "monitorsUp": "Monitors up",
-    "sshSessions": "SSH sessions",
+    "monitorsDown": "Monitors down",
     "errorTrend": "Error trend",
     "recentErrors": "Recent errors",
     "activity": "Recent Activity",

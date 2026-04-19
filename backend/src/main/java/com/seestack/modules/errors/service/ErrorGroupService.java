@@ -1,6 +1,5 @@
 package com.seestack.modules.errors.service;
 
-import com.seestack.modules.alerts.service.AlertEvaluationService;
 import com.seestack.modules.errors.entity.ErrorGroupEntity;
 import com.seestack.modules.errors.repository.ErrorGroupRepository;
 import com.seestack.shared.exception.EntityNotFoundException;
@@ -20,12 +19,9 @@ import java.util.UUID;
 public class ErrorGroupService {
 
     private final ErrorGroupRepository repository;
-    private final AlertEvaluationService alertEvaluation;
 
-    public ErrorGroupService(ErrorGroupRepository repository,
-                              AlertEvaluationService alertEvaluation) {
+    public ErrorGroupService(ErrorGroupRepository repository) {
         this.repository = repository;
-        this.alertEvaluation = alertEvaluation;
     }
 
     @Transactional
@@ -37,7 +33,6 @@ public class ErrorGroupService {
             ErrorGroupEntity group = new ErrorGroupEntity(
                     projectId, fingerprint, exceptionClass, title, level, environment, timestamp);
             repository.save(group);
-            alertEvaluation.onNewError(projectId, fingerprint, exceptionClass, environment);
         }
     }
 

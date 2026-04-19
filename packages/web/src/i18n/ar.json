@@ -19,6 +19,7 @@
     "sectionConfigure": "الإعدادات",
     "sectionSettings": "الإعدادات",
     "projects": "المشاريع",
+    "sdkSetup": "تثبيت SDK",
     "profile": "الملف الشخصي"
   },
   "common": {
@@ -277,7 +278,7 @@
     "totalErrors": "إجمالي الأخطاء",
     "newErrors": "أخطاء جديدة",
     "monitorsUp": "مراقبة نشطة",
-    "sshSessions": "جلسات SSH",
+    "monitorsDown": "المراقبات المتوقفة",
     "errorTrend": "اتجاه الأخطاء",
     "recentErrors": "أحدث الأخطاء",
     "activity": "آخر النشاط",

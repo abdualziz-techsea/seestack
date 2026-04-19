@@ -1,1 +1,0 @@
-ALTER TABLE project_members ADD COLUMN IF NOT EXISTS can_requests BOOLEAN DEFAULT FALSE;

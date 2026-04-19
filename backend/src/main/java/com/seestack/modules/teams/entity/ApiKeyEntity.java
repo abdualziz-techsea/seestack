@@ -22,6 +22,9 @@ public class ApiKeyEntity {
     @Column(name = "key_hash", nullable = false, unique = true)
     private String keyHash;
 
+    @Column(name = "key_prefix", nullable = false, length = 20)
+    private String keyPrefix = "";
+
     @Nullable
     @Column
     private String name;
@@ -35,15 +38,17 @@ public class ApiKeyEntity {
 
     protected ApiKeyEntity() {}
 
-    public ApiKeyEntity(UUID projectId, String keyHash, @Nullable String name) {
+    public ApiKeyEntity(UUID projectId, String keyHash, String keyPrefix, @Nullable String name) {
         this.projectId = projectId;
         this.keyHash = keyHash;
+        this.keyPrefix = keyPrefix;
         this.name = name;
     }
 
     public UUID getId() { return id; }
     public UUID getProjectId() { return projectId; }
     public String getKeyHash() { return keyHash; }
+    public String getKeyPrefix() { return keyPrefix; }
     public @Nullable String getName() { return name; }
     public @Nullable Instant getLastUsedAt() { return lastUsedAt; }
     public Instant getCreatedAt() { return createdAt; }

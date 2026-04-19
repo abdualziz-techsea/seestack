@@ -16,8 +16,8 @@ public class ProjectEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "org_id", nullable = false)
-    private UUID orgId;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
 
     @Column(nullable = false)
     private String name;
@@ -34,23 +34,22 @@ public class ProjectEntity {
 
     protected ProjectEntity() {}
 
-    public ProjectEntity(UUID orgId, String name, String slug, @Nullable String platform) {
-        this.orgId = orgId;
+    public ProjectEntity(UUID userId, String name, String slug, @Nullable String platform) {
+        this.userId = userId;
         this.name = name;
         this.slug = slug;
         this.platform = platform;
     }
 
     public UUID getId() { return id; }
-    public UUID getOrgId() { return orgId; }
+    public UUID getUserId() { return userId; }
     public String getName() { return name; }
     public String getSlug() { return slug; }
     public @Nullable String getPlatform() { return platform; }
     public Instant getCreatedAt() { return createdAt; }
 
-    public void update(String name, String slug, @Nullable String platform) {
+    public void update(String name, @Nullable String platform) {
         this.name = name;
-        this.slug = slug;
         this.platform = platform;
     }
 }

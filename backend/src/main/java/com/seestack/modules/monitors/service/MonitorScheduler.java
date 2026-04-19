@@ -1,7 +1,6 @@
 package com.seestack.modules.monitors.service;
 
 import com.seestack.ingestion.kafka.MonitorCheckKafkaEvent;
-import com.seestack.modules.alerts.service.AlertEvaluationService;
 import com.seestack.modules.monitors.entity.MonitorConfigEntity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jspecify.annotations.NullMarked;
@@ -32,7 +31,6 @@ public class MonitorScheduler {
     private final MonitorService monitorService;
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
-    private final AlertEvaluationService alertEvaluation;
     private final HttpClient httpClient;
 
     /** Tracks last check time per monitor to respect intervals */
@@ -40,12 +38,10 @@ public class MonitorScheduler {
 
     public MonitorScheduler(MonitorService monitorService,
                             KafkaTemplate<String, String> kafkaTemplate,
-                            ObjectMapper objectMapper,
-                            AlertEvaluationService alertEvaluation) {
+                            ObjectMapper objectMapper) {
         this.monitorService = monitorService;
         this.kafkaTemplate = kafkaTemplate;
         this.objectMapper = objectMapper;
-        this.alertEvaluation = alertEvaluation;
         this.httpClient = HttpClient.newBuilder()
                 .connectTimeout(TIMEOUT)
                 .followRedirects(HttpClient.Redirect.NORMAL)
@@ -98,14 +94,6 @@ public class MonitorScheduler {
         }
 
         publishResult(monitor, status, responseTimeMs, statusCode);
-
-        // Trigger alerts
-        if (status == 0) {
-            alertEvaluation.onMonitorDown(monitor.getProjectId(), monitor.getId(),
-                    monitor.getName(), monitor.getUrl());
-        }
-        alertEvaluation.onMonitorSlowResponse(monitor.getProjectId(), monitor.getId(),
-                monitor.getName(), responseTimeMs);
     }
 
     /**

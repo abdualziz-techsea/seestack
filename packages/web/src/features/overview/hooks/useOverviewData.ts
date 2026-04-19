@@ -43,11 +43,12 @@ export function useOverviewData() {
   const monitors = Array.isArray(monitorsData) ? monitorsData : monitorsData?.items ?? []
   const monitorsUp = monitors.filter((m: any) => m.status === 'up').length
 
+  const monitorsDown = monitors.filter((m: any) => m.status === 'down').length
   const stats = [
     { labelKey: 'overview.totalErrors', value: totalErrors },
     { labelKey: 'overview.newErrors', value: newErrors },
     { labelKey: 'overview.monitorsUp', value: monitorsUp },
-    { labelKey: 'overview.sshSessions', value: 0 },
+    { labelKey: 'overview.monitorsDown', value: monitorsDown },
   ]
 
   return {
