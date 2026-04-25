@@ -186,7 +186,30 @@ penetration test or vulnerability scanner.
 Endpoints: `POST /api/v1/security-scans`,
 `GET /api/v1/security-scans`, `GET /api/v1/security-scans/{id}`.
 
-### 4.7 AI-assisted error explanation and suggested resolution
+### 4.7 Error Insights
+
+The error detail page renders an Insights card that summarises an
+error group in a way a developer can act on at a glance. The card
+intentionally avoids speculative rate metrics and reports only:
+
+- **Impact level** — LOW / MEDIUM / HIGH derived from total
+  occurrences and recent activity.
+- **Total occurrences** — the count stored on the error group.
+- **Recent activity** — "Active recently" if the last event was
+  within the last hour, otherwise "No recent activity".
+- **First seen** and **Last seen** timestamps.
+- **Detected patterns** — a short list of repeated signals across
+  the latest occurrences (e.g. same top stack frame, same endpoint).
+- **Why this error is grouped** — the inputs to the fingerprint
+  (exception class, normalized message, top meaningful stack frame)
+  along with the formula `sha256(exceptionClass + normalizedMessage
+  + topMeaningfulFrame)`.
+- **Timeline (last 24 hours)** — hourly bar chart from ClickHouse.
+
+Every value is a transparent function of stored data; nothing is
+estimated or extrapolated.
+
+### 4.8 AI-assisted error explanation and suggested resolution
 
 On the error detail page the user can click **Explain & Suggest
 Fix**. The backend:

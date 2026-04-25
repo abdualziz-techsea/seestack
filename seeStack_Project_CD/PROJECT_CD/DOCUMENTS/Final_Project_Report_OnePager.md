@@ -33,6 +33,13 @@ the availability of websites, presenting both in one dashboard.
   (open vs. closed) are stored in PostgreSQL and surfaced on the
   dashboard. Explicitly *not* a penetration test or vulnerability
   scanner; no external tools (nmap, masscan, etc.) are used.
+- **Error Insights** — the error detail page renders a compact,
+  explainable Insights card: impact level (LOW / MEDIUM / HIGH),
+  total occurrences, "Active recently" / "No recent activity"
+  label, first/last seen, detected patterns (e.g. same top stack
+  frame, same endpoint), and a hourly timeline for the last 24 h.
+  No speculative rate or per-minute / per-hour metrics — every
+  value is a direct function of stored data.
 - **AI-assisted error explanation** — on the error detail page,
   the user can ask OpenAI to explain what happened, the likely
   cause, a suggested fix, and prevention tips. Secrets are

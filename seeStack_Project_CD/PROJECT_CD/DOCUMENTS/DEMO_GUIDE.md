@@ -98,6 +98,18 @@ Clicking any row on **Errors** opens a dedicated detail page at
 trace, occurrence count, first/last seen timestamps, environment,
 release, request metadata, recent occurrences, and project badge.
 
+### Error Insights
+
+The detail page also renders a compact Insights card:
+
+- Impact level (LOW / MEDIUM / HIGH)
+- Total occurrences
+- Recent activity ("Active recently" / "No recent activity")
+- First seen and Last seen
+- Detected patterns (e.g. same top stack frame, same endpoint)
+- Why this error is grouped (fingerprint inputs and formula)
+- Hourly timeline for the last 24 hours
+
 ### AI-assisted error explanation
 
 Each error detail page now includes an **Explain & Suggest Fix**
