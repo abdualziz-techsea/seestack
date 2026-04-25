@@ -4,6 +4,7 @@ import { StatCards } from '../components/StatCards'
 import { ErrorTrendChart } from '../components/ErrorTrendChart'
 import { RecentErrorsList } from '../components/RecentErrorsList'
 import { MonitorStatusList } from '../components/MonitorStatusList'
+import { LatestSecurityScanCard } from '../components/LatestSecurityScanCard'
 
 export function OverviewPage() {
   const { t } = useTranslation()
@@ -52,6 +53,9 @@ export function OverviewPage() {
         <div className="space-y-5">
           <div className="animate-in stagger-3">
             <MonitorStatusList />
+          </div>
+          <div className="animate-in stagger-4">
+            <LatestSecurityScanCard />
           </div>
         </div>
       </div>

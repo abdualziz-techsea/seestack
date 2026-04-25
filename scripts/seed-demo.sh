@@ -8,7 +8,7 @@
 
 set -euo pipefail
 
-BACKEND="${SEESTACK_BACKEND:-http://localhost:8080}"
+BACKEND="${SEESTACK_BACKEND:-http://localhost:8082}"
 EMAIL="${DEMO_EMAIL:-demo@seestack.local}"
 PASSWORD="${DEMO_PASSWORD:-Demo@12345}"
 NAME="${DEMO_NAME:-seeStack Demo}"
@@ -147,7 +147,34 @@ if [ -s "$KEY_FILE" ]; then
     "environment": "staging"
   }'
 
-  say "Ingested 3 + 1 + 1 events (expected: 3 grouped issues)."
+  # High-frequency error to drive insights / spike detection (15 events,
+  # all sharing the same top stack frame and the same /api/checkout endpoint)
+  for i in $(seq 1 15); do
+    send_error "{
+      \"exceptionClass\": \"DatabaseTimeoutException\",
+      \"message\": \"Postgres statement timed out after 30s on order #$((2000 + i))\",
+      \"stackTrace\": [
+        \"at com.demo.OrderRepository.save(OrderRepository.java:118)\",
+        \"at com.demo.CheckoutService.placeOrder(CheckoutService.java:64)\",
+        \"at com.demo.api.CheckoutController.checkout(CheckoutController.java:42)\",
+        \"at jdk.internal.reflect.GeneratedMethodAccessor.invoke(Unknown Source)\",
+        \"at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1000)\"
+      ],
+      \"level\": \"error\",
+      \"environment\": \"production\",
+      \"release\": \"1.4.2\",
+      \"user\": { \"id\": \"user-$((200 + i))\", \"email\": \"buyer$((200 + i))@example.com\" },
+      \"metadata\": {
+        \"path\": \"/api/checkout\",
+        \"method\": \"POST\",
+        \"orderId\": $((2000 + i)),
+        \"runtime\": \"Java 17\",
+        \"sdk\": \"seestack-java/1.0.0\"
+      }
+    }" || true
+  done
+
+  say "Ingested 3 + 1 + 1 + 15 events (expected: 4 grouped issues; one high-frequency)."
 fi
 
 # ── 5. ensure two monitors exist ───────────────────────────────────
@@ -180,5 +207,65 @@ DEMO_PASSWORD=$PASSWORD
 DEMO_PROJECT_ID=$PROJECT_ID
 DEMO_PROJECT_NAME=$PROJECT_NAME
 EOF
+
+# ── 7. seed one security scan (Basic Port Exposure Check) ─────────
+scans_body="$(curl -fs -H "Authorization: Bearer $TOKEN" \
+  "$BACKEND/api/v1/security-scans?page=1&perPage=1" || echo '{"data":{"items":[]}}')"
+existing_scans="$(printf '%s' "$scans_body" \
+  | python3 -c 'import json,sys
+try:
+  d=json.loads(sys.stdin.read())
+  print(len(d.get("data",{}).get("items",[])))
+except Exception:
+  print(0)' 2>/dev/null || echo 0)"
+
+if [ "$existing_scans" = "0" ]; then
+  say "Running a demo Basic Port Exposure Check against example.com ..."
+  curl -fs -o /dev/null -X POST "$BACKEND/api/v1/security-scans" \
+    -H "Authorization: Bearer $TOKEN" \
+    -H "Content-Type: application/json" \
+    -d "{\"target\":\"example.com\",\"projectId\":\"$PROJECT_ID\"}" || true
+  say "Demo security scan seeded."
+else
+  say "Security scan already exists — skipping."
+fi
+
+# ── 8. seed one Basic Load Test against the healthy monitor ──────
+loadtests_body="$(curl -fs -H "Authorization: Bearer $TOKEN" \
+  "$BACKEND/api/v1/load-tests?projectId=$PROJECT_ID&page=1&perPage=1" || echo '{"data":{"items":[]}}')"
+existing_loadtests="$(printf '%s' "$loadtests_body" \
+  | python3 -c 'import json,sys
+try:
+  d=json.loads(sys.stdin.read())
+  print(len(d.get("data",{}).get("items",[])))
+except Exception:
+  print(0)' 2>/dev/null || echo 0)"
+
+if [ "$existing_loadtests" = "0" ]; then
+  # Pick the first monitor that looks like the healthy "Example UP".
+  monitors_refresh="$(curl -fs -H "Authorization: Bearer $TOKEN" \
+    "$BACKEND/api/v1/monitors?projectId=$PROJECT_ID" || echo '')"
+  MONITOR_ID="$(printf '%s' "$monitors_refresh" \
+    | python3 -c 'import json,sys
+try:
+  d=json.loads(sys.stdin.read())["data"]["items"]
+  m=next((x for x in d if "example.com" in x.get("url","")), d[0] if d else None)
+  print(m["id"] if m else "")
+except Exception:
+  print("")' 2>/dev/null || echo '')"
+
+  if [ -n "$MONITOR_ID" ]; then
+    say "Running a demo Basic Load Test (10 requests, concurrency 2) against the seeded monitor ..."
+    curl -fs -o /dev/null -X POST "$BACKEND/api/v1/load-tests" \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d "{\"projectId\":\"$PROJECT_ID\",\"monitorId\":\"$MONITOR_ID\",\"requests\":10,\"concurrency\":2}" || true
+    say "Demo load test seeded."
+  else
+    say "No monitor available to load-test — skipping."
+  fi
+else
+  say "Load test already exists — skipping."
+fi
 
 say "Seed complete."

@@ -28,7 +28,7 @@ organization context.
 
 ```bash
 SEESTACK_API_KEY=ask_live_your_key \
-SEESTACK_ENDPOINT=http://localhost:8080 \
+SEESTACK_ENDPOINT=http://localhost:8082 \
   node sdks/examples/example-app.js
 ```
 

@@ -73,7 +73,7 @@ export function SdkSetupPage() {
   const currentProject = useAuthStore((s) => s.currentProject)
   const setCurrentProject = useAuthStore((s) => s.setCurrentProject)
   const [lang, setLang] = useState<Lang>('javascript')
-  const endpoint = typeof window !== 'undefined' ? window.location.origin.replace(':3000', ':8080') : 'http://localhost:8080'
+  const endpoint = typeof window !== 'undefined' ? window.location.origin.replace(':3002', ':8082') : 'http://localhost:8082'
   const apiKeyDisplay = currentProject?.apiKey ?? (currentProject?.apiKeyPrefix ? `${currentProject.apiKeyPrefix}_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx` : 'ask_live_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
   const code = useMemo(() => snippets(endpoint, apiKeyDisplay), [endpoint, apiKeyDisplay])
 

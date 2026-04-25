@@ -1,7 +1,7 @@
 // seeStack Java SDK — single-file, JDK-only. No OAuth, no external IdP.
 //
 // Usage:
-//   SeeStack seestack = new SeeStack("ask_live_...", "http://localhost:8080", "production");
+//   SeeStack seestack = new SeeStack("ask_live_...", "http://localhost:8082", "production");
 //   try { riskyWork(); } catch (Exception e) { seestack.captureException(e); }
 //
 // Compile + run standalone:
@@ -94,7 +94,7 @@ public class SeeStack {
     // ── Demo ───────────────────────────────────────────────────────
     public static void main(String[] args) {
         String key = System.getenv("SEESTACK_API_KEY");
-        String endpoint = System.getenv().getOrDefault("SEESTACK_ENDPOINT", "http://localhost:8080");
+        String endpoint = System.getenv().getOrDefault("SEESTACK_ENDPOINT", "http://localhost:8082");
         if (key == null || key.isBlank()) {
             System.err.println("SEESTACK_API_KEY env var is required");
             System.exit(1);

@@ -9,7 +9,7 @@
 
 set -euo pipefail
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-BACKEND="${SEESTACK_BACKEND:-http://localhost:8080}"
+BACKEND="${SEESTACK_BACKEND:-http://localhost:8082}"
 
 if [ ! -s "$HERE/.demo-api-key" ]; then
   echo "No demo ingest key cached." >&2
@@ -47,7 +47,7 @@ http_code=$(curl -s -o /tmp/seestack-test-error.body -w "%{http_code}" \
 if [ "$http_code" = "202" ]; then
   id=$(python3 -c 'import json,sys;print(json.load(open("/tmp/seestack-test-error.body"))["data"]["id"])' 2>/dev/null || echo '?')
   echo "OK — sent $CLASS (event id $id)"
-  echo "Visit http://localhost:3000/errors to see it."
+  echo "Visit http://localhost:3002/errors to see it."
 else
   echo "FAIL — HTTP $http_code" >&2
   cat /tmp/seestack-test-error.body >&2

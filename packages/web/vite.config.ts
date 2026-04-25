@@ -11,25 +11,26 @@ export default defineConfig({
     },
   },
   server: {
-    port: 3000,
+    port: 3002,
+    strictPort: true,
     proxy: {
       '/api/v1/logs/tail': {
-        target: 'ws://localhost:8080',
+        target: 'ws://localhost:8082',
         ws: true,
       },
       '/api/v1/chat/ws': {
-        target: 'ws://localhost:8080',
+        target: 'ws://localhost:8082',
         ws: true,
       },
       '/api/v1/ssh/terminal': {
-        target: 'ws://localhost:8080',
+        target: 'ws://localhost:8082',
         ws: true,
       },
-      '/api': 'http://localhost:8080',
-      '/ingest': 'http://localhost:8080',
-      '/webhooks': 'http://localhost:8080',
+      '/api': 'http://localhost:8082',
+      '/ingest': 'http://localhost:8082',
+      '/webhooks': 'http://localhost:8082',
       '/ws': {
-        target: 'ws://localhost:8080',
+        target: 'ws://localhost:8082',
         ws: true,
       },
     },

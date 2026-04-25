@@ -7,8 +7,8 @@
 # On first run this will:
 #   1. start postgres / clickhouse / kafka / redis via docker compose
 #   2. build the backend jar if missing
-#   3. launch the Spring Boot backend on :8080
-#   4. install + launch the Vite frontend on :3000
+#   3. launch the Spring Boot backend on :8082
+#   4. install + launch the Vite frontend on :3002
 #   5. seed a demo account + project + sample errors + 2 monitors
 #   6. print the URLs + demo credentials
 
@@ -79,10 +79,10 @@ fi
 ok "Backend jar present."
 
 # ── 3. start backend ──────────────────────────────────────────────
-if curl -fs http://localhost:8080/actuator/health 2>/dev/null | grep -q UP; then
-  ok "Backend already running on :8080."
+if curl -fs http://localhost:8082/actuator/health 2>/dev/null | grep -q UP; then
+  ok "Backend already running on :8082."
 else
-  log "Starting backend on :8080 ..."
+  log "Starting backend on :8082 ..."
   export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 17 2>/dev/null || /usr/libexec/java_home -v 25 2>/dev/null || echo "")}"
   export PATH="$JAVA_HOME/bin:$PATH"
   export POSTGRES_HOST=localhost POSTGRES_PORT=5433
@@ -96,7 +96,7 @@ else
   nohup java -jar "$JAR" > "$BACKEND_LOG" 2>&1 &
   echo $! > "$BACKEND_PID"
 
-  until curl -fs http://localhost:8080/actuator/health 2>/dev/null | grep -q UP; do
+  until curl -fs http://localhost:8082/actuator/health 2>/dev/null | grep -q UP; do
     if ! kill -0 "$(cat "$BACKEND_PID")" 2>/dev/null; then
       echo "Backend failed to start. Last 40 log lines:" >&2
       tail -n 40 "$BACKEND_LOG" >&2
@@ -108,15 +108,15 @@ else
 fi
 
 # ── 4. frontend ───────────────────────────────────────────────────
-if curl -fs http://localhost:3000/ >/dev/null 2>&1; then
-  ok "Frontend already running on :3000."
+if curl -fs http://localhost:3002/ >/dev/null 2>&1; then
+  ok "Frontend already running on :3002."
 else
   log "Installing frontend deps (if needed) ..."
   (cd "$REPO" && pnpm install --silent >/dev/null)
-  log "Starting frontend on :3000 ..."
+  log "Starting frontend on :3002 ..."
   (cd "$REPO" && nohup pnpm --filter @seestack/web dev > "$FRONTEND_LOG" 2>&1 &
    echo $! > "$FRONTEND_PID")
-  until curl -fs http://localhost:3000/ >/dev/null 2>&1; do sleep 1; done
+  until curl -fs http://localhost:3002/ >/dev/null 2>&1; do sleep 1; done
   ok "Frontend UP."
 fi
 
@@ -125,6 +125,15 @@ log "Seeding demo account + project + errors + monitors ..."
 bash "$REPO/scripts/seed-demo.sh"
 ok "Demo data seeded."
 
+# ── 5b. run the SDK demo so events are also visible from the SDK ──
+if command -v node >/dev/null 2>&1 && [ -s "$REPO/scripts/.demo-api-key" ]; then
+  log "Running JavaScript SDK demo against the seeded project ..."
+  SEESTACK_API_KEY="$(cat "$REPO/scripts/.demo-api-key")" \
+  SEESTACK_ENDPOINT="http://localhost:8082" \
+    node "$REPO/sdks/examples/example-app.js" | sed 's/^/    /' || true
+  ok "SDK demo sent."
+fi
+
 # ── 6. banner ─────────────────────────────────────────────────────
 EMAIL="$(grep '^DEMO_EMAIL=' "$REPO/scripts/.demo-state" | cut -d= -f2-)"
 PASSWORD="$(grep '^DEMO_PASSWORD=' "$REPO/scripts/.demo-state" | cut -d= -f2-)"
@@ -132,18 +141,18 @@ PASSWORD="$(grep '^DEMO_PASSWORD=' "$REPO/scripts/.demo-state" | cut -d= -f2-)"
 printf "\n"
 printf "${BOLD}seeStack is running.${RESET}\n"
 printf "\n"
-printf "  ${BOLD}Frontend${RESET}        http://localhost:3000\n"
-printf "  ${BOLD}Backend${RESET}         http://localhost:8080\n"
-printf "  ${BOLD}Health${RESET}          http://localhost:8080/actuator/health\n"
+printf "  ${BOLD}Frontend${RESET}        http://localhost:3002\n"
+printf "  ${BOLD}Backend${RESET}         http://localhost:8082\n"
+printf "  ${BOLD}Health${RESET}          http://localhost:8082/actuator/health\n"
 printf "\n"
 printf "  ${BOLD}Demo login${RESET}\n"
 printf "    Email       %s\n" "$EMAIL"
 printf "    Password    %s\n" "$PASSWORD"
 printf "\n"
-printf "  ${BOLD}Demo flow${RESET}\n"
-printf "    1. Open http://localhost:3000/login and sign in.\n"
-printf "    2. Browse Overview · Projects · Errors · Monitors · SDK Setup.\n"
-printf "    3. To generate a fresh error:    ${DIM}./scripts/generate-test-error.sh${RESET}\n"
-printf "    4. To stop everything later:     ${DIM}./run-demo.sh stop${RESET}\n"
+printf "  ${BOLD}Test commands${RESET}\n"
+printf "    Generate a fresh error           ${DIM}./test-error.sh${RESET}\n"
+printf "    Run the JavaScript SDK demo      ${DIM}./run-sdk-demo.sh${RESET}\n"
+printf "    Stop everything                  ${DIM}./run-demo.sh stop${RESET}\n"
+printf "    Stop + wipe seeded data          ${DIM}./run-demo.sh stop --clean${RESET}\n"
 printf "\n"
 dim "Logs: $BACKEND_LOG  ·  $FRONTEND_LOG"

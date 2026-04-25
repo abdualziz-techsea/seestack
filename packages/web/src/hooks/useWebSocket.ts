@@ -28,7 +28,7 @@ export function useWebSocket({ url, onMessage, onOpen, onClose, enabled = true }
     const connect = () => {
       if (unmounted) return
 
-      const wsUrl = `${import.meta.env.VITE_WS_URL ?? 'ws://localhost:8080'}${url}`
+      const wsUrl = `${import.meta.env.VITE_WS_URL ?? 'ws://localhost:8082'}${url}`
       const ws = new WebSocket(wsUrl)
       wsRef.current = ws
 

@@ -64,10 +64,10 @@ CLICKHOUSE_HOST=localhost CLICKHOUSE_PORT=18123 CLICKHOUSE_DB=seestack CLICKHOUS
 # 3. Run the frontend
 cd ../packages/web
 pnpm install
-pnpm dev    # serves http://localhost:3000
+pnpm dev    # serves http://localhost:3002
 ```
 
-Open `http://localhost:3000/register`, create an account, then explore
+Open `http://localhost:3002/register`, create an account, then explore
 **Overview · Projects · Errors · Monitors · SDK Setup**.
 
 ## How to generate the PDF report

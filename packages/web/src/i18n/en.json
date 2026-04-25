@@ -20,6 +20,8 @@
     "sectionSettings": "SETTINGS",
     "projects": "Projects",
     "sdkSetup": "SDK Setup",
+    "securityScan": "Security Scan",
+    "loadTest": "Load Test",
     "profile": "Profile"
   },
   "common": {

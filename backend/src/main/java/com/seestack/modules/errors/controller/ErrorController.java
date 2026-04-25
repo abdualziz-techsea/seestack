@@ -1,8 +1,12 @@
 package com.seestack.modules.errors.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.seestack.modules.errors.dto.ErrorDetailResponse;
 import com.seestack.modules.errors.dto.ErrorGroupResponse;
 import com.seestack.modules.errors.dto.ErrorStatusUpdateRequest;
+import com.seestack.modules.errors.repository.ErrorEventClickHouseRepository;
 import com.seestack.modules.errors.service.ErrorGroupService;
+import com.seestack.modules.errors.service.ErrorInsightsService;
 import com.seestack.shared.utils.ApiResponse;
 import jakarta.validation.Valid;
 import org.jspecify.annotations.NullMarked;
@@ -20,9 +24,18 @@ import java.util.UUID;
 public class ErrorController {
 
     private final ErrorGroupService errorGroupService;
+    private final ErrorEventClickHouseRepository eventRepository;
+    private final ErrorInsightsService insightsService;
+    private final ObjectMapper objectMapper;
 
-    public ErrorController(ErrorGroupService errorGroupService) {
+    public ErrorController(ErrorGroupService errorGroupService,
+                           ErrorEventClickHouseRepository eventRepository,
+                           ErrorInsightsService insightsService,
+                           ObjectMapper objectMapper) {
         this.errorGroupService = errorGroupService;
+        this.eventRepository = eventRepository;
+        this.insightsService = insightsService;
+        this.objectMapper = objectMapper;
     }
 
     @GetMapping
@@ -50,13 +63,16 @@ public class ErrorController {
     }
 
     @GetMapping("/{fingerprint}")
-    public ResponseEntity<ApiResponse<ErrorGroupResponse>> detail(
+    public ResponseEntity<ApiResponse<ErrorDetailResponse>> detail(
             @PathVariable String fingerprint,
             @RequestParam UUID projectId) {
 
-        ErrorGroupResponse response = ErrorGroupResponse.from(
-                errorGroupService.getByFingerprint(projectId, fingerprint));
-        return ResponseEntity.ok(ApiResponse.ok(response));
+        var group = errorGroupService.getByFingerprint(projectId, fingerprint);
+        var latest = eventRepository.findLatest(projectId, fingerprint);
+        var recent = eventRepository.findRecent(projectId, fingerprint, 25);
+        var insights = insightsService.compute(group, latest, recent).toMap();
+        return ResponseEntity.ok(ApiResponse.ok(
+                ErrorDetailResponse.from(group, latest, recent, objectMapper, insights)));
     }
 
     @PatchMapping("/{fingerprint}/status")

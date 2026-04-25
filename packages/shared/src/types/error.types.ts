@@ -30,11 +30,46 @@ export interface ErrorGroup {
   projectId?: string
 }
 
+export interface RecentOccurrence {
+  id: string
+  timestamp: string
+  environment?: string | null
+  level?: string | null
+}
+
+export interface ErrorInsightsTimelinePoint {
+  bucket: string
+  count: number
+}
+
+export interface ErrorInsightsFingerprint {
+  exceptionClass: string
+  normalizedMessage: string
+  topFrame: string
+  formula: string
+}
+
+export interface ErrorInsights {
+  impactLevel: 'LOW' | 'MEDIUM' | 'HIGH' | string
+  recentActivity: 'Active recently' | 'No recent activity' | string
+  activeRecently: boolean
+  totalOccurrences: number
+  firstSeen: string
+  lastSeen: string
+  patterns: string[]
+  fingerprint: ErrorInsightsFingerprint
+  timeline: ErrorInsightsTimelinePoint[]
+}
+
 export interface ErrorDetail extends ErrorGroup {
-  stackTrace?: StackFrame[]
-  userContext?: UserContext
-  release?: string
-  metadata?: Record<string, unknown>
+  message?: string | null
+  stackTrace?: (string | StackFrame)[]
+  userContext?: UserContext | null
+  release?: string | null
+  metadata?: Record<string, unknown> | null
+  recentOccurrences?: RecentOccurrence[]
+  traceId?: string
+  insights?: ErrorInsights | null
 }
 
 export interface IngestErrorRequest {

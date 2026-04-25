@@ -5,7 +5,7 @@
 //   const { SeeStack } = require('./seestack-sdk')
 //   const seestack = new SeeStack({
 //     apiKey: 'ask_live_...',
-//     endpoint: 'http://localhost:8080',
+//     endpoint: 'http://localhost:8082',
 //     environment: 'production',
 //   })
 //   seestack.captureException(err)
@@ -14,7 +14,7 @@
 // No OAuth. No user JWT. No external identity provider.
 
 class SeeStack {
-  constructor({ apiKey, endpoint = 'http://localhost:8080', environment = 'development', release = null }) {
+  constructor({ apiKey, endpoint = 'http://localhost:8082', environment = 'development', release = null }) {
     if (!apiKey) throw new Error('SeeStack: apiKey is required')
     this.apiKey = apiKey
     this.endpoint = endpoint.replace(/\/$/, '')

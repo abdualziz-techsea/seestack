@@ -29,7 +29,7 @@ Pulled automatically by `docker compose up`:
 | Kafka      | `apache/kafka:3.8.0` (KRaft mode)       | **19092**                     |
 | Redis      | `redis:7-alpine`                        | **16379**                     |
 
-The backend itself listens on **8080**; the Vite frontend on **3000**.
+The backend itself listens on **8082**; the Vite frontend on **3000**.
 
 ## Environment variables
 

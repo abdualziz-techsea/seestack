@@ -20,6 +20,8 @@
     "sectionSettings": "الإعدادات",
     "projects": "المشاريع",
     "sdkSetup": "تثبيت SDK",
+    "securityScan": "فحص الأمان",
+    "loadTest": "اختبار الحمل",
     "profile": "الملف الشخصي"
   },
   "common": {

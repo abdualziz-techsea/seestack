@@ -2,13 +2,13 @@
 //
 // Usage:
 //   SEESTACK_API_KEY=ask_live_your_key \
-//   SEESTACK_ENDPOINT=http://localhost:8080 \
+//   SEESTACK_ENDPOINT=http://localhost:8082 \
 //     node sdks/examples/example-app.js
 
 const { SeeStack } = require('../javascript/seestack-sdk')
 
 const apiKey = process.env.SEESTACK_API_KEY
-const endpoint = process.env.SEESTACK_ENDPOINT || 'http://localhost:8080'
+const endpoint = process.env.SEESTACK_ENDPOINT || 'http://localhost:8082'
 if (!apiKey) {
   console.error('SEESTACK_API_KEY env var is required')
   process.exit(1)

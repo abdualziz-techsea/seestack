@@ -9,6 +9,8 @@ import {
   AlertCircle,
   Activity,
   Code2,
+  ShieldCheck,
+  Gauge,
   PanelLeftClose,
   PanelLeftOpen,
 } from 'lucide-react'
@@ -22,6 +24,8 @@ const items = [
   { to: '/projects', icon: FolderOpen, labelKey: 'nav.projects' },
   { to: '/errors', icon: AlertCircle, labelKey: 'nav.errors' },
   { to: '/monitors', icon: Activity, labelKey: 'nav.monitors' },
+  { to: '/security-scan', icon: ShieldCheck, labelKey: 'nav.securityScan' },
+  { to: '/load-test', icon: Gauge, labelKey: 'nav.loadTest' },
   { to: '/sdk-setup', icon: Code2, labelKey: 'nav.sdkSetup' },
 ]
 

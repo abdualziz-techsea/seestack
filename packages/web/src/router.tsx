@@ -11,6 +11,8 @@ const ErrorDetailPage = () => import('@/features/errors').then((m) => ({ Compone
 const MonitorsPage = () => import('@/features/monitors').then((m) => ({ Component: m.MonitorsPage }))
 const MonitorDetailPage = () => import('@/features/monitors').then((m) => ({ Component: m.MonitorDetailPage }))
 const SdkSetupPage = () => import('@/features/sdk-setup').then((m) => ({ Component: m.SdkSetupPage }))
+const SecurityScanPage = () => import('@/features/security-scan').then((m) => ({ Component: m.SecurityScanPage }))
+const LoadTestPage = () => import('@/features/load-test').then((m) => ({ Component: m.LoadTestPage }))
 
 export const router = createBrowserRouter([
   {
@@ -31,6 +33,8 @@ export const router = createBrowserRouter([
       { path: '/monitors', lazy: MonitorsPage },
       { path: '/monitors/:monitorId', lazy: MonitorDetailPage },
       { path: '/sdk-setup', lazy: SdkSetupPage },
+      { path: '/security-scan', lazy: SecurityScanPage },
+      { path: '/load-test', lazy: LoadTestPage },
     ],
   },
   { path: '*', element: <Navigate to="/overview" replace /> },

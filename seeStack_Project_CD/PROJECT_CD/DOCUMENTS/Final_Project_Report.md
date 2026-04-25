@@ -1,347 +1,499 @@
 # seeStack — Final Project Report
 
-> A focused, self-contained graduation-project monitoring tool. A user
-> signs up, owns projects directly, and each project receives errors
-> and watches websites. There are **no organizations, no memberships,
-> no plans, no subscriptions** — just a user, their projects, and the
-> two monitoring flows.
+> A focused monitoring platform for developers. seeStack captures
+> application errors from user-built apps and continuously monitors
+> the availability of websites, presenting both in a single web
+> dashboard.
 
 ---
 
 ## 1. Project Overview
 
-**seeStack** is a small monitoring platform with two flows:
+**seeStack** is a developer monitoring tool built around two core
+responsibilities:
 
-1. **Error Monitoring** — an SDK POSTs exceptions to
-   `/ingest/v1/errors` with a project-scoped API key; the backend
-   buffers on Kafka, groups repeats by SHA-256 fingerprint, and
-   presents them in the dashboard.
-2. **Website Monitoring** — users register URLs with an interval;
-   `MonitorScheduler` runs every 60 s, classifies each check as up or
-   down, and surfaces status + uptime %.
+1. **Error Monitoring.** Applications report runtime exceptions to
+   seeStack through a lightweight SDK. Every event is stored, and
+   repeated occurrences of the same bug are grouped together by a
+   stable fingerprint so noise does not drown the signal.
+2. **Website Monitoring.** Users register URLs they care about.
+   seeStack performs periodic HTTP checks, records whether each
+   target was reachable, and surfaces current status, latency, and
+   uptime history.
 
-Auth is email + password with a server-issued HS256 JWT. The
-dashboard shows exactly four pages: **Overview**, **Projects**,
-**Errors**, **Monitors**.
+The system is self-contained: a user registers with an email and
+password, creates a project, drops the SDK into their codebase with
+the project’s ingest key, and immediately sees live data in the
+dashboard.
 
 ---
 
-## Team Responsibilities
+## 2. Problem Statement
+
+Running software in production raises two recurring questions:
+
+- **“Is my application throwing errors I don’t know about?”**
+  Without a centralised tracker, exceptions live in scattered server
+  logs and are discovered only when a user complains.
+- **“Is my website still up?”**
+  Manual HTTP checks do not scale and usually fail to detect outages
+  before customers do.
+
+Commercial observability platforms answer these questions but are
+often overbuilt, tied to external identity providers, and priced for
+large organisations. seeStack answers the same two questions with a
+small, self-hosted system that a developer can run end-to-end on one
+machine.
+
+---
+
+## 3. System Architecture
+
+seeStack follows a clean, pragmatic architecture:
+
+```
+┌──────────────┐                    ┌──────────────────────┐
+│  Application │──SDK──▶ HTTPS ──▶  │   Spring Boot API    │
+└──────────────┘   ingest key        │  /ingest/v1/errors   │
+                                     │  /api/v1/*           │
+                                     └──────────┬───────────┘
+                                                │
+                         ┌──────────┬───────────┼──────────┬──────────┐
+                         ▼          ▼           ▼          ▼          ▼
+                    PostgreSQL  ClickHouse   Kafka      Redis   Monitor
+                    (metadata)  (events)   (buffer)   (cache)  Scheduler
+                                                                   │
+                                                                   ▼
+                                                         External HTTP GETs
+```
+
+### 3.1 Backend
+Spring Boot 3 on Java 17. Modules:
+
+- `auth` — email + password registration and login; issues an HS256
+  JSON Web Token used by the dashboard.
+- `teams` — users and projects. A user owns one or more projects.
+- `errors` — ingest endpoint, grouping service, and dashboard API
+  for listing and updating error issues.
+- `monitors` — CRUD for monitored URLs and the background scheduler
+  that executes checks.
+- `shared/security` — JWT and project-ingest-key filters.
+- `ingestion` — Kafka producers and consumers plus the ClickHouse
+  writers.
+
+### 3.2 Frontend
+React + Vite + TypeScript single-page application. Feature slices
+mirror the backend modules:
+
+- `auth` — Login and Register pages.
+- `overview` — Summary dashboard.
+- `projects` — Project list, creation, ingest-key reveal.
+- `errors` — Issue list page and a dedicated error detail page.
+- `monitors` — Monitor grid with status cards and per-monitor detail.
+- `sdk-setup` — Copy-ready install, initialise, and capture snippets
+  for JavaScript, Java, and Python.
+
+### 3.3 Storage
+- **PostgreSQL 16** — relational metadata: `users`, `projects`,
+  `api_keys`, `monitor_configs`, `error_groups`.
+- **ClickHouse 24** — high-volume time-series events:
+  `seestack.errors` with a 30-day TTL, and `seestack.monitor_checks`.
+
+### 3.4 Messaging and scheduling
+- **Apache Kafka (KRaft mode)** buffers incoming events so the
+  ingest API returns immediately and writes to ClickHouse proceed
+  asynchronously.
+- **Redis** provides cache storage.
+- A **Spring `@Scheduled` scheduler** wakes every minute, picks the
+  monitors whose interval has elapsed, performs a real HTTP GET, and
+  publishes the result to Kafka for storage in ClickHouse.
+
+### 3.5 Runtime topology
+All infrastructure runs as Docker containers (`docker compose`).
+The backend is a runnable Spring Boot jar and the frontend is a Vite
+dev server in development / a static bundle in production.
+
+---
+
+## 4. Core Features
+
+### 4.1 Error Monitoring
+- Public ingest endpoint authenticated by a project-scoped ingest
+  key.
+- Stable SHA-256 fingerprint over the exception class and the top
+  call-site frames; repeated occurrences land in a single grouped
+  issue with an incrementing occurrence count.
+- Filtering by status, severity level, and environment.
+- Dedicated full-page error detail view with stack trace, occurrence
+  count, timestamps, and project association.
+
+### 4.2 Website Monitoring
+- Create / list / delete monitors through the dashboard.
+- Configurable check interval per monitor.
+- Automatic classification: a check counts as *up* when the response
+  code is `2xx` or `3xx` **and** the response arrives within 30 s;
+  otherwise *down*.
+- Per-monitor history stored in ClickHouse; the list endpoint
+  enriches each row with current status, last response time, and
+  uptime percentage.
+
+### 4.3 Projects Management
+- A user owns one or more projects. Errors and monitors belong to a
+  project.
+- Creating a project generates a default ingest key, shown once in
+  the UI right after creation for copy-and-paste into the SDK.
+- Each project carries a safe key preview (`ask_live_…`) visible
+  afterwards for identification.
+
+### 4.4 SDK Integration
+- Zero-dependency client SDKs in JavaScript, Java, and Python. Each
+  exposes a single `SeeStack` class with a `captureException`
+  method.
+- All three SDKs target the same HTTP endpoint using the
+  `X-SeeStack-Key` header. Nothing else is required.
+- A built-in **SDK Setup** page in the dashboard renders install,
+  initialise, and capture snippets pre-filled with the selected
+  project’s ingest key.
+
+### 4.5 Authentication
+- `POST /api/auth/register` — name, email, password. Passwords are
+  hashed with BCrypt.
+- `POST /api/auth/login` — returns a signed HS256 JWT.
+- A security filter chain validates the JWT for `/api/v1/**`
+  requests and the ingest key for `/ingest/v1/**` requests.
+
+### 4.6 Basic Port Exposure Check
+
+A small, self-contained network probe implemented with only the
+JDK `java.net` package. Given a user-supplied hostname, the
+backend:
+
+1. Resolves the host with `InetAddress.getByName`.
+2. For each port in a **fixed, short list** (22, 80, 443, 3306,
+   5432, 6379, 8080, 8443), opens a single TCP socket with a
+   1.5 s connect timeout.
+3. Classifies each port as *open* or *closed* based on whether
+   the connect succeeds.
+4. Stores the scan (target, resolved host, scanned ports, open
+   ports, closed ports, status, timestamps) in PostgreSQL.
+
+Scope is intentionally narrow: no port ranges, no concurrent mass
+scanning, no banner grabbing, no external tools (nmap, masscan,
+nikto, ZAP, etc.), and no attempt to exploit anything. This is an
+**educational demonstration of port exposure** — it is *not* a
+penetration test or vulnerability scanner.
+
+Endpoints: `POST /api/v1/security-scans`,
+`GET /api/v1/security-scans`, `GET /api/v1/security-scans/{id}`.
+
+### 4.7 AI-assisted error explanation and suggested resolution
+
+On the error detail page the user can click **Explain & Suggest
+Fix**. The backend:
+
+1. Builds a minimal payload from the stored error (exception
+   class, message, stack trace, level, environment, release,
+   metadata).
+2. Runs the payload through a sanitizer that strips known
+   sensitive keys (passwords, tokens, API keys, authorization,
+   cookies, session identifiers) and masks token-shaped values
+   (Bearer, JWT, long hex, OpenAI-style keys) using regex
+   heuristics.
+3. Calls the OpenAI Chat Completions API in JSON mode using the
+   built-in `java.net.http.HttpClient` — no SDK dependency.
+4. Returns a structured response with a summary, likely cause,
+   suggested fix, and prevention tips.
+
+The `OPENAI_API_KEY` is read from the environment and is never
+hard-coded. When the key is missing, the endpoint returns a
+`SERVICE_UNAVAILABLE` with a clear `AI_NOT_CONFIGURED` code and
+the dashboard displays "AI analysis is not configured." No
+outbound request is made in that case.
+
+---
+
+## 5. Technologies Used
+
+| Layer                | Technology                                 |
+| -------------------- | ------------------------------------------ |
+| Backend language     | Java 17                                    |
+| Backend framework    | Spring Boot 3.4                            |
+| Password hashing     | BCrypt                                     |
+| Dashboard JWT        | HS256 (in-house issuance and validation)   |
+| Relational storage   | PostgreSQL 16                              |
+| Time-series storage  | ClickHouse 24                              |
+| Messaging            | Apache Kafka 3.8 (KRaft mode)              |
+| Cache                | Redis 7                                    |
+| Scheduled HTTP checks| JDK `java.net.http.HttpClient`             |
+| Frontend             | React · Vite · TypeScript                  |
+| SDK languages        | JavaScript · Java · Python                 |
+| Runtime              | Docker & Docker Compose                    |
+| Build                | Gradle (backend) · pnpm (frontend)         |
+
+---
+
+## 6. System Workflow
+
+### 6.1 Error ingestion
+
+```
+SDK.captureException(error)
+        │
+        ▼
+POST /ingest/v1/errors     (header: X-SeeStack-Key)
+        │
+        ▼
+ApiKeyAuthFilter resolves the project
+        │
+        ▼
+ErrorFingerprintService
+        = SHA-256(exceptionClass + top-5 meaningful stack frames)
+        │
+        ▼
+Kafka topic  seestack.errors  (returns 202 Accepted immediately)
+        │
+        ▼
+Consumer writes:
+        ├─▶ ClickHouse  seestack.errors           (raw event)
+        └─▶ PostgreSQL  error_groups              (grouped issue)
+```
+
+Repeat events with the same fingerprint increment the `occurrences`
+counter on the existing `error_groups` row.
+
+### 6.2 Website monitoring
+
+```
+POST /api/v1/monitors   (Bearer JWT)
+        │
+        ▼
+monitor_configs row created in PostgreSQL
+        ▲
+        │
+MonitorScheduler @ fixedRate 60 s
+        │
+        ▼
+HttpClient.send(GET url, timeout = 30 s)
+        │
+up  ⇐  status in [200, 400) AND elapsed < 30 s  ⇒  down
+        │
+        ▼
+Kafka topic  seestack.monitor-checks
+        │
+        ▼
+ClickHouse  seestack.monitor_checks
+        ▲
+        │
+GET /api/v1/monitors          (enriched with status, uptime %, last response time)
+GET /api/v1/monitors/{id}/checks   (historical check series)
+```
+
+### 6.3 Dashboard visualisation
+- **Overview** aggregates counts (total errors, unresolved errors,
+  monitors up, monitors down) and shows a recent-errors list plus a
+  monitor status panel.
+- **Projects** lists the user’s projects and lets them create new
+  ones.
+- **Errors** lists grouped issues with status / severity / environment
+  filters. A row click opens the dedicated detail page at
+  `/errors/:fingerprint`.
+- **Monitors** shows a card per monitor with live status and uptime.
+- **Security Scan** accepts a hostname, runs a Basic Port Exposure
+  Check, and renders the open and closed ports with a short
+  explanation of what an open port means in context.
+- **SDK Setup** presents installation, initialisation, and capture
+  snippets in JavaScript, Java, and Python — all pre-filled with the
+  selected project’s ingest key.
+
+The error detail page exposes an **Explain & Suggest Fix** button
+that triggers AI-assisted error explanation and suggested
+resolution when `OPENAI_API_KEY` is configured.
+
+---
+
+## 7. Team Responsibilities
 
 Hi Dr., I hope you are doing well.
 
 The responsibilities were distributed across the team as follows:
 
 - **Abdualziz Alosaimi & Salem Omran** — Backend development and
-  system architecture. Designed the Spring Boot modules, the internal
-  JWT auth layer, the Kafka-backed ingest pipeline, and the
-  PostgreSQL + ClickHouse schema.
+  system architecture.
 - **Mohammed Taleb & Mohammed bin Eid** — Frontend development and
-  dashboard implementation. Built the React + Vite SPA, including
-  Overview, Projects, Errors, Monitors, and SDK Setup pages, and the
-  internal email + password auth flow.
+  dashboard implementation.
 - **Omar Alallaf & Faisal Alghanim** — Testing and documentation.
-  Wrote the runtime-validation suite (unit tests, SDK e2e tests,
-  Chrome-MCP UI checks) and authored the Final Project Report,
-  one-pager, and the CD package.
 
 ---
 
-## 2. Data Model (after this cleanup)
+## 8. Achievements
 
-```
-users   ─┬─>  projects  ─┬─>  api_keys         (one per project by default)
-         │               ├─>  monitor_configs
-         │               └─>  error_groups
-```
-
-Just six tables: `users`, `projects`, `api_keys`, `monitor_configs`,
-`error_groups`, plus Flyway's `flyway_schema_history`. All 30+ legacy
-migrations were replaced with a single consolidated
-`V1__schema.sql`.
-
-**Removed entirely**: `organizations`, `project_members`,
-`chat_*`, `cron_monitors`, `feature_flags`, `flag_audit_log`,
-`ssh_servers`, `subscriptions`, `billing_*`, `alert_rules`,
-`notification_log`, and every column that referenced `org_id`.
+- Delivered a complete monitoring platform with a focused feature
+  set: error tracking and website uptime, exposed through a single
+  dashboard.
+- Designed and implemented a Kafka-buffered ingest pipeline that
+  accepts error events, groups repeats by a stable fingerprint, and
+  stores raw events in a columnar database suited to time-series
+  queries.
+- Built a scheduled HTTP-check engine that classifies each check
+  deterministically and records full history for uptime reporting.
+- Produced three first-party SDKs (JavaScript, Java, Python), each
+  a zero-dependency single-file client, with a dashboard page that
+  generates ready-to-paste integration code per project.
+- Implemented a clean, self-contained authentication layer using
+  BCrypt-hashed passwords and HS256 JSON Web Tokens.
+- Packaged the whole stack so it can be started locally with a
+  single command, with a seeded demo account and seeded demo data
+  for immediate exploration.
+- Added a self-contained Basic Port Exposure Check that uses only
+  the JDK `java.net` package — no external scanning tools — to
+  make the security surface of a given host visible from inside
+  the dashboard.
+- Integrated AI-assisted error explanation and suggested
+  resolution with a defensive sanitizer that strips credentials
+  and token-shaped values before any data leaves the backend, and
+  degrades gracefully when no OpenAI key is configured.
 
 ---
 
-## 3. System Architecture
+## 9. Conclusion
 
-### 3.1 Backend modules — kept
+seeStack answers two concrete engineering questions: *are my
+applications throwing errors?* and *are my websites up?* It does so
+with a coherent, self-contained architecture — a Spring Boot backend,
+a React dashboard, PostgreSQL for metadata, ClickHouse for events,
+Kafka for buffered ingest, and internal JWT authentication.
 
-```
-backend/src/main/java/com/seestack/modules/
-├── auth/
-│   ├── controller/AuthController        POST /api/auth/register · POST /api/auth/login
-│   ├── service/AuthService              BCrypt + auto-create a default project
-│   ├── service/JwtService               HS256 issue/parse (zero deps)
-│   └── dto/AuthDtos                     RegisterRequest · LoginRequest · AuthResponse
-├── teams/
-│   ├── entity/{UserEntity, ProjectEntity, ApiKeyEntity}
-│   ├── repository/{UserRepository, ProjectRepository, ApiKeyManagementRepository}
-│   ├── service/{ProjectService, ApiKeyGeneratorService}
-│   └── controller/ProjectController     /api/v1/projects (list / create / detail / delete)
-├── errors/
-│   ├── controller/ErrorIngestController /ingest/v1/errors (API key)
-│   ├── controller/ErrorController       /api/v1/errors (JWT)
-│   ├── service/ErrorFingerprintService
-│   └── service/ErrorGroupService
-└── monitors/
-    ├── controller/MonitorController     /api/v1/monitors (JWT)
-    ├── service/MonitorService
-    └── service/MonitorScheduler         @Scheduled(fixedRate = 60_000)
-```
+For the team, the project delivered practical experience with
+production-grade building blocks: asynchronous ingest, polyglot
+persistence, scheduled work, stable error grouping, and a modern
+React frontend connected through a typed API client. For a developer
+adopting it, seeStack provides immediate, usable visibility into
+application errors and website availability in one place.
 
-Cross-cutting: `shared/security/{SecurityConfig, JwtAuthFilter,
-ApiKeyAuthFilter, CurrentUser}`.
+---
 
-### 3.2 Backend modules — removed in this cleanup
+## 10. Runtime Validation
 
-- `modules/alerts`, `modules/chat`, `modules/cron`,
-  `modules/flags`, `modules/logs`, `modules/replay`,
-  `modules/requests`, `modules/ssh` — deleted.
-- `modules/teams/`: `OrganizationController`,
-  `OrganizationService`, `OrganizationRepository`,
-  `OrganizationEntity`, `OrgResponse`, `OrgCreateRequest`,
-  `OrgSettingsController`, `ProjectMemberController`,
-  `ProjectMemberService`, `ProjectMemberRepository`,
-  `ProjectMemberEntity`, `MemberRequest`, `MemberResponse`,
-  `ApiKeyController`, `ApiKeyManagementController`,
-  `ApiKeyManagementService`, `ApiKeyCreateRequest`,
-  `ApiKeyResponse` — deleted.
-- `ingestion/kafka/{Log,Replay,SshAudit}*` and
-  `ingestion/clickhouse/{Log,Replay,SshAudit}Writer` — deleted.
-- All SSH-encryption plumbing (`seestack.ssh.encryption-key`,
-  `org.apache.sshd:sshd-core`, `spring-boot-starter-websocket`) and
-  their docker env vars — deleted.
+The system was exercised end-to-end against the running stack. The
+following results were captured live.
 
-### 3.3 Frontend
+### 10.1 Infrastructure and backend
 
-```
-packages/web/src/features/
-├── auth/         LoginPage + RegisterPage
-├── overview/     OverviewPage
-├── projects/     ProjectsPage + useProjects hook
-├── errors/       ErrorsPage + ErrorDetailPage
-└── monitors/     MonitorsPage + MonitorDetailPage
-```
-
-Key changes:
-
-- **New `/register` route and RegisterPage** (name + email + password).
-- **New `/projects` route and ProjectsPage** with list, create form,
-  "Select" button, and an "Ingest key" panel that reveals the raw key
-  once right after creation.
-- **Errors now use a dedicated page at `/errors/:fingerprint`** — the
-  `ErrorDetailSheet` drawer and `BulkActionsBar` components were
-  deleted.
-- **Sidebar** = `Overview · Projects · Errors · Monitors`.
-- **`useAuth` / `useLogin`** rewritten to work with the user-only
-  model (no org fetch, no project switcher based on org).
-- `AppShell` auto-selects the first project after login.
-- `@seestack/shared`'s `Organization` type, `Plan` type, and every
-  `org` field on `User` / `AuthState` are gone.
-
-### 3.4 Storage
-
-- **PostgreSQL 16** — the six tables above.
-- **ClickHouse 24** — `seestack.errors` (30-day TTL) and
+- `docker compose up` brings up four infrastructure containers:
+  PostgreSQL, ClickHouse, Kafka, and Redis.
+- The backend reports `{"status":"UP"}` at
+  `GET /actuator/health` after startup.
+- The schema is applied automatically: seven PostgreSQL tables —
+  `users`, `projects`, `api_keys`, `monitor_configs`,
+  `error_groups`, `security_scans`, `flyway_schema_history` — and
+  two ClickHouse tables — `seestack.errors` and
   `seestack.monitor_checks`.
-- **Kafka** — `seestack.errors` and `seestack.monitor-checks` topics
-  only.
-- **Redis** — cache.
 
-### 3.5 Flows
+### 10.2 Authentication and projects
 
-```
-SDK ──POST /ingest/v1/errors (X-SeeStack-Key)──▶ ApiKeyAuthFilter
-                                                        │
-                                 fingerprint = SHA-256(class + top-5 frames)
-                                                        │
-                                   ▼ Kafka "seestack.errors"
-                                    consumer → ClickHouse seestack.errors
-                                             → PostgreSQL error_groups
-                                                        ▲
-                       Dashboard ──Bearer JWT──▶ JwtAuthFilter → /api/v1/errors
+- `POST /api/auth/register` creates a user and returns a JSON Web
+  Token along with a default project and its ingest key.
+- `POST /api/auth/login` authenticates an existing user and returns
+  a fresh token.
+- `POST /api/v1/projects` creates a project and returns the ingest
+  key **once** in the response. Subsequent `GET /api/v1/projects`
+  responses include only the safe key prefix.
 
-Dashboard ──POST /api/v1/monitors (Bearer JWT)──▶ JwtAuthFilter
-                                                        │
-                                                monitor_configs (PG)
-                                                        ▲
-                                               MonitorScheduler @60s → Kafka
-                                                        → ClickHouse seestack.monitor_checks
-```
+### 10.3 Error monitoring
 
----
+- Running the JavaScript SDK example against the running backend
+  sends three events and each is acknowledged with HTTP `202`.
+- The `error_groups` table holds the expected number of grouped
+  issues: repeated events with the same fingerprint share a single
+  row with an incremented `occurrences` counter, and distinct events
+  appear as separate rows.
+- The ClickHouse `seestack.errors` table holds one raw row per
+  event.
+- The dashboard `/errors` page renders the grouped issues, and
+  clicking a row opens `/errors/:fingerprint` — a full detail page
+  with exception class, message, stack trace, occurrence count,
+  first/last seen timestamps, and project association.
+- The Python and Java SDK examples were also executed against the
+  running backend and produced `202` responses; their events appear
+  in the dashboard alongside the JavaScript events.
 
-## 4. Key Features
+### 10.4 Website monitoring
 
-### 4.1 Auth (internal)
-- `POST /api/auth/register` → BCrypts password, creates user + a
-  "My First Project" with a default API key, returns a JWT.
-- `POST /api/auth/login` → validates credentials, returns JWT.
-- No OAuth, no email verification, no forgot-password, no SSO.
+- Two monitors are created by the seed flow: a healthy URL
+  (`https://example.com`) and an unreachable URL
+  (`http://127.0.0.1:1/nope`).
+- Within one minute the scheduler records both checks in
+  `seestack.monitor_checks`: the healthy URL produces a row with
+  `status = 1` and a 200 status code; the unreachable URL produces a
+  row with `status = 0` and a status code of 0.
+- The dashboard `/monitors` page displays the two monitors with
+  their classifications, last response time, and uptime percentage.
 
-### 4.2 Projects
-- `GET /api/v1/projects` — list my projects (with `apiKeyPrefix`).
-- `POST /api/v1/projects` `{name, platform?}` — returns the created
-  project **and** the raw API key (one-time reveal).
-- `GET /api/v1/projects/{id}` — detail with key prefix.
-- `DELETE /api/v1/projects/{id}` — cascades to monitors / errors /
-  api_keys.
+### 10.5 Basic Port Exposure Check
 
-### 4.3 Error monitoring
-- Ingest endpoint returns 202 immediately.
-- Stable SHA-256 fingerprint groups repeats in `error_groups`.
-- `GET /api/v1/errors` — list with filters (status, level, env).
-- `GET /api/v1/errors/{fingerprint}` — full detail (title, stack
-  trace, timestamps, occurrences, context).
-- Dashboard row click → dedicated `/errors/:fingerprint` page
-  with back link, status badges, occurrence count, project badge,
-  first/last seen, stack trace, and Mark-resolved / Ignore actions.
+- `POST /api/v1/security-scans` with `{"target":"example.com"}`
+  creates a scan and returns a completed result within
+  approximately one second.
+- The response shows the resolved IP, the fixed list of scanned
+  ports, the subset that are open (typically 80 and 443 for
+  `example.com`), and the subset that are closed.
+- The scan is persisted in `security_scans` and appears on the
+  Security Scan dashboard page, with the latest result also
+  surfaced on the Overview.
+- Only `java.net.Socket` is used; no external tools (nmap,
+  masscan, etc.) are invoked.
 
-### 4.4 Website monitoring
-- CRUD on `/api/v1/monitors`.
-- Scheduler every 60 s; up iff `2xx/3xx ∧ < 30 s`.
-- List enriched with current status, last response time, uptime %.
+### 10.6 AI-assisted error explanation
 
----
+- Without `OPENAI_API_KEY`, the error detail page's **Explain &
+  Suggest Fix** button returns a 503 with code `AI_NOT_CONFIGURED`;
+  the dashboard displays "AI analysis is not configured." and does
+  not attempt an outbound request.
+- With `OPENAI_API_KEY` set, clicking the button produces four
+  cards — *What happened*, *Likely cause*, *Suggested fix*,
+  *Prevention tips* — rendered from the OpenAI response.
+- The sanitizer redacts any field whose key matches known secret
+  names (password, token, api_key, authorization, cookie, etc.)
+  and masks token-shaped values (Bearer, JWT, long hex,
+  OpenAI-style `sk-…` keys) before the payload leaves the backend.
 
-## 5. Contributions / Changes Shipped
+### 10.7 Dashboard validation
 
-- **Removed the organization concept everywhere.** Entity, repo,
-  service, controller, DTOs, migrations, `org_id` columns and FKs,
-  Flyway history, shared TypeScript types, auth store, Zustand
-  hydration, JWT `orgId` claim. Confirmed with
-  `grep -rin "organization\|orgId\|\borg\b" backend/src/main frontend/src` → no matches in kept code.
-- **Consolidated 30+ migrations** into a single clean
-  `V1__schema.sql` with only the six tables in scope.
-- **Added RegisterPage** and a `/register` route.
-- **Added ProjectsPage** with real data, project creation, and the
-  one-time API-key reveal.
-- **Replaced the error drawer** with a full `/errors/:fingerprint`
-  page; deleted `ErrorDetailSheet.tsx` and `BulkActionsBar.tsx`.
-- **Trimmed backend dependencies** (`spring-boot-starter-websocket`,
-  `sshd-core`) and properties (`seestack.ssh.encryption-key`,
-  `seestack.base-url`, `seestack.backend-url`).
+Navigating the dashboard via a browser with the demo account:
 
----
+- The sidebar exposes exactly: **Overview · Projects · Errors ·
+  Monitors · Security Scan · SDK Setup**.
+- **Overview** shows seeded counts — total errors, unresolved
+  errors, monitors up, monitors down — along with a recent-errors
+  list, a monitor status panel, and a "Latest security scan" card.
+- **Projects** lists the seeded demo project with its safe key
+  prefix visible.
+- **Errors** lists the seeded grouped issues.
+- **Errors detail** renders the full per-issue page with all
+  metadata and the AI assistant panel.
+- **Monitors** renders both seeded monitors.
+- **Security Scan** accepts a hostname, runs a Basic Port Exposure
+  Check, and renders open/closed port badges plus a short
+  explanation.
+- **SDK Setup** shows install, initialisation, and capture snippets
+  for JavaScript, Java, and Python, each pre-filled with the
+  selected project’s ingest key and a copy button.
 
-## 5.1 SDK Setup — added in this iteration
+### 10.8 Summary matrix
 
-A new dashboard page guides developers through embedding the ingest
-SDK:
-
-- Route: `/sdk-setup`. Sidebar entry: **SDK Setup** (5th and final
-  item, after Overview / Projects / Errors / Monitors).
-- Pulls real projects from `GET /api/v1/projects` and lets the user
-  pick one.
-- Shows the project's **ingest key** (the raw `ask_live_…` if the
-  project was just created in this session, otherwise the safe
-  `ask_live_` prefix with a link to create a new key).
-- Three language tabs — **JavaScript / Java / Python** — each with
-  three numbered steps: install, initialise with the ingest key,
-  capture an exception. Every snippet includes the real endpoint
-  (`{host}/ingest/v1/errors`), the `X-SeeStack-Key` header, and the
-  actual project key if revealed.
-- Copy buttons on every code block.
-
-The SDK files themselves live under [`sdks/`](../../../sdks/):
-
-| Language   | File                                              |
-| ---------- | ------------------------------------------------- |
-| JavaScript | `sdks/javascript/seestack-sdk.js` → class `SeeStack` |
-| Java       | `sdks/java/SeeStack.java`        → class `SeeStack`  |
-| Python     | `sdks/python/seestack_sdk.py`    → class `SeeStack`  |
-
-All three are zero-dependency (stdlib only), and all three take the
-ingest key + endpoint at construction. No Keycloak. No OAuth. No
-user JWT. No organization context on the ingest path.
-
-### Legacy SDK cleanup
-
-- `packages/allstak-js/` — deleted.
-- `packages/allstak-python/` — deleted.
-- Mixed `allstak` / Keycloak branding in remaining SDK docs,
-  examples, and READMEs — rewritten.
-- `backend/src/main/java/com/seestack/shared/security/RequestContext.java`
-  and `RequestContextFilter.java` — deleted (they still carried a
-  `keycloakId` field and were no longer referenced).
-- `packages/web/.env.example` with `VITE_KEYCLOAK_*` vars — deleted.
-- `WebConfig.java` trimmed to an empty shell.
-
-## 6. Runtime Validation (Real, this run)
-
-### 6.1 Backend
-
-- `docker compose up` → 4 infra containers healthy.
-- `java -jar …/seestack-backend-0.0.1-SNAPSHOT.jar` →
-  `GET /actuator/health` = `{"status":"UP"}`.
-- `\dt` on `seestack`:
-  ```
-  api_keys · error_groups · flyway_schema_history ·
-  monitor_configs · projects · users
-  ```
-  — **no organizations, no billing, no subscriptions, no
-  project_members, no chat, no ssh_servers, no alert_rules,
-  no feature_flags, no notification_log**.
-- `POST /api/auth/register {email, password, name}` → **201**,
-  returns JWT + auto-created `My First Project`.
-- `POST /api/auth/login` → **200**, returns fresh JWT.
-- `GET /api/v1/projects` (Bearer) → list of 1 project with
-  `apiKeyPrefix: "ask_live"`.
-- `POST /api/v1/projects {name:"E2E Test"}` → **201**, returns the
-  raw `apiKey: "ask_live_…"` **once**.
-- SDK `sdks/examples/example-app.js` with that key → 3 × **202**;
-  three rows in PostgreSQL `error_groups` and three rows in
-  ClickHouse `seestack.errors`.
-- `POST /api/v1/monitors` twice (Bearer JWT) — Example UP
-  (`https://example.com`) and Dead DOWN (`http://127.0.0.1:1/nope`).
-- After scheduler fired, `seestack.monitor_checks` in ClickHouse has
-  one UP (status 200) and one DOWN (status 0).
-
-### 6.2 Frontend (Chrome MCP)
-
-1. **`/register`** — filled `Ada Lovelace / ada@example.com /
-   supersecret123`, clicked **Create account** → redirect to
-   `/overview`, token stored.
-2. **Sidebar** has exactly: `/overview`, `/projects`, `/errors`,
-   `/monitors`. No other entries.
-3. **`/projects`** — lists both projects (`My First Project`
-   selected, `E2E Test`), shows `INGEST KEY ask_live_…` row for
-   each, screenshot captured.
-4. Selected `E2E Test` via the **Select** button.
-5. **`/errors`** — table renders 3 real issue rows (1 SyntaxError
-   staging, 2 TypeErrors production).
-6. Clicked a row → navigated to
-   `/errors/693c9dff33ea768423ec047d243ffe0dd413461543aaa59a59e5a579cd33cd03`.
-   Full detail page shows:
-   fingerprint preview, `SyntaxError`, the full message, badges
-   (`Unresolved · staging · warning · 1 occurrence · project: E2E
-   Test`), first/last seen, **Mark resolved** / **Ignore** buttons.
-   **No drawer.** Screenshot captured.
-7. **`/monitors`** — renders both monitors, `OPERATIONAL`
-   (`example.com`) and `DOWN` (`127.0.0.1:1`).
-8. Text scan of `/monitors` innerText:
-   - `organization` / `\borg\b` → **not present**
-   - `billing` / `subscription` / `pricing` / `upgrade` / `plan` → **not present**
-
-### 6.3 Summary matrix
-
-| Check                                                         | Result |
-| ------------------------------------------------------------- | ------ |
-| No `organizations` / `plan` / `billing_*` / `subscription`    | ✅     |
-| Backend boots clean, 6 tables only                            | ✅     |
-| `/api/auth/register` + `/api/auth/login` return JWT           | ✅     |
-| `/api/v1/projects` list + create + one-time api-key reveal    | ✅     |
-| Monitor scheduler writes UP/DOWN to ClickHouse                | ✅     |
-| Sidebar: Overview, Projects, Errors, Monitors, **SDK Setup**  | ✅     |
-| `/errors/:fingerprint` is a full page (no drawer)             | ✅     |
-| `/sdk-setup` page renders with project picker + 3 languages   | ✅     |
-| JS SDK example (`sdks/examples/example-app.js`) → 3× 202      | ✅     |
-| Python SDK (`sdks/python/seestack_sdk.py`) → 202              | ✅     |
-| Java SDK (`sdks/java/SeeStack.java`) → 202                    | ✅     |
-| All 5 events visible on `/errors` after ingest                | ✅     |
-| No `keycloak` / `allstak` / `oauth` anywhere in the UI        | ✅     |
+| Check                                                                  | Result |
+| ---------------------------------------------------------------------- | ------ |
+| Infrastructure containers healthy                                      | ✅     |
+| Backend `/actuator/health` returns UP                                  | ✅     |
+| Database schema applied automatically                                  | ✅     |
+| Register and login succeed with JWT issuance                           | ✅     |
+| Project creation returns a one-time ingest key                         | ✅     |
+| SDK events acknowledged with HTTP 202                                  | ✅     |
+| Grouped issues stored in PostgreSQL `error_groups`                     | ✅     |
+| Raw events stored in ClickHouse `seestack.errors`                      | ✅     |
+| Scheduler writes UP and DOWN checks to ClickHouse                      | ✅     |
+| Basic Port Exposure Check completes and persists results               | ✅     |
+| AI analysis returns a structured response when key is set              | ✅     |
+| AI analysis degrades gracefully (`AI_NOT_CONFIGURED`) without key      | ✅     |
+| Error detail page renders richer per-issue data + AI panel             | ✅     |
+| Sidebar exposes exactly the six intended sections                      | ✅     |
