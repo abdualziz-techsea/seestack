@@ -39,16 +39,21 @@ public class ErrorInsightsService {
             "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
 
     private final ErrorEventClickHouseRepository eventRepo;
-    private final Clock clock;
+    private Clock clock;
 
     public ErrorInsightsService(ErrorEventClickHouseRepository eventRepo) {
-        this(eventRepo, Clock.systemUTC());
+        this.eventRepo = eventRepo;
+        this.clock = Clock.systemUTC();
     }
 
-    /** Visible-for-testing constructor with an injectable clock. */
-    public ErrorInsightsService(ErrorEventClickHouseRepository eventRepo, Clock clock) {
-        this.eventRepo = eventRepo;
-        this.clock = clock;
+    /** Visible-for-testing factory with an injectable clock. */
+    static ErrorInsightsService withClock(ErrorEventClickHouseRepository eventRepo, Clock clock) {
+        ErrorInsightsService s = new ErrorInsightsService(eventRepo);
+        try {
+            java.lang.reflect.Field f = ErrorInsightsService.class.getDeclaredField("clock");
+            f.setAccessible(true); f.set(s, clock);
+        } catch (Exception e) { throw new RuntimeException(e); }
+        return s;
     }
 
     public Insights compute(ErrorGroupEntity group, @Nullable ErrorEventRow latest, List<ErrorEventRow> recent) {

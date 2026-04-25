@@ -22,7 +22,7 @@ class ErrorInsightsServiceTest {
 
     private final ErrorEventClickHouseRepository repo = mock(ErrorEventClickHouseRepository.class);
     private final ErrorInsightsService service =
-            new ErrorInsightsService(repo, Clock.fixed(NOW, ZoneOffset.UTC));
+            ErrorInsightsService.withClock(repo, Clock.fixed(NOW, ZoneOffset.UTC));
 
     private ErrorGroupEntity group(long occurrences, Instant firstSeen, Instant lastSeen) {
         ErrorGroupEntity g = new ErrorGroupEntity(
