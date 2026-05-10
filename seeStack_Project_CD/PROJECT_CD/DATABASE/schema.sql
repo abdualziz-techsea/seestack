@@ -1,5 +1,6 @@
--- seeStack consolidated schema.
--- User → Projects (1:N).  Each project owns its API keys, monitors, error groups.
+-- seeStack consolidated PostgreSQL schema.
+-- User -> Projects (1:N). Each project owns API keys, monitors,
+-- grouped errors, security scans, load tests, and cached AI analyses.
 -- No organizations, no memberships, no plans.
 
 CREATE TABLE users (
@@ -67,3 +68,64 @@ CREATE TABLE error_groups (
 );
 
 CREATE INDEX idx_error_groups_project_id ON error_groups (project_id);
+
+CREATE TABLE security_scans (
+  id               UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id       UUID REFERENCES projects(id) ON DELETE CASCADE,
+  target           VARCHAR(255) NOT NULL,
+  resolved_host    VARCHAR(255),
+  scanned_ports    TEXT NOT NULL,
+  open_ports       TEXT NOT NULL DEFAULT '',
+  closed_ports     TEXT NOT NULL DEFAULT '',
+  status           VARCHAR(50) NOT NULL DEFAULT 'pending',
+  error_message    TEXT,
+  created_at       TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at     TIMESTAMPTZ,
+  detected_services TEXT NOT NULL DEFAULT '{}',
+  http_info         TEXT NOT NULL DEFAULT '{}',
+  security_headers  TEXT NOT NULL DEFAULT '{}',
+  risk_score        INT NOT NULL DEFAULT 0,
+  risk_level        VARCHAR(20) NOT NULL DEFAULT 'LOW',
+  summary           TEXT
+);
+
+CREATE INDEX idx_security_scans_project_id ON security_scans (project_id);
+CREATE INDEX idx_security_scans_created_at ON security_scans (created_at DESC);
+
+CREATE TABLE load_tests (
+  id                       UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id               UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  monitor_id               UUID REFERENCES monitor_configs(id) ON DELETE SET NULL,
+  target_url               TEXT NOT NULL,
+  requested_count          INT NOT NULL,
+  concurrency              INT NOT NULL,
+  status                   VARCHAR(50) NOT NULL DEFAULT 'pending',
+  total_requests           INT NOT NULL DEFAULT 0,
+  successful_requests      INT NOT NULL DEFAULT 0,
+  failed_requests          INT NOT NULL DEFAULT 0,
+  avg_response_time_ms     DOUBLE PRECISION NOT NULL DEFAULT 0,
+  min_response_time_ms     INT NOT NULL DEFAULT 0,
+  max_response_time_ms     INT NOT NULL DEFAULT 0,
+  p95_response_time_ms     INT NOT NULL DEFAULT 0,
+  status_code_distribution TEXT NOT NULL DEFAULT '{}',
+  error_message            TEXT,
+  created_at               TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  completed_at             TIMESTAMPTZ
+);
+
+CREATE INDEX idx_load_tests_project_id ON load_tests (project_id);
+CREATE INDEX idx_load_tests_created_at ON load_tests (created_at DESC);
+
+CREATE TABLE ai_error_analyses (
+  id                         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id                 UUID NOT NULL REFERENCES projects(id) ON DELETE CASCADE,
+  fingerprint                VARCHAR(64) NOT NULL,
+  payload                    TEXT NOT NULL,
+  model                      VARCHAR(100),
+  occurrences_at_generation  BIGINT,
+  created_at                 TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (project_id, fingerprint)
+);
+
+CREATE INDEX idx_ai_error_analyses_project_fp
+  ON ai_error_analyses (project_id, fingerprint);

@@ -1,4 +1,4 @@
-Project Title    seeStack — Error Monitoring and Website Monitoring Platform
+Project Title    seeStack — AI-Powered Error Detection and Monitoring System for Developers
 
 Team Members
 - Abdualziz Alosaimi
@@ -8,15 +8,25 @@ Team Members
 - Omar Alallaf
 - Faisal Alghanim
 
+Project Supervisor: 
+Dr. Khaled Alwasel
+
+
 Project Summary
-seeStack is a focused developer tool with two responsibilities:
-capturing runtime errors from applications and monitoring the
-availability of websites. Applications ship errors to seeStack via a
+seeStack is a focused developer tool for runtime error monitoring,
+website uptime monitoring, controlled validation, and developer
+documentation. Applications ship errors to seeStack via a
 zero-dependency SDK and a project-scoped ingest key; the backend
 groups repeated events by a stable fingerprint and surfaces them in a
-web dashboard. Separately, users register URLs and a scheduler
-performs periodic HTTP checks, classifying each result as up or down
-and recording uptime history. Authentication is internal email +
-password (BCrypt + HS256 JWT) — no external identity provider. The
-system runs on PostgreSQL, ClickHouse, Apache Kafka, and Redis behind
-a Spring Boot 3 backend and a React + Vite frontend.
+web dashboard. Users can also register URLs for scheduled uptime
+checks, run a Basic Security Analysis against a hostname, and run a
+capped Basic Load Test against an existing monitor URL. Error detail
+pages include explainable insights and optional AI-assisted analysis
+with sanitizer and cache support. The AI feature is enabled by the
+backend environment variable OPENAI_API_KEY; if it is unset, the
+dashboard shows a clear not-configured message. Authentication is
+internal email + password (BCrypt + HS256 JWT) — no external identity
+provider. The system runs on PostgreSQL, ClickHouse, Apache Kafka,
+and Redis behind a Spring Boot 3 backend and a React + Vite frontend,
+with a separate Next.js/Fumadocs documentation app for SDK and API
+reference material.

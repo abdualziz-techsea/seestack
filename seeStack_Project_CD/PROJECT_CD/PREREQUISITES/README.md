@@ -47,9 +47,17 @@ in `backend/src/main/resources/application.properties`):
 | `CLICKHOUSE_DB` / `_USER`  | `seestack` / `default`                        |
 | `KAFKA_BOOTSTRAP_SERVERS`  | `localhost:19092`                             |
 | `SEESTACK_JWT_SECRET`      | Required — any 32+ char string in dev         |
+| `OPENAI_API_KEY`           | Optional — enables AI-assisted error analysis |
+
+`OPENAI_API_KEY` is only needed for the **Explain & Suggest Fix**
+button on the error detail page. Leave it unset for an offline demo;
+the backend returns `AI_NOT_CONFIGURED` and the dashboard shows a
+clear message instead of making an outbound request.
 
 ## No external services required
 
 The project does not talk to Keycloak, OAuth providers, payment
 gateways, or any third-party identity or billing service. Everything
-the backend needs is provided by the four infra containers above.
+required for the core demo is provided by the four infra containers
+above. AI-assisted error analysis is optional and only makes an
+outbound OpenAI request when `OPENAI_API_KEY` is set.

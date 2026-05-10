@@ -11,18 +11,24 @@ root. Key directories:
 │   │   │   ├── auth/            /api/auth/* — register, login, JWT
 │   │   │   ├── teams/           users + projects + API keys
 │   │   │   ├── errors/          /ingest/v1/errors + /api/v1/errors
-│   │   │   └── monitors/        /api/v1/monitors + scheduler
+│   │   │   ├── monitors/        /api/v1/monitors + scheduler
+│   │   │   ├── security/        /api/v1/security-scans
+│   │   │   ├── loadtest/        /api/v1/load-tests
+│   │   │   └── ai/              /api/v1/errors/*/ai-analysis
 │   │   ├── ingestion/           Kafka event records + ClickHouse writers
 │   │   └── shared/              security, exception, config, utils
 │   ├── src/main/resources/
 │   │   ├── application.properties
-│   │   ├── db/migration/V1__schema.sql     Consolidated Postgres schema
-│   │   └── clickhouse/init.sql              Error + monitor-check tables
+│   │   ├── db/migration/V1__schema.sql     Core Postgres schema
+│   │   ├── db/migration/V2__security_scans.sql
+│   │   ├── db/migration/V3__load_tests.sql
+│   │   ├── db/migration/V4__security_scan_analysis.sql
+│   │   └── clickhouse/init.sql              ClickHouse telemetry tables
 │   └── build.gradle
 │
 ├── packages/
 │   ├── shared/                  Shared TS types + API clients (errors,
-│   │                            monitors, auth, notifications)
+│   │                            monitors, security, load tests, AI)
 │   └── web/                     React + Vite + TypeScript dashboard
 │       └── src/
 │           ├── components/      AppShell, Sidebar, Topbar, shared UI
@@ -32,6 +38,8 @@ root. Key directories:
 │           │   ├── projects/    ProjectsPage + useProjects hook
 │           │   ├── errors/      ErrorsPage + ErrorDetailPage
 │           │   ├── monitors/    MonitorsPage + MonitorDetailPage
+│           │   ├── security-scan/ SecurityScanPage
+│           │   ├── load-test/   LoadTestPage
 │           │   └── sdk-setup/   SdkSetupPage + CodeBlock
 │           └── router.tsx
 │
@@ -41,9 +49,16 @@ root. Key directories:
 │   ├── python/seestack_sdk.py       class SeeStack, stdlib-only
 │   └── examples/example-app.js      Runnable three-error demo
 │
-└── infra/
-    └── docker/                  docker-compose.yml + init scripts
+├── infra/
+│   └── docker/                  docker-compose.yml + init scripts
+│
+└── docs/                        Next.js + Fumadocs SDK/API docs app
 ```
+
+The backend reads `OPENAI_API_KEY` from the process environment for
+AI-assisted error analysis. The key is optional, is never stored in
+source code, and is only used when the user requests analysis from an
+error detail page.
 
 ## How to build
 
@@ -63,11 +78,16 @@ cd packages/web && pnpm install && pnpm dev
 cd backend && gradle test
 ```
 
-Unit suites cover the two pieces of logic most worth verifying in
+Unit suites cover the main backend logic worth verifying in
 isolation:
 - `ErrorFingerprintServiceTest` — 9 tests on the SHA-256 grouping.
 - `MonitorSchedulerTest` — 10 tests on the up/down classification.
+- `ErrorInsightsServiceTest` — explainable error insight summaries.
+- `ErrorDataSanitizerTest` — redaction before AI analysis.
+- `SecurityAnalyzerTest` — security header/risk analysis behavior.
+- `LoadTestRunnerLimitsTest` — public Basic Load Test limits.
+- `ApiKeyGeneratorServiceTest` — ingest-key format and hashing.
 
 End-to-end validation (SDK → ingest → Postgres + ClickHouse →
 dashboard) is documented in
-`../DOCUMENTS/Final_Project_Report.md` §6.
+`../DOCUMENTS/Final_Project_Report.md` §10.
