@@ -1,4 +1,4 @@
-Project Title    seeStack — AI-Powered Error Detection and Monitoring System for Developers
+Project Title    seeStack — Error Monitoring and Developer Observability Platform with AI-Assisted Error Explanation
 
 Team Members
 - Abdualziz Alosaimi

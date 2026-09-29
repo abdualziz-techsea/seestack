@@ -3,6 +3,11 @@
 Exact steps to bring the full stack up and use it. Assumes the
 prerequisites in `../PREREQUISITES/README.md` are installed.
 
+> **Recommended path for reviewers:** the one-command launcher
+> `./run-demo.sh` documented in `DEMO_GUIDE.md` brings the full
+> stack up, seeds a demo account, and prints the access URLs.
+> The detailed steps below are kept for completeness.
+
 Paths below are relative to the repository root
 (`/Volumes/M.2/MyProjects/seestack` on the development machine, or
 wherever you cloned the project).

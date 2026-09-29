@@ -216,8 +216,9 @@ Engine: `MergeTree() ORDER BY (monitor_id, timestamp)`.
 
 ### Additional telemetry tables
 
-The ClickHouse schema also contains tables used by earlier or
-supporting observability capabilities:
+Some supporting or experimental tables may exist from earlier
+development phases, but only the documented modules are exposed in
+the delivered dashboard.
 
 | Table                    | Purpose                                      | TTL    |
 | ------------------------ | -------------------------------------------- | ------ |

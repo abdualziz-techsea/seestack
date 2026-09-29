@@ -34,13 +34,24 @@ public class ClickHouseSchemaInitializer {
             try (Connection conn = dataSource.getConnection();
                  Statement stmt = conn.createStatement()) {
                 for (String statement : statements) {
-                    String trimmed = statement.strip();
-                    if (!trimmed.isEmpty() && !trimmed.startsWith("--")) {
+                    String trimmed = stripLineComments(statement);
+                    if (!trimmed.isEmpty()) {
                         stmt.execute(trimmed);
                     }
                 }
             }
             log.info("ClickHouse schema initialized successfully.");
         };
+    }
+
+    private static String stripLineComments(String sql) {
+        StringBuilder cleaned = new StringBuilder();
+        for (String line : sql.lines().toList()) {
+            String trimmed = line.stripLeading();
+            if (!trimmed.startsWith("--")) {
+                cleaned.append(line).append('\n');
+            }
+        }
+        return cleaned.toString().strip();
     }
 }

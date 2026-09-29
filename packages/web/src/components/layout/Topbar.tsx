@@ -33,7 +33,7 @@ export function Topbar() {
 
   return (
     <header
-      className="flex shrink-0 items-center border-b"
+      className="relative z-40 flex shrink-0 items-center border-b"
       style={{
         height: 52,
         borderColor: 'var(--border)',
@@ -81,11 +81,13 @@ export function Topbar() {
               >
                 <div className="border-b px-3 py-2" style={{ borderColor: 'var(--border)' }}>
                   <div className="text-[13px] font-medium" style={{ color: 'var(--text-primary)' }}>
-                    {user.name}
+                    {user.name || user.email}
                   </div>
-                  <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
-                    {user.email}
-                  </div>
+                  {user.name && user.name !== user.email && (
+                    <div className="text-[11px]" style={{ color: 'var(--text-tertiary)' }}>
+                      {user.email}
+                    </div>
+                  )}
                 </div>
                 <button
                   onClick={logout}
